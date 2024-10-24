@@ -1,17 +1,14 @@
 #include "instructions.hpp"
-#include <cstdio>
 #include <iostream>
-#include <list>
 #include <vector>
+#include <list>
 
 namespace interpreter {
 
-#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof(arr[0]))
-
-#define PUSH(valstr, t)                                                        \
+#define PUSH(val, t)                                                        \
   {                                                                            \
     .kind = instructions::InstructionKind::Push,                               \
-    .operand = {.value = valstr, .type = t},                                   \
+    .operand = {.value = val, .type = t},                                   \
   }
 
 #define PLUS                                                                   \
@@ -29,7 +26,8 @@ namespace interpreter {
 #define SHOW                                                                   \
   { .kind = instructions::InstructionKind::Show }
 
-int eval(std::vector<instructions::Instruction> insts) {
+  
+asa::AsaObj eval(std::vector<instructions::Instruction> insts) {
   std::list<asa::AsaObj> stack;
 
   std::list<asa::AsaObj>::iterator it;
@@ -40,8 +38,9 @@ int eval(std::vector<instructions::Instruction> insts) {
       break;
 
     case instructions::Plus: {
-      if (stack.size() < 2)
-        return -1; // TODO: add errors / exceptions
+      if (stack.size() < 2) 
+        return asa::ERROR_STACKUNDERFLOW;
+      
       asa::AsaObj a = stack.back();
       it = std::prev(stack.end());
       stack.erase(it);
@@ -52,19 +51,34 @@ int eval(std::vector<instructions::Instruction> insts) {
       break;
     }
 
+    case instructions::Minus: {
+      if (stack.size() < 2)
+        return asa::ERROR_STACKUNDERFLOW;
+      
+      asa::AsaObj a = stack.back();
+      it = std::prev(stack.end());
+      stack.erase(it);
+      asa::AsaObj b = stack.back();
+      it = std::prev(stack.end());
+      stack.erase(it);
+      stack.push_back(asa::subtract(a, b));
+      break;
+    }
+
     case instructions::Show:
       printf("Stack:\n");
       if (stack.empty()) {
-        printf("[ EMPTY ]");
+        printf("[ EMPTY ]\n");
         break;
       }
 
       for (asa::AsaObj o : stack) {
         std::cout << o.value << std::endl;
       }
+      printf("\n");
       break;
     }
   }
-  return 0;
+  return asa::ERROR_OK;
 }
 } // namespace interpreter

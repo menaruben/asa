@@ -1,15 +1,21 @@
 #include "interpreter.hpp"
+#include <ostream>
 #include <vector>
+#include <iostream>
 
 std::vector<instructions::Instruction> program = {
-    PUSH("42", asa::AsaType::Integer),
-    PUSH("69", asa::AsaType::Integer),
+    PUSH("6.9", asa::AsaType::Float),
+    PUSH("42.0", asa::AsaType::Float),
     SHOW,
     PLUS,
     SHOW,
-    PUSH("3.141", asa::AsaType::Float),
-    PUSH("69.420", asa::AsaType::Float),
-    MINUS,
 };
 
-int main() { return interpreter::eval(program); }
+int main() { 
+    asa::AsaObj result = interpreter::eval(program); 
+    if (result.error != asa::AsaError::Ok) {
+        std::cout << "Error encountered: " << result.value << std::endl;
+        return -1;
+    }
+    return 0;
+}
