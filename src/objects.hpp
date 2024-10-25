@@ -13,7 +13,7 @@ enum AsaError {
   IllegalInstruction
 };
 
-std::string type_to_str(AsaType t) {
+std::string typeToStr(AsaType t) {
   switch (t) {
   case Integer:
     return "Integer";

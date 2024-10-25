@@ -7,10 +7,17 @@ namespace interpreter {
 
 #define MAX_STACK_SIZE 8192
 
+
 #define PUSH(val, t)                                                           \
   {                                                                            \
     .kind = instructions::InstructionKind::Push,                               \
     .operand = {.value = val, .type = t},                                      \
+  }
+
+#define LABEL(name)                                                            \
+  {                                                                            \
+    .kind = instructions::InstructionKind::Label,                              \
+    .operand = {.value = name },                                               \
   }
 
 #define PLUS                                                                   \
@@ -27,6 +34,7 @@ namespace interpreter {
 
 #define SHOW                                                                   \
   { .kind = instructions::InstructionKind::Show }
+
 
 asa::AsaObj eval(std::vector<instructions::Instruction> insts) {
   std::list<asa::AsaObj> stack;
@@ -103,7 +111,7 @@ asa::AsaObj eval(std::vector<instructions::Instruction> insts) {
       stack.reverse();
       for (asa::AsaObj o : stack) {
         std::cout << "    Value: " << o.value
-                  << ", Type: " << asa::type_to_str(o.type) << std::endl;
+                  << ", Type: " << asa::typeToStr(o.type) << std::endl;
       }
       printf("\n");
       stack.reverse();
