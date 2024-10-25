@@ -5,10 +5,12 @@
 
 namespace interpreter {
 
-#define PUSH(val, t)                                                        \
+#define MAX_STACK_SIZE 2048
+
+#define PUSH(val, t)                                                           \
   {                                                                            \
     .kind = instructions::InstructionKind::Push,                               \
-    .operand = {.value = val, .type = t},                                   \
+    .operand = {.value = val, .type = t},                                      \
   }
 
 #define PLUS                                                                   \
@@ -34,6 +36,9 @@ asa::AsaObj eval(std::vector<instructions::Instruction> insts) {
   for (instructions::Instruction inst : insts) {
     switch (inst.kind) {
     case instructions::Push:
+      if (stack.size()+1 > MAX_STACK_SIZE)
+        return asa::ERROR_STACKOVERFLOW;
+      
       stack.push_back(inst.operand);
       break;
 

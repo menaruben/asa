@@ -46,15 +46,15 @@ AsaObj add(AsaObj a, AsaObj b) {
     return {.value = std::to_string(sum), .type = AsaType::Integer};
   }
   case AsaType::Float: {
-    int ai = std::stof(a.value);
-    int bi = std::stof(b.value);
-    int sum = ai + bi;
+    float af = std::stof(a.value);
+    float bf = std::stof(b.value);
+    float sum = af + bf;
     return {.value = std::to_string(sum), .type = AsaType::Integer};
   }
   case AsaType::Double: {
-    int ai = std::stod(a.value);
-    int bi = std::stod(b.value);
-    int sum = ai + bi;
+    double ad = std::stod(a.value);
+    double bd = std::stod(b.value);
+    double sum = ad + bd;
     return {.value = std::to_string(sum), .type = AsaType::Integer};
   }
 
@@ -78,15 +78,15 @@ AsaObj subtract(AsaObj a, AsaObj b) {
     return {.value = std::to_string(delta), .type = AsaType::Integer};
   }
   case AsaType::Float: {
-    int ai = std::stof(a.value);
-    int bi = std::stof(b.value);
-    int delta = ai - bi;
+    float af = std::stof(a.value);
+    float bf = std::stof(b.value);
+    float delta = af - bf;
     return {.value = std::to_string(delta), .type = AsaType::Integer};
   }
   case AsaType::Double: {
-    int ai = std::stod(a.value);
-    int bi = std::stod(b.value);
-    int delta = ai - bi;
+    double ad = std::stod(a.value);
+    double bd = std::stod(b.value);
+    double delta = ad - bd;
     return {.value = std::to_string(delta), .type = AsaType::Integer};
   }
   default:
