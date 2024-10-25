@@ -77,27 +77,27 @@ Stack:
 The result is `0.693252` and has the type `Double`
 
 # Instructions
-## PUSH
+## PUSH(v, t)
 Pushes and element with the value `v` (as string) and type
 `t` onto the stack
 
-## Plus
-Adds and pops the last two elements from the stack and
+## PLUS
+Adds the last two elements from the stack and
 pushes the result to the stack
 
-## Minus
+## MINUS
 Subtracts the last element from the second last element
 and pushes the result to the stack
 
-## Mult
+## MULT
 Multiplies the last two elements from the stack and pushes 
 the result to the stack.
 
-## Div
+## DIV
 Divides the second last element by the last element and pushes
 the result to the stack
 
-## Show
+## SHOW
 Prints the current state of the stack with the "newest" element
 at the top. 
 
