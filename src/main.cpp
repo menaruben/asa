@@ -1,10 +1,12 @@
 
+
 #include "interpreter.hpp"
 #include <iostream>
 #include <ostream>
 #include <vector>
 
 std::vector<instructions::Instruction> program = {
+    PUSH("1", asa::AsaType::Double),
     PUSH("3", asa::AsaType::Double),
     PUSH("5", asa::AsaType::Double),
     PUSH("6.9", asa::AsaType::Double),
@@ -15,6 +17,8 @@ std::vector<instructions::Instruction> program = {
     DIV,
     SHOW,
     MULT,
+    SHOW,
+    MINUS,
     SHOW
 };
 

@@ -2,7 +2,7 @@
 #include <string>
 
 namespace asa {
-enum AsaType { Integer, Float, Double, String, Bool };
+enum AsaType { Integer, Float, Double, String, Char, Bool };
 enum AsaError {
   Ok,
   StackOverflow,
