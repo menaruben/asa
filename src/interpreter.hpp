@@ -31,7 +31,6 @@ namespace interpreter {
   
 asa::AsaObj eval(std::vector<instructions::Instruction> insts) {
   std::list<asa::AsaObj> stack;
-
   std::list<asa::AsaObj>::iterator it;
   for (instructions::Instruction inst : insts) {
     switch (inst.kind) {
@@ -43,42 +42,33 @@ asa::AsaObj eval(std::vector<instructions::Instruction> insts) {
       break;
 
     case instructions::Plus: {
-      if (stack.size() < 2) 
-        return asa::ERROR_STACKUNDERFLOW;
-      
-      asa::AsaObj a = stack.back();
-      it = std::prev(stack.end());
-      stack.erase(it);
-      asa::AsaObj b = stack.back();
-      it = std::prev(stack.end());
-      stack.erase(it);
-      stack.push_back(asa::add(a, b));
+        
+      std::vector<asa::AsaObj> args = instructions::pop(&stack, 2);
+      if (args.size() < 2) return asa::ERROR_STACKUNDERFLOW;
+      asa::AsaObj a = args[0];
+      asa::AsaObj b = args[1];      
+      stack.push_back(instructions::plus(a, b));
       break;
     }
 
     case instructions::Minus: {
-      if (stack.size() < 2)
-        return asa::ERROR_STACKUNDERFLOW;
-      
-      asa::AsaObj a = stack.back();
-      it = std::prev(stack.end());
-      stack.erase(it);
-      asa::AsaObj b = stack.back();
-      it = std::prev(stack.end());
-      stack.erase(it);
-      stack.push_back(asa::subtract(a, b));
+      std::vector<asa::AsaObj> args = instructions::pop(&stack, 2);
+      if (args.size() < 2) return asa::ERROR_STACKUNDERFLOW;
+      asa::AsaObj a = args[0];
+      asa::AsaObj b = args[1];      
+      stack.push_back(instructions::minus(a, b));
       break;
     }
 
     case instructions::Show:
       printf("Stack:\n");
       if (stack.empty()) {
-        printf("[ EMPTY ]\n");
+        printf("    [ EMPTY ]\n");
         break;
       }
 
       for (asa::AsaObj o : stack) {
-        std::cout << o.value << std::endl;
+        std::cout << "    " << o.value << std::endl;
       }
       printf("\n");
       break;
