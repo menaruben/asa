@@ -47,7 +47,7 @@ int main() {
   return 0;
 }
 ```
-This is evaluated to the following expression:
+This is evaluated as the following:
 ```asm
 Stack:
     Value: 42, Type: Double
