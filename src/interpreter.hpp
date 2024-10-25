@@ -46,8 +46,10 @@ asa::AsaObj eval(std::vector<instructions::Instruction> insts) {
       std::vector<asa::AsaObj> args = instructions::pop(&stack, 2);
       if (args.size() < 2) return asa::ERROR_STACKUNDERFLOW;
       asa::AsaObj a = args[0];
-      asa::AsaObj b = args[1];      
-      stack.push_back(instructions::plus(a, b));
+      asa::AsaObj b = args[1];            
+      asa::AsaObj c = instructions::plus(b, a);
+      if (c.error != asa::AsaError::Ok) return c;
+      stack.push_back(c);
       break;
     }
 
@@ -56,7 +58,31 @@ asa::AsaObj eval(std::vector<instructions::Instruction> insts) {
       if (args.size() < 2) return asa::ERROR_STACKUNDERFLOW;
       asa::AsaObj a = args[0];
       asa::AsaObj b = args[1];      
-      stack.push_back(instructions::minus(a, b));
+      asa::AsaObj c = instructions::minus(b, a);
+      if (c.error != asa::AsaError::Ok) return c;
+      stack.push_back(c);
+      break;
+    }
+
+    case instructions::Mult: {
+      std::vector<asa::AsaObj> args = instructions::pop(&stack, 2);
+      if (args.size() < 2) return asa::ERROR_STACKUNDERFLOW;
+      asa::AsaObj a = args[0];
+      asa::AsaObj b = args[1];      
+      asa::AsaObj c = instructions::mult(b, a);
+      if (c.error != asa::AsaError::Ok) return c;
+      stack.push_back(c);
+      break;
+    }
+
+    case instructions::Div: {
+      std::vector<asa::AsaObj> args = instructions::pop(&stack, 2);
+      if (args.size() < 2) return asa::ERROR_STACKUNDERFLOW;
+      asa::AsaObj a = args[0];
+      asa::AsaObj b = args[1];      
+      asa::AsaObj c = instructions::div(b, a);
+      if (c.error != asa::AsaError::Ok) return c;
+      stack.push_back(c);
       break;
     }
 
@@ -67,10 +93,12 @@ asa::AsaObj eval(std::vector<instructions::Instruction> insts) {
         break;
       }
 
+      stack.reverse();
       for (asa::AsaObj o : stack) {
-        std::cout << "    " << o.value << std::endl;
+        std::cout << "    Value: " << o.value << ", Type: " << asa::type_to_str(o.type) << std::endl;
       }
       printf("\n");
+      stack.reverse();
       break;
     }
   }

@@ -1,3 +1,4 @@
+#include <exception>
 #include <string>
 
 namespace asa {
@@ -11,6 +12,18 @@ enum AsaError {
   DivByZero,
   IllegalInstruction
 };
+
+std::string type_to_str(AsaType t)
+{
+  switch (t) {
+    case Integer: return "Integer";
+    case Float:   return "Float";
+    case Double:  return "Double";
+    case String:  return "String";
+    case Bool:    return "Bool";
+    default:      throw std::exception(); // unreachable
+  }  
+}
 
 struct AsaObj {
   std::string value;
