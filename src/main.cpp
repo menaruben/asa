@@ -1,7 +1,7 @@
 #include "interpreter.hpp"
+#include <iostream>
 #include <ostream>
 #include <vector>
-#include <iostream>
 
 std::vector<instructions::Instruction> program = {
     PUSH("3", asa::AsaType::Double),
@@ -17,14 +17,11 @@ std::vector<instructions::Instruction> program = {
     SHOW
 };
 
-int main() { 
-    asa::AsaObj result = interpreter::eval(program); 
-    if (result.error != asa::AsaError::Ok) {
-        std::cout 
-            << "Error encountered: "
-            << result.value 
-            << std::endl;
-        return -1;
-    }
-    return 0;
+int main() {
+  asa::AsaObj result = interpreter::eval(program);
+  if (result.error != asa::AsaError::Ok) {
+    std::cout << "Error encountered: " << result.value << std::endl;
+    return -1;
+  }
+  return 0;
 }

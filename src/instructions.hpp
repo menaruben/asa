@@ -1,6 +1,6 @@
+#include "list"
 #include "objects.hpp"
 #include "vector"
-#include "list"
 
 namespace instructions {
 
@@ -42,7 +42,6 @@ asa::AsaObj plus(asa::AsaObj a, asa::AsaObj b) {
     return asa::ERROR_ILLEGALINSTRUCTION;
   }
 }
-
 
 asa::AsaObj minus(asa::AsaObj a, asa::AsaObj b) {
   if (a.type != b.type)
@@ -136,20 +135,17 @@ asa::AsaObj div(asa::AsaObj a, asa::AsaObj b) {
   }
 }
 
-std::vector<asa::AsaObj> pop(std::list<asa::AsaObj> *stack, int count)
-{
+std::vector<asa::AsaObj> pop(std::list<asa::AsaObj> *stack, int count) {
   std::vector<asa::AsaObj> args;
   std::list<asa::AsaObj>::iterator it;
-  if (stack->size() < count)
-  {
+  if (stack->size() < count) {
     args.push_back(asa::ERROR_STACKUNDERFLOW);
     return args;
   };
-  
+
   asa::AsaObj o;
   int i = 0;
-  while (i < count)
-  {
+  while (i < count) {
     o = stack->back();
     args.push_back(o);
     it = std::prev(stack->end());
@@ -158,4 +154,4 @@ std::vector<asa::AsaObj> pop(std::list<asa::AsaObj> *stack, int count)
   }
   return args;
 }
-}
+} // namespace instructions
