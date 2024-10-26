@@ -10,7 +10,8 @@ enum Error {
   TypeMismatch,
   ArithmeticOnNonNumericType,
   DivByZero,
-  IllegalInstruction
+  IllegalInstruction,
+  LabelNotFound,
 };
 
 std::string typeToStr(Type t) {
@@ -54,6 +55,8 @@ Object ERROR_DIVBYZERO = {.value = "DivByZero", .error = Error::DivByZero};
 
 Object ERROR_ILLEGALINSTRUCTION = {.value = "IllegalInstruction",
                                    .error = Error::IllegalInstruction};
+
+Object ERROR_LABEL_NOT_FOUND = {.value = "LabelNotFound", .error = Error::LabelNotFound };
 
 bool isNumericType(Object o) {
   return o.type == Type::Float || 

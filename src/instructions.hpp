@@ -4,7 +4,7 @@
 
 namespace instructions {
 
-enum InstructionKind { Show, Push, Plus, Minus, Mult, Div, Label };
+enum InstructionKind { Show, Push, Plus, Minus, Mult, Div, Label, Jump };
 
 struct Instruction {
   InstructionKind kind;

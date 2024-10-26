@@ -1,25 +1,23 @@
 #include "instructions.hpp"
 #include <iostream>
 #include <list>
+#include <string>
+#include <unordered_map>
 #include <vector>
 
 using namespace instructions;
 namespace interpreter {
 
-#define MAX_STACK_SIZE 8192
-
+#define MAX_STACK_SIZE 5
 
 #define PUSH(val, t)                                                           \
-  {                                                                            \
-    .kind = InstructionKind::Push,                               \
-    .operand = {.value = val, .type = t},                                      \
-  }
+  { .kind = InstructionKind::Push, .operand = {.value = val, .type = t}, }
 
 #define LABEL(name)                                                            \
-  {                                                                            \
-    .kind = InstructionKind::Label,                              \
-    .operand = {.value = name },                                               \
-  }
+  { .kind = InstructionKind::Label, .operand = {.value = name}, }
+
+#define JUMP(label)                                                            \
+  { .kind = InstructionKind::Jump, .operand = {.value = label}, }
 
 #define PLUS                                                                   \
   { .kind = InstructionKind::Plus }
@@ -36,20 +34,20 @@ namespace interpreter {
 #define SHOW                                                                   \
   { .kind = InstructionKind::Show }
 
-
 asa::Object eval(std::vector<Instruction> insts) {
   std::list<asa::Object> stack;
   std::list<asa::Object>::iterator it;
   int instPosition = 0;
   Instruction inst;
   bool halt = false;
+  std::unordered_map<std::string, int> labels;
 
   while (!halt) {
     if (instPosition >= insts.size()) {
       halt = true;
       continue;
     }
-    
+
     inst = insts[instPosition++];
     switch (inst.kind) {
     case Push:
@@ -58,6 +56,17 @@ asa::Object eval(std::vector<Instruction> insts) {
 
       stack.push_back(inst.operand);
       break;
+
+    case Label:
+      labels[inst.operand.value] = instPosition;
+
+    case Jump: {
+      if (labels.find(inst.operand.value) == labels.end()) {
+        return asa::ERROR_LABEL_NOT_FOUND;
+      }
+      instPosition = labels[inst.operand.value];
+      break;
+    }
 
     case Plus: {
 
