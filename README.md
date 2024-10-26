@@ -22,6 +22,8 @@ The following example evaluates the mathematical expression `1 - 3 * (5 / (6.9 +
 #include <vector>
 
 using namespace instructions;
+using namespace asa;
+using namespace interpreter;
 
 std::vector<Instruction> program = {PUSH("1", asa::Double),
                                     PUSH("3", asa::Double),
@@ -39,8 +41,8 @@ std::vector<Instruction> program = {PUSH("1", asa::Double),
                                     SHOW};
 
 int main() {
-  asa::Object result = interpreter::eval(program);
-  if (result.error != asa::Ok) {
+  Object result = eval(program);
+  if (result.error != Ok) {
     std::cout << "Error encountered: " << result.value << std::endl;
     return -1;
   }
