@@ -1,14 +1,25 @@
 #include "list"
 #include "objects.hpp"
 #include "vector"
+#include <string>
 
 namespace instructions {
 
-enum InstructionKind { Show, Push, Plus, Minus, Mult, Div, Label, Jump };
+enum InstructionKind {
+  Show,
+  Push,
+  Plus,
+  Minus,
+  Mult,
+  Div,
+  Label,
+  Jump,
+};
 
 struct Instruction {
   InstructionKind kind;
   asa::Object operand;
+  std::string id;
 };
 
 asa::Object plus(asa::Object a, asa::Object b) {

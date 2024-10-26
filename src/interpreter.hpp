@@ -14,10 +14,10 @@ namespace interpreter {
   { .kind = InstructionKind::Push, .operand = {.value = val, .type = t}, }
 
 #define LABEL(name)                                                            \
-  { .kind = InstructionKind::Label, .operand = {.value = name}, }
+  { .kind = InstructionKind::Label, .id = name, }
 
-#define JUMP(label)                                                            \
-  { .kind = InstructionKind::Jump, .operand = {.value = label}, }
+#define JUMP(name)                                                             \
+  { .kind = InstructionKind::Jump, .id = name, }
 
 #define PLUS                                                                   \
   { .kind = InstructionKind::Plus }
@@ -36,11 +36,12 @@ namespace interpreter {
 
 asa::Object eval(std::vector<Instruction> insts) {
   std::list<asa::Object> stack;
+  std::unordered_map<std::string, int> labels;
+  // std::unordered_map<std::string, asa::Object> variables;
   std::list<asa::Object>::iterator it;
   int instPosition = 0;
   Instruction inst;
   bool halt = false;
-  std::unordered_map<std::string, int> labels;
 
   while (!halt) {
     if (instPosition >= insts.size()) {
@@ -58,13 +59,14 @@ asa::Object eval(std::vector<Instruction> insts) {
       break;
 
     case Label:
-      labels[inst.operand.value] = instPosition;
+      labels[inst.id] = instPosition;
+      break;
 
     case Jump: {
-      if (labels.find(inst.operand.value) == labels.end()) {
+      if (labels.find(inst.id) == labels.end()) {
         return asa::ERROR_LABEL_NOT_FOUND;
       }
-      instPosition = labels[inst.operand.value];
+      instPosition = labels[inst.id];
       break;
     }
 

@@ -12,6 +12,7 @@ enum Error {
   DivByZero,
   IllegalInstruction,
   LabelNotFound,
+  UndefinedVariable,
 };
 
 std::string typeToStr(Type t) {
@@ -57,6 +58,8 @@ Object ERROR_ILLEGALINSTRUCTION = {.value = "IllegalInstruction",
                                    .error = Error::IllegalInstruction};
 
 Object ERROR_LABEL_NOT_FOUND = {.value = "LabelNotFound", .error = Error::LabelNotFound };
+
+Object ERROR_UNDEFINED_VARIABLE = { .value = "UndefinedVariable", .error = Error::UndefinedVariable };
 
 bool isNumericType(Object o) {
   return o.type == Type::Float || 
