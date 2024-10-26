@@ -3,6 +3,7 @@
 #include <list>
 #include <vector>
 
+using namespace instructions;
 namespace interpreter {
 
 #define MAX_STACK_SIZE 8192
@@ -10,98 +11,108 @@ namespace interpreter {
 
 #define PUSH(val, t)                                                           \
   {                                                                            \
-    .kind = instructions::InstructionKind::Push,                               \
+    .kind = InstructionKind::Push,                               \
     .operand = {.value = val, .type = t},                                      \
   }
 
 #define LABEL(name)                                                            \
   {                                                                            \
-    .kind = instructions::InstructionKind::Label,                              \
+    .kind = InstructionKind::Label,                              \
     .operand = {.value = name },                                               \
   }
 
 #define PLUS                                                                   \
-  { .kind = instructions::InstructionKind::Plus }
+  { .kind = InstructionKind::Plus }
 
 #define MINUS                                                                  \
-  { .kind = instructions::InstructionKind::Minus }
+  { .kind = InstructionKind::Minus }
 
 #define MULT                                                                   \
-  { .kind = instructions::InstructionKind::Mult }
+  { .kind = InstructionKind::Mult }
 
 #define DIV                                                                    \
-  { .kind = instructions::InstructionKind::Div }
+  { .kind = InstructionKind::Div }
 
 #define SHOW                                                                   \
-  { .kind = instructions::InstructionKind::Show }
+  { .kind = InstructionKind::Show }
 
 
-asa::AsaObj eval(std::vector<instructions::Instruction> insts) {
-  std::list<asa::AsaObj> stack;
-  std::list<asa::AsaObj>::iterator it;
-  for (instructions::Instruction inst : insts) {
+asa::Object eval(std::vector<Instruction> insts) {
+  std::list<asa::Object> stack;
+  std::list<asa::Object>::iterator it;
+  int instPosition = 0;
+  Instruction inst;
+  bool halt = false;
+
+  while (!halt) {
+    if (instPosition >= insts.size()) {
+      halt = true;
+      continue;
+    }
+    
+    inst = insts[instPosition++];
     switch (inst.kind) {
-    case instructions::Push:
+    case Push:
       if (stack.size() + 1 > MAX_STACK_SIZE)
         return asa::ERROR_STACKOVERFLOW;
 
       stack.push_back(inst.operand);
       break;
 
-    case instructions::Plus: {
+    case Plus: {
 
-      std::vector<asa::AsaObj> args = instructions::pop(&stack, 2);
+      std::vector<asa::Object> args = pop(&stack, 2);
       if (args.size() < 2)
         return asa::ERROR_STACKUNDERFLOW;
-      asa::AsaObj a = args[0];
-      asa::AsaObj b = args[1];
-      asa::AsaObj c = instructions::plus(b, a);
-      if (c.error != asa::AsaError::Ok)
+      asa::Object a = args[0];
+      asa::Object b = args[1];
+      asa::Object c = plus(b, a);
+      if (c.error != asa::Ok)
         return c;
       stack.push_back(c);
       break;
     }
 
-    case instructions::Minus: {
-      std::vector<asa::AsaObj> args = instructions::pop(&stack, 2);
+    case Minus: {
+      std::vector<asa::Object> args = pop(&stack, 2);
       if (args.size() < 2)
         return asa::ERROR_STACKUNDERFLOW;
-      asa::AsaObj a = args[0];
-      asa::AsaObj b = args[1];
-      asa::AsaObj c = instructions::minus(b, a);
-      if (c.error != asa::AsaError::Ok)
+      asa::Object a = args[0];
+      asa::Object b = args[1];
+      asa::Object c = minus(b, a);
+      if (c.error != asa::Ok)
         return c;
       stack.push_back(c);
       break;
     }
 
-    case instructions::Mult: {
-      std::vector<asa::AsaObj> args = instructions::pop(&stack, 2);
+    case Mult: {
+      std::vector<asa::Object> args = pop(&stack, 2);
       if (args.size() < 2)
         return asa::ERROR_STACKUNDERFLOW;
-      asa::AsaObj a = args[0];
-      asa::AsaObj b = args[1];
-      asa::AsaObj c = instructions::mult(b, a);
-      if (c.error != asa::AsaError::Ok)
+      asa::Object a = args[0];
+      asa::Object b = args[1];
+      asa::Object c = mult(b, a);
+      if (c.error != asa::Ok)
         return c;
       stack.push_back(c);
       break;
     }
 
-    case instructions::Div: {
-      std::vector<asa::AsaObj> args = instructions::pop(&stack, 2);
+    case Div: {
+      std::vector<asa::Object> args = pop(&stack, 2);
       if (args.size() < 2)
         return asa::ERROR_STACKUNDERFLOW;
-      asa::AsaObj a = args[0];
-      asa::AsaObj b = args[1];
-      asa::AsaObj c = instructions::div(b, a);
-      if (c.error != asa::AsaError::Ok)
+      asa::Object a = args[0];
+      asa::Object b = args[1];
+      asa::Object c = div(b, a);
+      if (c.error != asa::Ok)
         return c;
       stack.push_back(c);
       break;
     }
 
-    case instructions::Show:
+    case Show:
       printf("Stack:\n");
       if (stack.empty()) {
         printf("    [ EMPTY ]\n");
@@ -109,7 +120,7 @@ asa::AsaObj eval(std::vector<instructions::Instruction> insts) {
       }
 
       stack.reverse();
-      for (asa::AsaObj o : stack) {
+      for (asa::Object o : stack) {
         std::cout << "    Value: " << o.value
                   << ", Type: " << asa::typeToStr(o.type) << std::endl;
       }

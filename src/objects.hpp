@@ -2,8 +2,8 @@
 #include <string>
 
 namespace asa {
-enum AsaType { Integer, Float, Double, String, Char, Bool };
-enum AsaError {
+enum Type { Integer, Float, Double, String, Char, Bool };
+enum Error {
   Ok,
   StackOverflow,
   StackUnderflow,
@@ -13,7 +13,7 @@ enum AsaError {
   IllegalInstruction
 };
 
-std::string typeToStr(AsaType t) {
+std::string typeToStr(Type t) {
   switch (t) {
   case Integer:
     return "Integer";
@@ -30,33 +30,34 @@ std::string typeToStr(AsaType t) {
   }
 }
 
-struct AsaObj {
+struct Object {
   std::string value;
-  AsaType type;
-  AsaError error;
+  Type type;
+  Error error;
 };
 
-AsaObj ERROR_OK = {.value = "Ok", .error = AsaError::Ok};
+Object ERROR_OK = {.value = "Ok", .error = Error::Ok};
 
-AsaObj ERROR_STACKOVERFLOW = {.value = "StackOverflow",
-                              .error = AsaError::StackOverflow};
+Object ERROR_STACKOVERFLOW = {.value = "StackOverflow",
+                              .error = Error::StackOverflow};
 
-AsaObj ERROR_STACKUNDERFLOW = {.value = "StackUnderflow",
-                               .error = AsaError::StackUnderflow};
+Object ERROR_STACKUNDERFLOW = {.value = "StackUnderflow",
+                               .error = Error::StackUnderflow};
 
-AsaObj ERROR_TYPEMISMATCH = {.value = "TypeMismatch",
-                             .error = AsaError::TypeMismatch};
+Object ERROR_TYPEMISMATCH = {.value = "TypeMismatch",
+                             .error = Error::TypeMismatch};
 
-AsaObj ERROR_ARITHMETIC = {.value = "Arithmetic (Math without numeric type)",
-                           .error = AsaError::ArithmeticOnNonNumericType};
+Object ERROR_ARITHMETIC = {.value = "Arithmetic (Math without numeric type)",
+                           .error = Error::ArithmeticOnNonNumericType};
 
-AsaObj ERROR_DIVBYZERO = {.value = "DivByZero", .error = AsaError::DivByZero};
+Object ERROR_DIVBYZERO = {.value = "DivByZero", .error = Error::DivByZero};
 
-AsaObj ERROR_ILLEGALINSTRUCTION = {.value = "IllegalInstruction",
-                                   .error = AsaError::IllegalInstruction};
+Object ERROR_ILLEGALINSTRUCTION = {.value = "IllegalInstruction",
+                                   .error = Error::IllegalInstruction};
 
-bool isNumericType(asa::AsaObj o) {
-  return o.type == asa::AsaType::Float || o.type == asa::AsaType::Double ||
-         o.type == asa::AsaType::Integer;
+bool isNumericType(Object o) {
+  return o.type == Type::Float || 
+         o.type == Type::Double ||
+         o.type == Type::Integer;
 }
 } // namespace asa

@@ -8,10 +8,10 @@ enum InstructionKind { Show, Push, Plus, Minus, Mult, Div, Label };
 
 struct Instruction {
   InstructionKind kind;
-  asa::AsaObj operand;
+  asa::Object operand;
 };
 
-asa::AsaObj plus(asa::AsaObj a, asa::AsaObj b) {
+asa::Object plus(asa::Object a, asa::Object b) {
   if (a.type != b.type)
     return asa::ERROR_TYPEMISMATCH;
 
@@ -19,23 +19,23 @@ asa::AsaObj plus(asa::AsaObj a, asa::AsaObj b) {
     return asa::ERROR_ARITHMETIC;
 
   switch (a.type) {
-  case asa::AsaType::Integer: {
+  case asa::Integer: {
     int ai = std::stoi(a.value);
     int bi = std::stoi(b.value);
     int sum = ai + bi;
-    return {.value = std::to_string(sum), .type = asa::AsaType::Integer};
+    return {.value = std::to_string(sum), .type = asa::Integer};
   }
-  case asa::AsaType::Float: {
+  case asa::Float: {
     float af = std::stof(a.value);
     float bf = std::stof(b.value);
     float sum = af + bf;
-    return {.value = std::to_string(sum), .type = asa::AsaType::Float};
+    return {.value = std::to_string(sum), .type = asa::Float};
   }
-  case asa::AsaType::Double: {
+  case asa::Double: {
     double ad = std::stod(a.value);
     double bd = std::stod(b.value);
     double sum = ad + bd;
-    return {.value = std::to_string(sum), .type = asa::AsaType::Double};
+    return {.value = std::to_string(sum), .type = asa::Double};
   }
 
   default:
@@ -43,7 +43,7 @@ asa::AsaObj plus(asa::AsaObj a, asa::AsaObj b) {
   }
 }
 
-asa::AsaObj minus(asa::AsaObj a, asa::AsaObj b) {
+asa::Object minus(asa::Object a, asa::Object b) {
   if (a.type != b.type)
     return asa::ERROR_TYPEMISMATCH;
 
@@ -51,29 +51,29 @@ asa::AsaObj minus(asa::AsaObj a, asa::AsaObj b) {
     return asa::ERROR_ARITHMETIC;
 
   switch (a.type) {
-  case asa::AsaType::Integer: {
+  case asa::Integer: {
     int ai = std::stoi(a.value);
     int bi = std::stoi(b.value);
     int delta = ai - bi;
-    return {.value = std::to_string(delta), .type = asa::AsaType::Integer};
+    return {.value = std::to_string(delta), .type = asa::Integer};
   }
-  case asa::AsaType::Float: {
+  case asa::Float: {
     float af = std::stof(a.value);
     float bf = std::stof(b.value);
     float delta = af - bf;
-    return {.value = std::to_string(delta), .type = asa::AsaType::Float};
+    return {.value = std::to_string(delta), .type = asa::Float};
   }
-  case asa::AsaType::Double: {
+  case asa::Double: {
     double ad = std::stod(a.value);
     double bd = std::stod(b.value);
     double delta = ad - bd;
-    return {.value = std::to_string(delta), .type = asa::AsaType::Double};
+    return {.value = std::to_string(delta), .type = asa::Double};
   }
   default:
     return asa::ERROR_ILLEGALINSTRUCTION;
   }
 }
-asa::AsaObj mult(asa::AsaObj a, asa::AsaObj b) {
+asa::Object mult(asa::Object a, asa::Object b) {
   if (a.type != b.type)
     return asa::ERROR_TYPEMISMATCH;
 
@@ -81,30 +81,30 @@ asa::AsaObj mult(asa::AsaObj a, asa::AsaObj b) {
     return asa::ERROR_ARITHMETIC;
 
   switch (a.type) {
-  case asa::AsaType::Integer: {
+  case asa::Integer: {
     int ai = std::stoi(a.value);
     int bi = std::stoi(b.value);
     int prod = ai * bi;
-    return {.value = std::to_string(prod), .type = asa::AsaType::Integer};
+    return {.value = std::to_string(prod), .type = asa::Integer};
   }
-  case asa::AsaType::Float: {
+  case asa::Float: {
     float af = std::stof(a.value);
     float bf = std::stof(b.value);
     float prod = af * bf;
-    return {.value = std::to_string(prod), .type = asa::AsaType::Float};
+    return {.value = std::to_string(prod), .type = asa::Float};
   }
-  case asa::AsaType::Double: {
+  case asa::Double: {
     double ad = std::stod(a.value);
     double bd = std::stod(b.value);
     double prod = ad * bd;
-    return {.value = std::to_string(prod), .type = asa::AsaType::Double};
+    return {.value = std::to_string(prod), .type = asa::Double};
   }
   default:
     return asa::ERROR_ILLEGALINSTRUCTION;
   }
 }
 
-asa::AsaObj div(asa::AsaObj a, asa::AsaObj b) {
+asa::Object div(asa::Object a, asa::Object b) {
   if (a.type != b.type)
     return asa::ERROR_TYPEMISMATCH;
 
@@ -112,38 +112,38 @@ asa::AsaObj div(asa::AsaObj a, asa::AsaObj b) {
     return asa::ERROR_ARITHMETIC;
 
   switch (a.type) {
-  case asa::AsaType::Integer: {
+  case asa::Integer: {
     int ai = std::stoi(a.value);
     int bi = std::stoi(b.value);
     int quotient = ai / bi;
-    return {.value = std::to_string(quotient), .type = asa::AsaType::Integer};
+    return {.value = std::to_string(quotient), .type = asa::Integer};
   }
-  case asa::AsaType::Float: {
+  case asa::Float: {
     float af = std::stof(a.value);
     float bf = std::stof(b.value);
     float quotient = af / bf;
-    return {.value = std::to_string(quotient), .type = asa::AsaType::Float};
+    return {.value = std::to_string(quotient), .type = asa::Float};
   }
-  case asa::AsaType::Double: {
+  case asa::Double: {
     double ad = std::stod(a.value);
     double bd = std::stod(b.value);
     double quotient = ad / bd;
-    return {.value = std::to_string(quotient), .type = asa::AsaType::Double};
+    return {.value = std::to_string(quotient), .type = asa::Double};
   }
   default:
     return asa::ERROR_ILLEGALINSTRUCTION;
   }
 }
 
-std::vector<asa::AsaObj> pop(std::list<asa::AsaObj> *stack, int count) {
-  std::vector<asa::AsaObj> args;
-  std::list<asa::AsaObj>::iterator it;
+std::vector<asa::Object> pop(std::list<asa::Object> *stack, int count) {
+  std::vector<asa::Object> args;
+  std::list<asa::Object>::iterator it;
   if (stack->size() < count) {
     args.push_back(asa::ERROR_STACKUNDERFLOW);
     return args;
   };
 
-  asa::AsaObj o;
+  asa::Object o;
   int i = 0;
   while (i < count) {
     o = stack->back();
