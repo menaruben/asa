@@ -14,12 +14,16 @@ enum InstructionKind {
   Mult,
   Div,
   Label,
-  Jump,
+  Goto,
   DefVar,
   SetVar,
   GetVar,
   Cmp,
-  If,
+  IfGoto,
+  Halt,
+  Clear,
+  Increment,
+  Decrement,
 };
 
 struct Instruction {

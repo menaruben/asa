@@ -10,14 +10,20 @@ namespace interpreter {
 
 #define MAX_STACK_SIZE 8192
 
+#define HALT                                                                   \
+  { .kind = InstructionKind::Halt }
+
+#define CLEAR                                                                  \
+  { .kind = InstructionKind::Clear }
+
 #define PUSH(val, t)                                                           \
   { .kind = InstructionKind::Push, .operand = {.value = val, .type = t}, }
 
 #define LABEL(name)                                                            \
   { .kind = InstructionKind::Label, .id = name, }
 
-#define JUMP(name)                                                             \
-  { .kind = InstructionKind::Jump, .id = name, }
+#define GOTO(name)                                                             \
+  { .kind = InstructionKind::Goto, .id = name, }
 
 #define DEF(name, val, t)                                                      \
   {                                                                            \
@@ -34,9 +40,9 @@ namespace interpreter {
 #define CMP                                                                    \
   { .kind = InstructionKind::Cmp }
 
-#define IF(val, gotoLabel)                                                     \
+#define IFGOTO(val, gotoLabel)                                                 \
   {                                                                            \
-    .kind = InstructionKind::If,                                               \
+    .kind = InstructionKind::IfGoto,                                           \
     .operand =                                                                 \
         {                                                                      \
             .value = val,                                                      \
@@ -44,6 +50,12 @@ namespace interpreter {
         },                                                                     \
     .id = gotoLabel                                                            \
   }
+
+#define INCR(var)                                                              \
+  { .kind = InstructionKind::Increment, .id = var }
+
+#define DECR(var)                                                              \
+  { .kind = InstructionKind::Decrement, .id = var }
 
 #define PLUS                                                                   \
   { .kind = InstructionKind::Plus }
@@ -77,6 +89,16 @@ asa::Object eval(std::vector<Instruction> insts) {
 
     inst = insts[instPosition++];
     switch (inst.kind) {
+    case Halt: {
+      halt = true;
+      break;
+    }
+
+    case Clear: {
+      stack.clear();
+      break;
+    }
+
     case Push:
       if (stack.size() + 1 > MAX_STACK_SIZE)
         return asa::ERROR_STACKOVERFLOW;
@@ -88,7 +110,7 @@ asa::Object eval(std::vector<Instruction> insts) {
       labels[inst.id] = instPosition;
       break;
 
-    case Jump: {
+    case Goto: {
       if (labels.find(inst.id) == labels.end()) {
         return asa::ERROR_LABEL_NOT_FOUND;
       }
@@ -96,7 +118,7 @@ asa::Object eval(std::vector<Instruction> insts) {
       break;
     }
 
-    case If: {
+    case IfGoto: {
       if (stack.size() < 1)
         return asa::ERROR_STACKUNDERFLOW;
       if (labels.find(inst.id) == labels.end()) {
@@ -133,6 +155,24 @@ asa::Object eval(std::vector<Instruction> insts) {
       }
       asa::Object o = variables[inst.id];
       stack.push_back(o);
+      break;
+    }
+
+    case Increment: {
+      if (variables.find(inst.id) == variables.end()) {
+        return asa::ERROR_UNDEFINED_VARIABLE;
+      }    
+      asa::Object o = variables[inst.id];
+      variables[inst.id] = plus(o, { .value = "1", .type = o.type });
+      break;
+    }
+    
+    case Decrement: {
+      if (variables.find(inst.id) == variables.end()) {
+        return asa::ERROR_UNDEFINED_VARIABLE;
+      }    
+      asa::Object o = variables[inst.id];
+      variables[inst.id] = minus(o, { .value = "1", .type = o.type });
       break;
     }
 

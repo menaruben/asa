@@ -1,4 +1,3 @@
-
 #include "interpreter.hpp"
 #include <iostream>
 #include <ostream>
@@ -9,31 +8,29 @@ using namespace asa;
 using namespace interpreter;
 
 std::vector<Instruction> program = {
-  // define variable "remaining" with 
-  // initial value 4 and type Integer
-  DEF("remaining", "4", Integer),
+  DEF("n", "10", Integer),
+  DEF("ans", "1", Integer),
   
-  // create a label to simulate loop in a goto style
-  LABEL("loop"),
-    PUSH("1", Integer),
+  DEF("i", "1", Integer),
+  LABEL("factorial"),
+    // push current ans to stack
+    GET("ans"),
+  
+    // calculate ans = ans * i
+    GET("ans"),
+    GET("i"),
+    MULT,
+    SET("ans"),
+
+    // increment i
+    INCR("i"),
     
-    // decrement remaining variable my one
-    GET("remaining"),
-    PUSH("1", Integer),
-    MINUS,
-    SET("remaining"),
-    
-    // check if remaining is 0
-    GET("remaining"),
-    PUSH("0", Integer),
+    // check if n > i
+    GET("n"),
+    GET("i"),
     CMP,
-  // if remaining > 0  then it pushes  1 onto the stack
-  // if remaining == 0 then it pushes  0 onto the stack
-  // if remaining < 0  then it pushes -1 onto the stack
-  IF("1", "loop"),
+    IFGOTO("1", "factorial"),
   
-  // else show the stack
-  PUSH("done!", String),
   SHOW,
 };
 
