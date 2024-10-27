@@ -38,7 +38,7 @@ std::vector<Instruction> program = {
     // calculate ans = ans * i
     GET("ans"),
     GET("i"),
-    MULT,
+    MUL,
     SET("ans"),
 
     // increment i
@@ -101,7 +101,7 @@ std::vector<Instruction> program = {
     // decrement remaining variable my one
     GET("remaining"),
     PUSH("1", Integer),
-    MINUS,
+    SUB,
     SET("remaining"),
     
     // check if remaining is 0
@@ -155,13 +155,13 @@ std::vector<Instruction> program = {PUSH("1", asa::Double),
                                     PUSH("6.9", asa::Double),
                                     PUSH("42", asa::Double),
                                     SHOW,
-                                    PLUS,
+                                    ADD,
                                     SHOW,
                                     DIV,
                                     SHOW,
-                                    MULT,
+                                    MUL,
                                     SHOW,
-                                    MINUS,
+                                    SUB,
                                     SHOW};
 
 int main() {

@@ -9,10 +9,10 @@ namespace instructions {
 enum InstructionKind {
   Show,
   Push,
-  Plus,
-  Minus,
-  Mult,
-  Div,
+  Add,
+  Subtract,
+  Multiply,
+  Divide,
   Label,
   Goto,
   DefVar,
@@ -32,7 +32,7 @@ struct Instruction {
   std::string id;
 };
 
-asa::Object plus(asa::Object a, asa::Object b) {
+asa::Object add(asa::Object a, asa::Object b) {
   if (a.type != b.type)
     return asa::ERROR_TYPEMISMATCH;
 
@@ -64,7 +64,7 @@ asa::Object plus(asa::Object a, asa::Object b) {
   }
 }
 
-asa::Object minus(asa::Object a, asa::Object b) {
+asa::Object subtract(asa::Object a, asa::Object b) {
   if (a.type != b.type)
     return asa::ERROR_TYPEMISMATCH;
 
@@ -94,7 +94,7 @@ asa::Object minus(asa::Object a, asa::Object b) {
     return asa::ERROR_ILLEGALINSTRUCTION;
   }
 }
-asa::Object mult(asa::Object a, asa::Object b) {
+asa::Object multiply(asa::Object a, asa::Object b) {
   if (a.type != b.type)
     return asa::ERROR_TYPEMISMATCH;
 
@@ -125,7 +125,7 @@ asa::Object mult(asa::Object a, asa::Object b) {
   }
 }
 
-asa::Object div(asa::Object a, asa::Object b) {
+asa::Object divide(asa::Object a, asa::Object b) {
   if (a.type != b.type)
     return asa::ERROR_TYPEMISMATCH;
 

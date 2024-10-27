@@ -19,13 +19,14 @@ std::vector<Instruction> program = {
     // calculate ans = ans * i
     GET("ans"),
     GET("i"),
-    MULT,
+    MUL,
     SET("ans"),
 
     // increment i
     INCR("i"),
     
-    // check if n > i
+    // check if n > i (instead of checking i <= n 
+    // which takes twice the amount of instructions...)
     GET("n"),
     GET("i"),
     CMP,

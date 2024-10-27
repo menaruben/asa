@@ -57,17 +57,17 @@ namespace interpreter {
 #define DECR(var)                                                              \
   { .kind = InstructionKind::Decrement, .id = var }
 
-#define PLUS                                                                   \
-  { .kind = InstructionKind::Plus }
+#define ADD                                                                    \
+  { .kind = InstructionKind::Add }
 
-#define MINUS                                                                  \
-  { .kind = InstructionKind::Minus }
+#define SUB                                                                    \
+  { .kind = InstructionKind::Subtract }
 
-#define MULT                                                                   \
-  { .kind = InstructionKind::Mult }
+#define MUL                                                                    \
+  { .kind = InstructionKind::Multiply }
 
 #define DIV                                                                    \
-  { .kind = InstructionKind::Div }
+  { .kind = InstructionKind::Divide }
 
 #define SHOW                                                                   \
   { .kind = InstructionKind::Show }
@@ -161,18 +161,18 @@ asa::Object eval(std::vector<Instruction> insts) {
     case Increment: {
       if (variables.find(inst.id) == variables.end()) {
         return asa::ERROR_UNDEFINED_VARIABLE;
-      }    
+      }
       asa::Object o = variables[inst.id];
-      variables[inst.id] = plus(o, { .value = "1", .type = o.type });
+      variables[inst.id] = add(o, {.value = "1", .type = o.type});
       break;
     }
-    
+
     case Decrement: {
       if (variables.find(inst.id) == variables.end()) {
         return asa::ERROR_UNDEFINED_VARIABLE;
-      }    
+      }
       asa::Object o = variables[inst.id];
-      variables[inst.id] = minus(o, { .value = "1", .type = o.type });
+      variables[inst.id] = subtract(o, {.value = "1", .type = o.type});
       break;
     }
 
@@ -184,52 +184,52 @@ asa::Object eval(std::vector<Instruction> insts) {
       break;
     }
 
-    case Plus: {
+    case Add: {
       std::vector<asa::Object> args = pop(&stack, 2);
       if (args.size() < 2)
         return asa::ERROR_STACKUNDERFLOW;
       asa::Object a = args[0];
       asa::Object b = args[1];
-      asa::Object c = plus(b, a);
+      asa::Object c = add(b, a);
       if (c.error != asa::Ok)
         return c;
       stack.push_back(c);
       break;
     }
 
-    case Minus: {
+    case Subtract: {
       std::vector<asa::Object> args = pop(&stack, 2);
       if (args.size() < 2)
         return asa::ERROR_STACKUNDERFLOW;
       asa::Object a = args[0];
       asa::Object b = args[1];
-      asa::Object c = minus(b, a);
+      asa::Object c = subtract(b, a);
       if (c.error != asa::Ok)
         return c;
       stack.push_back(c);
       break;
     }
 
-    case Mult: {
+    case Multiply: {
       std::vector<asa::Object> args = pop(&stack, 2);
       if (args.size() < 2)
         return asa::ERROR_STACKUNDERFLOW;
       asa::Object a = args[0];
       asa::Object b = args[1];
-      asa::Object c = mult(b, a);
+      asa::Object c = multiply(b, a);
       if (c.error != asa::Ok)
         return c;
       stack.push_back(c);
       break;
     }
 
-    case Div: {
+    case Divide: {
       std::vector<asa::Object> args = pop(&stack, 2);
       if (args.size() < 2)
         return asa::ERROR_STACKUNDERFLOW;
       asa::Object a = args[0];
       asa::Object b = args[1];
-      asa::Object c = div(b, a);
+      asa::Object c = divide(b, a);
       if (c.error != asa::Ok)
         return c;
       stack.push_back(c);
