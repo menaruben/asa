@@ -1,3 +1,4 @@
+
 #include "interpreter.hpp"
 #include <iostream>
 #include <ostream>
@@ -16,17 +17,19 @@ std::vector<Instruction> program = {
   LABEL("loop"),
     PUSH("1", Integer),
     
-    // decrement i variable my one
+    // decrement remaining variable my one
     GET("remaining"),
     PUSH("1", Integer),
     MINUS,
     SET("remaining"),
     
-    // check if i is 0
+    // check if remaining is 0
     GET("remaining"),
     PUSH("0", Integer),
     CMP,
-  // if i > 0 then it pushes 1 onto stack because it is bigger
+  // if remaining > 0  then it pushes  1 onto the stack
+  // if remaining == 0 then it pushes  0 onto the stack
+  // if remaining < 0  then it pushes -1 onto the stack
   IF("1", "loop"),
   
   // else show the stack

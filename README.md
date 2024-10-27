@@ -13,7 +13,70 @@ a:::::aaaa::::::as::::::::::::::s a:::::aaaa::::::a
   aaaaaaaaaa  aaaa sssssssssss      aaaaaaaaaa  aaaa
 ```
 
-# Example
+# Examples
+## Conditions
+This example showcases the use of conditions and comparisons...
+```cpp
+
+
+#include "interpreter.hpp"
+#include <iostream>
+#include <ostream>
+#include <vector>
+
+using namespace instructions;
+using namespace asa;
+using namespace interpreter;
+
+std::vector<Instruction> program = {
+  // define variable "remaining" with 
+  // initial value 4 and type Integer
+  DEF("remaining", "4", Integer),
+  
+  // create a label to simulate loop in a goto style
+  LABEL("loop"),
+    PUSH("1", Integer),
+    
+    // decrement remaining variable my one
+    GET("remaining"),
+    PUSH("1", Integer),
+    MINUS,
+    SET("remaining"),
+    
+    // check if remaining is 0
+    GET("remaining"),
+    PUSH("0", Integer),
+    CMP,
+  // if remaining > 0  then it pushes  1 onto the stack
+  // if remaining == 0 then it pushes  0 onto the stack
+  // if remaining < 0  then it pushes -1 onto the stack
+  IF("1", "loop"),
+  
+  // else show the stack
+  PUSH("done!", String),
+  SHOW,
+};
+
+int main() {
+  Object result = eval(program);
+  if (result.error != Ok) {
+    std::cout << "[ERROR]: " << result.value << std::endl;
+    return -1;
+  }
+  return 0;
+}
+```
+The above code evaluates to the following:
+```asm
+Stack:
+    Value: done!, Type: String
+    Value: 1, Type: Integer
+    Value: 1, Type: Integer
+    Value: 1, Type: Integer
+    Value: 1, Type: Integer
+```
+
+## Math
 The following example evaluates the mathematical expression `1 - 3 * (5 / (6.9 + 42))`:
 ```cpp
 #include "interpreter.hpp"
@@ -78,36 +141,8 @@ Stack:
 ```
 The result is `0.693252` and has the type `Double`
 
-# Instructions
-## PUSH(v, t)
-Pushes and element with the value `v` (as string) and type
-`t` onto the stack
+# Documentation
+> work in progress :)
 
-## PLUS
-Adds the last two elements from the stack and
-pushes the result to the stack
-
-## MINUS
-Subtracts the last element from the second last element
-and pushes the result to the stack
-
-## MULT
-Multiplies the last two elements from the stack and pushes 
-the result to the stack.
-
-## DIV
-Divides the second last element by the last element and pushes
-the result to the stack
-
-## SHOW
-Prints the current state of the stack with the "newest" element
-at the top. 
-
-# Types
-- Integer
-- Double
-- Float
-- Boolean
-- String
-- Char
-- Bool
+## Instruction
+docs coming soon... :)
