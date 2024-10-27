@@ -29,7 +29,7 @@ namespace interpreter {
   { .kind = InstructionKind::SetVar, .id = name }
 
 #define GET(name)                                                              \
-  { .kind = InstructionKind::GetVar }
+  { .kind = InstructionKind::GetVar, .id = name }
 
 #define CMP                                                                    \
   { .kind = InstructionKind::Cmp }
@@ -97,20 +97,23 @@ asa::Object eval(std::vector<Instruction> insts) {
     }
 
     case If: {
-      if (stack.size() < 1) return asa::ERROR_STACKUNDERFLOW;
+      if (stack.size() < 1)
+        return asa::ERROR_STACKUNDERFLOW;
       if (labels.find(inst.id) == labels.end()) {
         return asa::ERROR_LABEL_NOT_FOUND;
       }
       asa::Object top = pop(&stack, 1)[0];
       if (top.value == inst.operand.value) {
-        instPosition = labels[inst.id];      
+        instPosition = labels[inst.id];
       }
       break;
     }
 
-    case DefVar:
+    case DefVar: {
       variables[inst.id] = {.value = inst.operand.value,
                             .type = inst.operand.type};
+      break;
+    }
 
     case SetVar: {
       if (stack.size() < 1)
@@ -134,6 +137,8 @@ asa::Object eval(std::vector<Instruction> insts) {
     }
 
     case Cmp: {
+      if (stack.size() < 2)
+        return asa::ERROR_STACKUNDERFLOW;
       std::vector<asa::Object> objs = pop(&stack, 2);
       stack.push_back(compare(objs[1], objs[0]));
       break;

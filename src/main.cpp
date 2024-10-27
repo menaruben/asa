@@ -8,22 +8,30 @@ using namespace asa;
 using namespace interpreter;
 
 std::vector<Instruction> program = {
-  DEF("times", "4", Integer),
-  DEF("count", "0", Integer),
-
+  // define variable "remaining" with 
+  // initial value 4 and type Integer
+  DEF("remaining", "4", Integer),
+  
+  // create a label to simulate loop in a goto style
   LABEL("loop"),
-  PUSH("1", Integer),
-  PUSH("1", Integer),
-  GET("count"),
-  PLUS,
-  SET("count"),
-  GET("count"),
-  GET("times"),
-  CMP,
-  IF("-1", "loop"),  
-
-  PUSH("Pushed 4 ones to stack successfully!", String),
-  SHOW
+    PUSH("1", Integer),
+    
+    // decrement i variable my one
+    GET("remaining"),
+    PUSH("1", Integer),
+    MINUS,
+    SET("remaining"),
+    
+    // check if i is 0
+    GET("remaining"),
+    PUSH("0", Integer),
+    CMP,
+  // if i > 0 then it pushes 1 onto stack because it is bigger
+  IF("1", "loop"),
+  
+  // else show the stack
+  PUSH("done!", String),
+  SHOW,
 };
 
 int main() {
