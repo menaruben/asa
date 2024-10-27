@@ -8,7 +8,7 @@
 using namespace instructions;
 namespace interpreter {
 
-#define MAX_STACK_SIZE 5
+#define MAX_STACK_SIZE 8192
 
 #define PUSH(val, t)                                                           \
   { .kind = InstructionKind::Push, .operand = {.value = val, .type = t}, }
@@ -18,6 +18,32 @@ namespace interpreter {
 
 #define JUMP(name)                                                             \
   { .kind = InstructionKind::Jump, .id = name, }
+
+#define DEF(name, val, t)                                                      \
+  {                                                                            \
+    .kind = InstructionKind::DefVar, .operand = {.value = val, .type = t},     \
+    .id = name,                                                                \
+  }
+
+#define SET(name)                                                              \
+  { .kind = InstructionKind::SetVar, .id = name }
+
+#define GET(name)                                                              \
+  { .kind = InstructionKind::GetVar }
+
+#define CMP                                                                    \
+  { .kind = InstructionKind::Cmp }
+
+#define IF(val, gotoLabel)                                                     \
+  {                                                                            \
+    .kind = InstructionKind::If,                                               \
+    .operand =                                                                 \
+        {                                                                      \
+            .value = val,                                                      \
+            .type = asa::Integer,                                              \
+        },                                                                     \
+    .id = gotoLabel                                                            \
+  }
 
 #define PLUS                                                                   \
   { .kind = InstructionKind::Plus }
@@ -37,7 +63,7 @@ namespace interpreter {
 asa::Object eval(std::vector<Instruction> insts) {
   std::list<asa::Object> stack;
   std::unordered_map<std::string, int> labels;
-  // std::unordered_map<std::string, asa::Object> variables;
+  std::unordered_map<std::string, asa::Object> variables;
   std::list<asa::Object>::iterator it;
   int instPosition = 0;
   Instruction inst;
@@ -70,8 +96,50 @@ asa::Object eval(std::vector<Instruction> insts) {
       break;
     }
 
-    case Plus: {
+    case If: {
+      if (stack.size() < 1) return asa::ERROR_STACKUNDERFLOW;
+      if (labels.find(inst.id) == labels.end()) {
+        return asa::ERROR_LABEL_NOT_FOUND;
+      }
+      asa::Object top = pop(&stack, 1)[0];
+      if (top.value == inst.operand.value) {
+        instPosition = labels[inst.id];      
+      }
+      break;
+    }
 
+    case DefVar:
+      variables[inst.id] = {.value = inst.operand.value,
+                            .type = inst.operand.type};
+
+    case SetVar: {
+      if (stack.size() < 1)
+        return asa::ERROR_STACKUNDERFLOW;
+
+      if (variables.find(inst.id) == variables.end())
+        return asa::ERROR_UNDEFINED_VARIABLE;
+
+      asa::Object o = pop(&stack, 1)[0];
+      variables[inst.id] = o;
+      break;
+    }
+
+    case GetVar: {
+      if (variables.find(inst.id) == variables.end()) {
+        return asa::ERROR_UNDEFINED_VARIABLE;
+      }
+      asa::Object o = variables[inst.id];
+      stack.push_back(o);
+      break;
+    }
+
+    case Cmp: {
+      std::vector<asa::Object> objs = pop(&stack, 2);
+      stack.push_back(compare(objs[1], objs[0]));
+      break;
+    }
+
+    case Plus: {
       std::vector<asa::Object> args = pop(&stack, 2);
       if (args.size() < 2)
         return asa::ERROR_STACKUNDERFLOW;

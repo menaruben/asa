@@ -8,10 +8,22 @@ using namespace asa;
 using namespace interpreter;
 
 std::vector<Instruction> program = {
-  LABEL("start"),
+  DEF("times", "4", Integer),
+  DEF("count", "0", Integer),
+
+  LABEL("loop"),
   PUSH("1", Integer),
-  SHOW,
-  JUMP("start"),
+  PUSH("1", Integer),
+  GET("count"),
+  PLUS,
+  SET("count"),
+  GET("count"),
+  GET("times"),
+  CMP,
+  IF("-1", "loop"),  
+
+  PUSH("Pushed 4 ones to stack successfully!", String),
+  SHOW
 };
 
 int main() {
