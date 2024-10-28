@@ -1,21 +1,21 @@
 BEGIN factorial
-DEF n 0 Integer
-SET n
-DEF ans 1 Integer
-DEF i 1 Integer
-LABEL fact
-GET ans
-GET i
-MUL
-SET ans
-INCR i
-IF i < n THEN GOTO fact
-IF i == n THEN GOTO fact
-GET ans
+    DEF n 0 Integer
+    SET n
+    DEF ans 1 Integer
+    DEF i 1 Integer
+    LABEL fact
+        GET ans
+        GET i
+        MUL
+        SET ans
+        INCR i
+        IF i < n THEN GOTO fact
+        IF i == n THEN GOTO fact
+    GET ans
 END
 
 BEGIN main
-PUSH 10 Integer
-CALL factorial
-SHOW
+    PUSH 10 Integer
+    CALL factorial
+    SHOW
 END

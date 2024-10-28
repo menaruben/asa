@@ -8,6 +8,11 @@
 using namespace instructions;
 
 namespace transpiler {
+std::string trim(const std::string &str) {
+    size_t start = str.find_first_not_of(" \t");
+    return (start == std::string::npos) ? "" : str.substr(start);
+}
+
 std::vector<std::string> splitStr(const std::string &str, char delimiter) {
   std::vector<std::string> tokens;
   std::stringstream ss(str);
@@ -17,8 +22,6 @@ std::vector<std::string> splitStr(const std::string &str, char delimiter) {
   }
   return tokens;
 }
-
-
 
 void parseHalt(
     std::vector<std::string> instParts, int linenum,
@@ -236,6 +239,7 @@ loadProgramFromMemory(std::string source) {
   std::string ctx = "";
 
   for (std::string line : lines) {
+    line = trim(line);
     std::vector<std::string> instParts = splitStr(line, ' ');
     if (instParts.size() < 1)
       continue;
