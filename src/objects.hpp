@@ -1,4 +1,5 @@
 #include <exception>
+#include <stdexcept>
 #include <string>
 
 namespace asa {
@@ -30,6 +31,15 @@ std::string typeToStr(Type t) {
   default:
     throw std::exception(); // unreachable
   }
+}
+
+Type strToType(std::string t) {
+  if (t == "Integer") return Integer;
+  if (t == "Float")   return Float;
+  if (t == "Double")  return Double;
+  if (t == "String")  return String;
+  if (t == "Bool")    return Bool;
+  throw std::runtime_error("Invalid type: " + t);
 }
 
 struct Object {

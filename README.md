@@ -14,56 +14,28 @@ a:::::aaaa::::::as::::::::::::::s a:::::aaaa::::::a
 ```
 > This is a toy project and should not be taken seriously, which means it is NOT for production at all. The goal of this project is to have fun!
 
-```cpp
-#include "interpreter.hpp"
-#include <iostream>
-#include <ostream>
-#include <string>
-#include <unordered_map>
-#include <vector>
+```asm
+BEGIN factorial
+DEF n 0 Integer
+SET n
+DEF ans 1 Integer
+DEF i 1 Integer
+LABEL fact
+GET ans
+GET i
+MUL
+SET ans
+INCR i
+IF i < n THEN GOTO fact
+IF i == n THEN GOTO fact
+GET ans
+END
 
-using namespace instructions;
-using namespace asa;
-using namespace interpreter;
-
-int main() {
-  std::unordered_map<std::string, std::vector<Instruction>> program;
-  // add program entry point
-  program["main"] = {
-      PUSH("10", Integer),
-      CALL("factorial"),
-      SHOW,
-  };
-
-  // custom function "factorial"
-  program["factorial"] = {
-      DEF("n", "0", Integer), // define n
-      SET("n"),             // set n to top of stack
-      DEF("ans", "1", Integer), DEF("i", "1", Integer),
-
-      LABEL("fact"),
-        // compute: ans = ans * i
-        GET("ans"), GET("i"), MUL, SET("ans"),
-        
-        // increment i
-        INCR("i"),
-
-        // if i <= n then loop again...
-        GET("i"), GET("n"), CMP, IFGOTO("-1", "fact"),
-        GET("i"), GET("n"), CMP, IFGOTO("0", "fact"),
-
-      // else push ans to stack
-      GET("ans"),
-  };
-
-  std::list<asa::Object> stack;
-  Object result = eval(program, "main", &stack);
-  if (result.error != Ok) {
-    std::cout << "[ERROR]: " << result.value << std::endl;
-    return -1;
-  }
-  return 0;
-}
+BEGIN main
+PUSH 10 Integer
+CALL factorial
+SHOW
+END
 ```
 ```asm
 Stack:
