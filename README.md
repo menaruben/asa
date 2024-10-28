@@ -12,6 +12,7 @@ a:::::aaaa::::::as::::::::::::::s a:::::aaaa::::::a
  a::::::::::aa:::as:::::::::::ss   a::::::::::aa:::a
   aaaaaaaaaa  aaaa sssssssssss      aaaaaaaaaa  aaaa
 ```
+> This is a toy project and should not be taken seriously, which means it is NOT for production at all. The goal of this project is to have fun!
 
 ```cpp
 #include "interpreter.hpp"

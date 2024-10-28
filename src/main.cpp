@@ -18,14 +18,24 @@ int main() {
   };
   program["factorial"] = {
       DEF("n", "0", Integer), // define n
-      SET("n"),             // set n to top of stack
-      DEF("ans", "1", Integer), DEF("i", "1", Integer),
+      SET("n"),               // set n to top of stack
+      DEF("ans", "1", Integer),
+      DEF("i", "1", Integer),
 
       LABEL("fact"),
-        GET("ans"), GET("i"), MUL, SET("ans"),
-        INCR("i"),
-        GET("i"), GET("n"), CMP, IFGOTO("-1", "fact"),
-        GET("i"), GET("n"), CMP, IFGOTO("0", "fact"),
+      GET("ans"),
+      GET("i"),
+      MUL,
+      SET("ans"),
+      INCR("i"),
+      GET("i"),
+      GET("n"),
+      CMP,
+      IFGOTO("-1", "fact"),
+      GET("i"),
+      GET("n"),
+      CMP,
+      IFGOTO("0", "fact"),
 
       GET("ans"), // push answer to stack
   };

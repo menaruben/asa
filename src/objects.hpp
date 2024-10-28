@@ -57,13 +57,14 @@ Object ERROR_DIVBYZERO = {.value = "DivByZero", .error = Error::DivByZero};
 Object ERROR_ILLEGALINSTRUCTION = {.value = "IllegalInstruction",
                                    .error = Error::IllegalInstruction};
 
-Object ERROR_LABEL_NOT_FOUND = {.value = "LabelNotFound", .error = Error::LabelNotFound };
+Object ERROR_LABEL_NOT_FOUND = {.value = "LabelNotFound",
+                                .error = Error::LabelNotFound};
 
-Object ERROR_UNDEFINED_VARIABLE = { .value = "UndefinedVariable", .error = Error::UndefinedVariable };
+Object ERROR_UNDEFINED_VARIABLE = {.value = "UndefinedVariable",
+                                   .error = Error::UndefinedVariable};
 
 bool isNumericType(Object o) {
-  return o.type == Type::Float || 
-         o.type == Type::Double ||
+  return o.type == Type::Float || o.type == Type::Double ||
          o.type == Type::Integer;
 }
 } // namespace asa
