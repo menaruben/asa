@@ -13,6 +13,7 @@ a:::::aaaa::::::as::::::::::::::s a:::::aaaa::::::a
   aaaaaaaaaa  aaaa sssssssssss      aaaaaaaaaa  aaaa
 ```
 > This is a toy project and should not be taken seriously, which means it is NOT for production at all. The goal of this project is to have fun!
+> I am not also not a experienced C++ developer but I will definitely clean up and refactor a lot :D
 
 ```asm
 BEGIN factorial
