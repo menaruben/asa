@@ -21,10 +21,7 @@ BEGIN factorial
   DEF ans 1 Integer
   DEF i 1 Integer
   LABEL fact
-    GET ans
-    GET i
-    MUL
-    SET ans
+    GET ans; GET i; MUL; SET ans
     INCR i
     IF i < n THEN GOTO fact
     IF i == n THEN GOTO fact

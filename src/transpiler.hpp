@@ -239,137 +239,143 @@ loadProgramFromMemory(std::string source) {
   std::string ctx = "";
 
   for (std::string line : lines) {
+    // to support indentation (optional)
     line = trim(line);
-    std::vector<std::string> instParts = splitStr(line, ' ');
-    if (instParts.size() < 1)
-      continue;
-    std::string instkw = instParts[0];
-    Instruction inst;
+    // to support multiple instructions in one line separated by ';'
+    std::vector<std::string> lines = splitStr(line, ';'); 
 
-    if (instkw == "BEGIN") {
-      if (instParts.size() < 2)
+    for (std::string inststr : lines) {
+      inststr = trim(inststr);
+      std::vector<std::string> instParts = splitStr(inststr, ' ');
+      if (instParts.size() < 1) continue;
+      std::string instkw = instParts[0];
+      Instruction inst;
+
+      if (instkw == "BEGIN") {
+        if (instParts.size() < 2)
+          throw std::runtime_error(
+              "No name for beginning block defined at line " +
+              std::to_string(linenum));
+        ctx = instParts[1];
+        linenum++;
+        continue;
+      }
+
+      if (ctx == "")
         throw std::runtime_error(
-            "No name for beginning block defined at line " +
+            "Instructions must be inside a BEGIN...END block, line: " +
             std::to_string(linenum));
-      ctx = instParts[1];
-      linenum++;
-      continue;
-    }
 
-    if (ctx == "")
-      throw std::runtime_error(
-          "Instructions must be inside a BEGIN...END block, line: " +
-          std::to_string(linenum));
+      if (instkw == "SHOW") {
+        parseShow(instParts, linenum, program, ctx);
+        linenum++;
+        continue;
+      }
 
-    if (instkw == "SHOW") {
-      parseShow(instParts, linenum, program, ctx);
-      linenum++;
-      continue;
-    }
+      if (instkw == "DEF") {
+        parseDef(instParts, linenum, program, ctx);
+        linenum++;
+        continue;
+      }
 
-    if (instkw == "DEF") {
-      parseDef(instParts, linenum, program, ctx);
-      linenum++;
-      continue;
-    }
+      if (instkw == "SET") {
+        parseSet(instParts, linenum, program, ctx);
+        linenum++;
+        continue;
+      }
 
-    if (instkw == "SET") {
-      parseSet(instParts, linenum, program, ctx);
-      linenum++;
-      continue;
-    }
+      if (instkw == "LABEL") {
+        parseLabel(instParts, linenum, program, ctx);
+        linenum++;
+        continue;
+      }
 
-    if (instkw == "LABEL") {
-      parseLabel(instParts, linenum, program, ctx);
-      linenum++;
-      continue;
-    }
+      if (instkw == "GET") {
+        parseGet(instParts, linenum, program, ctx);
+        linenum++;
+        continue;
+      }
 
-    if (instkw == "GET") {
-      parseGet(instParts, linenum, program, ctx);
-      linenum++;
-      continue;
-    }
+      if (instkw == "ADD") {
+        parseAdd(instParts, linenum, program, ctx);
+        linenum++;
+        continue;
+      }
 
-    if (instkw == "ADD") {
-      parseAdd(instParts, linenum, program, ctx);
-      linenum++;
-      continue;
-    }
+      if (instkw == "SUB") {
+        parseSub(instParts, linenum, program, ctx);
+        linenum++;
+        continue;
+      }
 
-    if (instkw == "SUB") {
-      parseSub(instParts, linenum, program, ctx);
-      linenum++;
-      continue;
-    }
+      if (instkw == "MUL") {
+        parseMul(instParts, linenum, program, ctx);
+        linenum++;
+        continue;
+      }
+          
+      if (instkw == "DIV") {
+        parseDiv(instParts, linenum, program, ctx);
+        linenum++;
+        continue;
+      }
+      
+      if (instkw == "HALT") {
+        parseHalt(instParts, linenum, program, ctx);
+        linenum++;
+        continue;
+      }
+      
+      if (instkw == "CLEAR") {
+        parseClear(instParts, linenum, program, ctx);
+        linenum++;
+        continue;
+      }
 
-    if (instkw == "MUL") {
-      parseMul(instParts, linenum, program, ctx);
-      linenum++;
-      continue;
-    }
-        
-    if (instkw == "DIV") {
-      parseDiv(instParts, linenum, program, ctx);
-      linenum++;
-      continue;
-    }
-    
-    if (instkw == "HALT") {
-      parseHalt(instParts, linenum, program, ctx);
-      linenum++;
-      continue;
-    }
-    
-    if (instkw == "CLEAR") {
-      parseClear(instParts, linenum, program, ctx);
-      linenum++;
-      continue;
-    }
+      if (instkw == "GOTO") {
+        parseGoto(instParts, linenum, program, ctx);
+        linenum++;
+        continue;
+      }
 
-    if (instkw == "GOTO") {
-      parseGoto(instParts, linenum, program, ctx);
-      linenum++;
-      continue;
-    }
+      if (instkw == "INCR") {
+        parseIncr(instParts, linenum, program, ctx);
+        linenum++;
+        continue;
+      }
 
-    if (instkw == "INCR") {
-      parseIncr(instParts, linenum, program, ctx);
-      linenum++;
-      continue;
-    }
+      if (instkw == "DECR") {
+        parseDecr(instParts, linenum, program, ctx);
+        linenum++;
+        continue;
+      }
 
-    if (instkw == "DECR") {
-      parseDecr(instParts, linenum, program, ctx);
-      linenum++;
-      continue;
-    }
+      if (instkw == "IF") {
+        parseIf(instParts, linenum, program, ctx);
+        linenum++;
+        continue;
+      }
 
-    if (instkw == "IF") {
-      parseIf(instParts, linenum, program, ctx);
-      linenum++;
-      continue;
-    }
+      if (instkw == "END") {
+        if (instParts.size() != 1)
+          throw std::runtime_error("Invalid amount of arguments at line: " +
+                                  std::to_string(linenum));
+        ctx = "";
+        linenum++;
+        continue;
+      }
 
-    if (instkw == "END") {
-      if (instParts.size() != 1)
-        throw std::runtime_error("Invalid amount of arguments at line: " +
-                                 std::to_string(linenum));
-      ctx = "";
-      linenum++;
-      continue;
-    }
+      if (instkw == "PUSH") {
+        parsePush(instParts, linenum, program, ctx);
+        linenum++;
+        continue;
+      }
 
-    if (instkw == "PUSH") {
-      parsePush(instParts, linenum, program, ctx);
-      linenum++;
-      continue;
-    }
-
-    if (instkw == "CALL") {
-      parseCall(instParts, linenum, program, ctx);
-      linenum++;
-      continue;
+      if (instkw == "CALL") {
+        parseCall(instParts, linenum, program, ctx);
+        linenum++;
+        continue;
+      }
     }
   }
   return program;
