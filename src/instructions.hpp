@@ -1,7 +1,6 @@
 #include "list"
 #include "objects.hpp"
 #include "vector"
-#include <cstring>
 #include <exception>
 #include <string>
 
@@ -25,6 +24,7 @@ enum InstructionKind {
   Clear,
   Increment,
   Decrement,
+  Call
 };
 
 struct Instruction {

@@ -1,24 +1,24 @@
 factorial n:
-	DEF ans, 1
-	DEF i, 1
-	LABEL fact_loop
-		;; ans = ans * i
-		GET ans
-		GET i
-		MUL
-		SET ans
+    DEF ans, 1
+    DEF i, 1
+    LABEL fact_loop
+        ;; compute ans = ans * i
+        GET ans
+        GET i
+        MUL
+        SET ans
 
-		;; increment i
-		INCR i
-
-		;; check if i <= n
-		IF i <= n THEN GOTO fact_loop
-
-	;; push ans on stack
-	GET("ans")
+        ;; increment i
+        INCR i
+    
+        ;; check if i <= n
+        IF i <= n THEN GOTO fact_loop
+    
+    ;; push ans on stack
+    GET("ans")
 end
 
 main:
-	CALL factorial, 10  ;; calls factorial with 10 as arg for n
-	SHOW                ;; show stack (contains result)
+    CALL factorial, 10  ;; calls factorial with 10 as arg for n
+    SHOW                ;; show stack (contains result)
 end

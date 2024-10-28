@@ -19,6 +19,9 @@ namespace interpreter {
 #define PUSH(val, t)                                                           \
   { .kind = InstructionKind::Push, .operand = {.value = val, .type = t}, }
 
+#define CALL(name)                                                             \
+  { .kind = InstructionKind::Call, .id = name }
+
 #define LABEL(name)                                                            \
   { .kind = InstructionKind::Label, .id = name, }
 
@@ -72,8 +75,10 @@ namespace interpreter {
 #define SHOW                                                                   \
   { .kind = InstructionKind::Show }
 
-asa::Object eval(std::vector<Instruction> insts) {
-  std::list<asa::Object> stack;
+asa::Object evalInstructions(
+    std::vector<Instruction> instructions, std::list<asa::Object> *stack,
+    std::unordered_map<std::string, std::vector<Instruction>> program) {
+
   std::unordered_map<std::string, int> labels;
   std::unordered_map<std::string, asa::Object> variables;
   std::list<asa::Object>::iterator it;
@@ -82,12 +87,12 @@ asa::Object eval(std::vector<Instruction> insts) {
   bool halt = false;
 
   while (!halt) {
-    if (instPosition >= insts.size()) {
+    if (instPosition >= instructions.size()) {
       halt = true;
       continue;
     }
 
-    inst = insts[instPosition++];
+    inst = instructions[instPosition++];
     switch (inst.kind) {
     case Halt: {
       halt = true;
@@ -95,15 +100,15 @@ asa::Object eval(std::vector<Instruction> insts) {
     }
 
     case Clear: {
-      stack.clear();
+      stack->clear();
       break;
     }
 
     case Push:
-      if (stack.size() + 1 > MAX_STACK_SIZE)
+      if (stack->size() + 1 > MAX_STACK_SIZE)
         return asa::ERROR_STACKOVERFLOW;
 
-      stack.push_back(inst.operand);
+      stack->push_back(inst.operand);
       break;
 
     case Label:
@@ -119,12 +124,12 @@ asa::Object eval(std::vector<Instruction> insts) {
     }
 
     case IfGoto: {
-      if (stack.size() < 1)
+      if (stack->size() < 1)
         return asa::ERROR_STACKUNDERFLOW;
       if (labels.find(inst.id) == labels.end()) {
         return asa::ERROR_LABEL_NOT_FOUND;
       }
-      asa::Object top = pop(&stack, 1)[0];
+      asa::Object top = pop(stack, 1)[0];
       if (top.value == inst.operand.value) {
         instPosition = labels[inst.id];
       }
@@ -138,13 +143,13 @@ asa::Object eval(std::vector<Instruction> insts) {
     }
 
     case SetVar: {
-      if (stack.size() < 1)
+      if (stack->size() < 1)
         return asa::ERROR_STACKUNDERFLOW;
 
       if (variables.find(inst.id) == variables.end())
         return asa::ERROR_UNDEFINED_VARIABLE;
 
-      asa::Object o = pop(&stack, 1)[0];
+      asa::Object o = pop(stack, 1)[0];
       variables[inst.id] = o;
       break;
     }
@@ -154,7 +159,7 @@ asa::Object eval(std::vector<Instruction> insts) {
         return asa::ERROR_UNDEFINED_VARIABLE;
       }
       asa::Object o = variables[inst.id];
-      stack.push_back(o);
+      stack->push_back(o);
       break;
     }
 
@@ -177,15 +182,15 @@ asa::Object eval(std::vector<Instruction> insts) {
     }
 
     case Cmp: {
-      if (stack.size() < 2)
+      if (stack->size() < 2)
         return asa::ERROR_STACKUNDERFLOW;
-      std::vector<asa::Object> objs = pop(&stack, 2);
-      stack.push_back(compare(objs[1], objs[0]));
+      std::vector<asa::Object> objs = pop(stack, 2);
+      stack->push_back(compare(objs[1], objs[0]));
       break;
     }
 
     case Add: {
-      std::vector<asa::Object> args = pop(&stack, 2);
+      std::vector<asa::Object> args = pop(stack, 2);
       if (args.size() < 2)
         return asa::ERROR_STACKUNDERFLOW;
       asa::Object a = args[0];
@@ -193,12 +198,12 @@ asa::Object eval(std::vector<Instruction> insts) {
       asa::Object c = add(b, a);
       if (c.error != asa::Ok)
         return c;
-      stack.push_back(c);
+      stack->push_back(c);
       break;
     }
 
     case Subtract: {
-      std::vector<asa::Object> args = pop(&stack, 2);
+      std::vector<asa::Object> args = pop(stack, 2);
       if (args.size() < 2)
         return asa::ERROR_STACKUNDERFLOW;
       asa::Object a = args[0];
@@ -206,12 +211,12 @@ asa::Object eval(std::vector<Instruction> insts) {
       asa::Object c = subtract(b, a);
       if (c.error != asa::Ok)
         return c;
-      stack.push_back(c);
+      stack->push_back(c);
       break;
     }
 
     case Multiply: {
-      std::vector<asa::Object> args = pop(&stack, 2);
+      std::vector<asa::Object> args = pop(stack, 2);
       if (args.size() < 2)
         return asa::ERROR_STACKUNDERFLOW;
       asa::Object a = args[0];
@@ -219,12 +224,12 @@ asa::Object eval(std::vector<Instruction> insts) {
       asa::Object c = multiply(b, a);
       if (c.error != asa::Ok)
         return c;
-      stack.push_back(c);
+      stack->push_back(c);
       break;
     }
 
     case Divide: {
-      std::vector<asa::Object> args = pop(&stack, 2);
+      std::vector<asa::Object> args = pop(stack, 2);
       if (args.size() < 2)
         return asa::ERROR_STACKUNDERFLOW;
       asa::Object a = args[0];
@@ -232,27 +237,45 @@ asa::Object eval(std::vector<Instruction> insts) {
       asa::Object c = divide(b, a);
       if (c.error != asa::Ok)
         return c;
-      stack.push_back(c);
+      stack->push_back(c);
+      break;
+    }
+
+    case Call: {
+      if (program.find(inst.id) == program.end()) {
+        return asa::ERROR_ILLEGALINSTRUCTION;
+      }
+      std::vector<Instruction> funcinsts = program[inst.id];
+      asa::Object result = evalInstructions(funcinsts, stack, program);
+      if (result.error != asa::Ok) {
+        return result;
+      }
       break;
     }
 
     case Show:
       printf("Stack:\n");
-      if (stack.empty()) {
+      if (stack->empty()) {
         printf("    [ EMPTY ]\n");
         break;
       }
 
-      stack.reverse();
-      for (asa::Object o : stack) {
+      stack->reverse();
+      for (asa::Object o : *stack) {
         std::cout << "    Value: " << o.value
                   << ", Type: " << asa::typeToStr(o.type) << std::endl;
       }
       printf("\n");
-      stack.reverse();
+      stack->reverse();
       break;
     }
   }
   return asa::ERROR_OK;
+}
+
+asa::Object
+eval(std::unordered_map<std::string, std::vector<Instruction>> program) {
+  std::list<asa::Object> stack;
+  return evalInstructions(program["main"], &stack, program);
 }
 } // namespace interpreter
