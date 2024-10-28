@@ -96,7 +96,7 @@ IF i < n THEN GOTO mylabel
 IF i == n then HALT
 ```
 Keep in mind that the condition must be separated by spaces and that the values
-compared must be two variables!
+compared must be two variables! Valid compare operators are `<`, `==` and `>`.
 
 ## HALT
 Stops the program. 
