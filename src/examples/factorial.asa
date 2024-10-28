@@ -1,17 +1,10 @@
 factorial n:
     DEF ans, 1
-    DEF i, 1
+    DEF i, 1;
     LABEL fact_loop
         ;; compute ans = ans * i
-        GET ans
-        GET i
-        MUL
-        SET ans
-
-        ;; increment i
+        GET ans; GET i; MUL; SET ans;
         INCR i
-    
-        ;; check if i <= n
         IF i <= n THEN GOTO fact_loop
     
     ;; push ans on stack

@@ -1,4 +1,5 @@
 #include "instructions.hpp"
+#include <forward_list>
 #include <iostream>
 #include <list>
 #include <string>
@@ -75,9 +76,9 @@ namespace interpreter {
 #define SHOW                                                                   \
   { .kind = InstructionKind::Show }
 
-asa::Object evalInstructions(
-    std::vector<Instruction> instructions, std::list<asa::Object> *stack,
-    std::unordered_map<std::string, std::vector<Instruction>> program) {
+asa::Object
+eval(std::unordered_map<std::string, std::vector<Instruction>> program,
+     std::string entryPoint, std::list<asa::Object> *stack) {
 
   std::unordered_map<std::string, int> labels;
   std::unordered_map<std::string, asa::Object> variables;
@@ -87,12 +88,12 @@ asa::Object evalInstructions(
   bool halt = false;
 
   while (!halt) {
-    if (instPosition >= instructions.size()) {
+    if (instPosition >= program[entryPoint].size()) {
       halt = true;
       continue;
     }
 
-    inst = instructions[instPosition++];
+    inst = program[entryPoint][instPosition++];
     switch (inst.kind) {
     case Halt: {
       halt = true;
@@ -246,7 +247,7 @@ asa::Object evalInstructions(
         return asa::ERROR_ILLEGALINSTRUCTION;
       }
       std::vector<Instruction> funcinsts = program[inst.id];
-      asa::Object result = evalInstructions(funcinsts, stack, program);
+      asa::Object result = eval(program, inst.id, stack);
       if (result.error != asa::Ok) {
         return result;
       }
@@ -271,11 +272,5 @@ asa::Object evalInstructions(
     }
   }
   return asa::ERROR_OK;
-}
-
-asa::Object
-eval(std::unordered_map<std::string, std::vector<Instruction>> program) {
-  std::list<asa::Object> stack;
-  return evalInstructions(program["main"], &stack, program);
 }
 } // namespace interpreter
