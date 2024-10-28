@@ -1,9 +1,9 @@
+#include "transpiler.hpp"
 #include <iostream>
 #include <list>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include "transpiler.hpp"
 
 using namespace instructions;
 namespace interpreter {
@@ -52,6 +52,14 @@ namespace interpreter {
             .type = asa::Integer,                                              \
         },                                                                     \
     .id = gotoLabel                                                            \
+  }
+
+#define IFHALT(val)                                                            \
+  {                                                                            \
+    .kind = InstructionKind::IfHalt, .operand = {                              \
+      .value = val,                                                            \
+      .type = asa::Integer                                                     \
+    }                                                                          \
   }
 
 #define INCR(var)                                                              \
@@ -134,6 +142,15 @@ eval(std::unordered_map<std::string, std::vector<Instruction>> program,
         instPosition = labels[inst.id];
       }
       break;
+    }
+
+    case IfHalt: {
+      if (stack->size() < 1) return asa::ERROR_STACKUNDERFLOW;
+      asa::Object top = pop(stack, 1)[0];
+      if (top.value == inst.operand.value) {
+        halt = true;
+        break;
+      }    
     }
 
     case DefVar: {

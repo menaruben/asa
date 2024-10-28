@@ -20,6 +20,7 @@ enum InstructionKind {
   GetVar,
   Cmp,
   IfGoto,
+  IfHalt,
   Halt,
   Clear,
   Increment,

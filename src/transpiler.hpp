@@ -9,8 +9,8 @@ using namespace instructions;
 
 namespace transpiler {
 std::string trim(const std::string &str) {
-    size_t start = str.find_first_not_of(" \t");
-    return (start == std::string::npos) ? "" : str.substr(start);
+  size_t start = str.find_first_not_of(" \t");
+  return (start == std::string::npos) ? "" : str.substr(start);
 }
 
 std::vector<std::string> splitStr(const std::string &str, char delimiter) {
@@ -42,7 +42,6 @@ void parseShow(
                              std::to_string(linenum));
   program[ctx].push_back({.kind = InstructionKind::Show});
 }
-
 
 void parseClear(
     std::vector<std::string> instParts, int linenum,
@@ -157,6 +156,7 @@ void parseIncr(
     std::vector<std::string> instParts, int linenum,
     std::unordered_map<std::string, std::vector<Instruction>> &program,
     std::string ctx) {
+
   if (instParts.size() != 2)
     throw std::runtime_error("Invalid amount of arguments at line: " +
                              std::to_string(linenum));
@@ -175,9 +175,10 @@ void parseDecr(
   program[ctx].push_back({.kind = instructions::Decrement, .id = id});
 }
 
-void parseIf(std::vector<std::string> instParts, int linenum,
-             std::unordered_map<std::string, std::vector<Instruction>> &program,
-             std::string ctx) {
+void parseIfGoto(
+    std::vector<std::string> instParts, int linenum,
+    std::unordered_map<std::string, std::vector<Instruction>> &program,
+    std::string ctx) {
   if (instParts.size() != 7)
     throw std::runtime_error("Invalid amount of arguments at line: " +
                              std::to_string(linenum));
@@ -194,7 +195,8 @@ void parseIf(std::vector<std::string> instParts, int linenum,
   else if (cmpop == ">")
     ifval = "1";
   else
-    throw std::runtime_error("Invalid compare operator: " + cmpop);
+    throw std::runtime_error("Invalid compare operator: " + cmpop +
+                             " at line: " + std::to_string(linenum));
 
   program[ctx].push_back({.kind = InstructionKind::GetVar, .id = lhs});
   program[ctx].push_back({.kind = InstructionKind::GetVar, .id = rhs});
@@ -203,6 +205,34 @@ void parseIf(std::vector<std::string> instParts, int linenum,
       .kind = InstructionKind::IfGoto,
       .operand = {.value = ifval, .type = asa::Integer},
       .id = label,
+  });
+}
+
+void parseIfHalt(
+    std::vector<std::string> instParts, int linenum,
+    std::unordered_map<std::string, std::vector<Instruction>> &program,
+    std::string ctx) {
+  std::string lhs = instParts[1];
+  std::string cmpop = instParts[2];
+  std::string rhs = instParts[3];
+  std::string ifval;
+
+  if (cmpop == "<")
+    ifval = "-1";
+  else if (cmpop == "==")
+    ifval = "0";
+  else if (cmpop == ">")
+    ifval = "1";
+  else
+    throw std::runtime_error("Invalid compare operator: " + cmpop +
+                             " at line " + std::to_string(linenum));
+
+  program[ctx].push_back({.kind = InstructionKind::GetVar, .id = lhs});
+  program[ctx].push_back({.kind = InstructionKind::GetVar, .id = rhs});
+  program[ctx].push_back({.kind = InstructionKind::Cmp});
+  program[ctx].push_back({
+      .kind = InstructionKind::IfHalt,
+      .operand = {.value = ifval, .type = asa::Integer},
   });
 }
 
@@ -242,12 +272,13 @@ loadProgramFromMemory(std::string source) {
     // to support indentation (optional)
     line = trim(line);
     // to support multiple instructions in one line separated by ';'
-    std::vector<std::string> lines = splitStr(line, ';'); 
+    std::vector<std::string> lines = splitStr(line, ';');
 
     for (std::string inststr : lines) {
       inststr = trim(inststr);
       std::vector<std::string> instParts = splitStr(inststr, ' ');
-      if (instParts.size() < 1) continue;
+      if (instParts.size() < 1)
+        continue;
       std::string instkw = instParts[0];
       Instruction inst;
 
@@ -313,19 +344,19 @@ loadProgramFromMemory(std::string source) {
         linenum++;
         continue;
       }
-          
+
       if (instkw == "DIV") {
         parseDiv(instParts, linenum, program, ctx);
         linenum++;
         continue;
       }
-      
+
       if (instkw == "HALT") {
         parseHalt(instParts, linenum, program, ctx);
         linenum++;
         continue;
       }
-      
+
       if (instkw == "CLEAR") {
         parseClear(instParts, linenum, program, ctx);
         linenum++;
@@ -351,7 +382,20 @@ loadProgramFromMemory(std::string source) {
       }
 
       if (instkw == "IF") {
-        parseIf(instParts, linenum, program, ctx);
+        if (instParts.size() < 6)
+          throw std::runtime_error("Invalid amount of arguments at line " +
+                                   std::to_string(linenum) + ": " + line);
+        std::string action = instParts[5];
+
+        if (action == "GOTO" || action == "goto") {
+          parseIfGoto(instParts, linenum, program, ctx);
+        } else if (action == "HALT" || action == "halt") {
+          parseIfHalt(instParts, linenum, program, ctx);
+        } else {
+          throw std::runtime_error("Unsupported action in if: " + action +
+                                   ", on line " + std::to_string(linenum));
+        }
+
         linenum++;
         continue;
       }
@@ -359,7 +403,7 @@ loadProgramFromMemory(std::string source) {
       if (instkw == "END") {
         if (instParts.size() != 1)
           throw std::runtime_error("Invalid amount of arguments at line: " +
-                                  std::to_string(linenum));
+                                   std::to_string(linenum));
         ctx = "";
         linenum++;
         continue;

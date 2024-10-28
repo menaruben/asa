@@ -1,4 +1,3 @@
-
 BEGIN factorial
     DEF n 0 Integer
     SET n
