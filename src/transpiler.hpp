@@ -23,6 +23,16 @@ std::vector<std::string> splitStr(const std::string &str, char delimiter) {
   return tokens;
 }
 
+void parseCmp(
+    std::vector<std::string> instParts, int linenum,
+    std::unordered_map<std::string, std::vector<Instruction>> &program,
+    std::string ctx) {
+  if (instParts.size() != 1)
+    throw std::runtime_error("Invalid amount of arguments at line: " +
+                             std::to_string(linenum));
+  program[ctx].push_back({.kind = InstructionKind::Cmp});
+}
+
 void parseHalt(
     std::vector<std::string> instParts, int linenum,
     std::unordered_map<std::string, std::vector<Instruction>> &program,
@@ -417,6 +427,12 @@ loadProgramFromMemory(std::string source) {
 
       if (instkw == "CALL") {
         parseCall(instParts, linenum, program, ctx);
+        linenum++;
+        continue;
+      }
+
+      if (instkw == "CMP") {
+        parseCmp(instParts, linenum, program, ctx);
         linenum++;
         continue;
       }
