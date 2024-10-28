@@ -85,7 +85,7 @@ that may look like this:
 ```asm
 ;; create a new instruction called "factorial" with an argument n
 factorial n:
-	DEF ans, 1
+    DEF ans, 1
 	DEF i, 1
 	LABEL fact_loop
 		;; ans = ans * i
@@ -101,7 +101,7 @@ factorial n:
 		IF i <= n THEN GOTO fact_loop
 
 	;; push ans on stack
-	GET("ans")
+	GET ans
 end
 
 main:
