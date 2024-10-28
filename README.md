@@ -44,11 +44,16 @@ std::vector<Instruction> program = {
     // increment i
     INCR("i"),
     
-    // check if n > i
-    GET("n"),
+    // check if i < n 
     GET("i"),
+    GET("n"),
     CMP,
-    IFGOTO("1", "factorial"),
+    IFGOTO("-1", "factorial"),
+    // check if i == n 
+    GET("i"),
+    GET("n"),
+    CMP,
+    IFGOTO("0", "factorial"),
   
   SHOW,
 };
@@ -64,6 +69,7 @@ int main() {
 ```
 ```asm
 Stack:
+    Value: 362880, Type: Integer
     Value: 40320, Type: Integer
     Value: 5040, Type: Integer
     Value: 720, Type: Integer
@@ -73,6 +79,35 @@ Stack:
     Value: 2, Type: Integer
     Value: 1, Type: Integer
     Value: 1, Type: Integer
+```
+The goal is that you don't have to write the c++ main.cpp but write a `.asa` file
+that may look like this:
+```asm
+;; create a new instruction called "factorial" with an argument n
+factorial n:
+	DEF ans, 1
+	DEF i, 1
+	LABEL fact_loop
+		;; ans = ans * i
+		GET ans
+		GET i
+		MUL
+		SET ans
+
+		;; increment i
+		INCR i
+
+		;; check if i <= n
+		IF i <= n THEN GOTO fact_loop
+
+	;; push ans on stack
+	GET("ans")
+end
+
+main:
+	CALL factorial, 10  ;; calls factorial with 10 as arg for n
+	SHOW                ;; show stack (contains result)
+end
 ```
 
 ## Conditions

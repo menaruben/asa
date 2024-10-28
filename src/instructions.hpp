@@ -1,6 +1,7 @@
 #include "list"
 #include "objects.hpp"
 #include "vector"
+#include <cstring>
 #include <exception>
 #include <string>
 
@@ -157,42 +158,63 @@ asa::Object divide(asa::Object a, asa::Object b) {
 }
 
 asa::Object compare(asa::Object a, asa::Object b) {
-  if (a.type != b.type) return asa::ERROR_TYPEMISMATCH;
-  if (!asa::isNumericType(a)) return asa::ERROR_ARITHMETIC;
+  if (a.type != b.type)
+    return asa::ERROR_TYPEMISMATCH;
   asa::Type returnType = a.type;
 
   switch (returnType) {
-    case asa::Integer: {
-      int ai = std::stoi(a.value);
-      int bi = std::stoi(b.value);
-      std::string result;
-      if (ai < bi)  result = "-1";
-      if (ai == bi) result = "0";
-      if (ai > bi)  result = "1"; 
-      return { .value = result, .type = asa::Integer };
-    }
+  case asa::String: {
+    std::string result;
+    if (a.value < b.value)
+      result = "-1";
+    if (a.value == b.value)
+      result = "0";
+    if (a.value < b.value)
+      result = "1";
+    return {.value = result, .type = asa::Integer};
+  }
 
-    case asa::Float: {
-      int af = std::stof(a.value);
-      int bf = std::stof(b.value);
-      std::string result;
-      if (af < bf)  result = "-1";
-      if (af == bf) result = "0";
-      if (af > bf)  result = "1"; 
-      return { .value = result, .type = asa::Integer };
-    }
+  case asa::Integer: {
+    int ai = std::stoi(a.value);
+    int bi = std::stoi(b.value);
+    std::string result;
+    if (ai < bi)
+      result = "-1";
+    if (ai == bi)
+      result = "0";
+    if (ai > bi)
+      result = "1";
+    return {.value = result, .type = asa::Integer};
+  }
 
-    case asa::Double: {
-      int ad = std::stod(a.value);
-      int bd = std::stod(b.value);
-      std::string result;
-      if (ad < bd)  result = "-1";
-      if (ad == bd) result = "0";
-      if (ad > bd)  result = "1"; 
-      return { .value = result, .type = asa::Integer };
-    }
+  case asa::Float: {
+    int af = std::stof(a.value);
+    int bf = std::stof(b.value);
+    std::string result;
+    if (af < bf)
+      result = "-1";
+    if (af == bf)
+      result = "0";
+    if (af > bf)
+      result = "1";
+    return {.value = result, .type = asa::Integer};
+  }
 
-    default: throw std::exception(); // unreachable
+  case asa::Double: {
+    int ad = std::stod(a.value);
+    int bd = std::stod(b.value);
+    std::string result;
+    if (ad < bd)
+      result = "-1";
+    if (ad == bd)
+      result = "0";
+    if (ad > bd)
+      result = "1";
+    return {.value = result, .type = asa::Integer};
+  }
+
+  default:
+    throw std::exception(); // unreachable
   }
 }
 

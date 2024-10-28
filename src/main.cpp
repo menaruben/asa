@@ -25,12 +25,16 @@ std::vector<Instruction> program = {
     // increment i
     INCR("i"),
     
-    // check if n > i (instead of checking i <= n 
-    // which takes twice the amount of instructions...)
-    GET("n"),
+    // check if i < n 
     GET("i"),
+    GET("n"),
     CMP,
-    IFGOTO("1", "factorial"),
+    IFGOTO("-1", "factorial"),
+    // check if i == n 
+    GET("i"),
+    GET("n"),
+    CMP,
+    IFGOTO("0", "factorial"),
   
   SHOW,
 };
