@@ -43,6 +43,9 @@ namespace interpreter {
 #define CMP                                                                    \
   { .kind = InstructionKind::Cmp }
 
+#define IF(val, codeblock)                                                     \
+  { .kind = InstructionKind::If, .block = codeblock }
+
 #define IFGOTO(val, gotoLabel)                                                 \
   {                                                                            \
     .kind = InstructionKind::IfGoto,                                           \
@@ -86,7 +89,6 @@ namespace interpreter {
 asa::Object
 eval(std::unordered_map<std::string, std::vector<Instruction>> program,
      std::string entryPoint, std::list<asa::Object> *stack) {
-
   std::unordered_map<std::string, int> labels;
   std::unordered_map<std::string, asa::Object> variables;
   std::list<asa::Object>::iterator it;
@@ -131,12 +133,28 @@ eval(std::unordered_map<std::string, std::vector<Instruction>> program,
       break;
     }
 
+    case If: {
+      if (stack->size() < 2)
+        return asa::ERROR_STACKUNDERFLOW;
+
+      std::vector<asa::Object> objs = pop(stack, 2);
+      asa::Object result = compare(objs[1], objs[0]);
+      if (result.value == inst.operand.value) {
+        for (const auto& blockInst : inst.block) {
+          if (halt) break;
+          eval({{entryPoint, {blockInst}}}, entryPoint, stack);
+        }
+      }
+      break;
+    }
+
     case IfGoto: {
       if (stack->size() < 1)
         return asa::ERROR_STACKUNDERFLOW;
       if (labels.find(inst.id) == labels.end()) {
         return asa::ERROR_LABEL_NOT_FOUND;
       }
+      
       asa::Object top = pop(stack, 1)[0];
       if (top.value == inst.operand.value) {
         instPosition = labels[inst.id];
@@ -145,12 +163,13 @@ eval(std::unordered_map<std::string, std::vector<Instruction>> program,
     }
 
     case IfHalt: {
-      if (stack->size() < 1) return asa::ERROR_STACKUNDERFLOW;
+      if (stack->size() < 1)
+        return asa::ERROR_STACKUNDERFLOW;
       asa::Object top = pop(stack, 1)[0];
       if (top.value == inst.operand.value) {
         halt = true;
         break;
-      }    
+      }
     }
 
     case DefVar: {

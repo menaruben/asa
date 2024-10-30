@@ -7,7 +7,7 @@
 
 using namespace instructions;
 
-namespace transpiler {
+namespace trash_transpiler {
 std::string trim(const std::string &str) {
   size_t start = str.find_first_not_of(" \t");
   return (start == std::string::npos) ? "" : str.substr(start);
@@ -218,6 +218,39 @@ void parseIfGoto(
   });
 }
 
+void parseIf(
+    std::vector<std::string> instParts, int linenum,
+    std::unordered_map<std::string, std::vector<Instruction>> &program,
+    std::string ctx) {
+  if (instParts.size() < 7)
+    throw std::runtime_error("Invalid amount of arguments at line: " +
+                             std::to_string(linenum));
+  std::string lhs = instParts[1];
+  std::string cmpop = instParts[2];
+  std::string rhs = instParts[3];
+  std::string ifval;
+
+  if (cmpop == "<")
+    ifval = "-1";
+  else if (cmpop == "==")
+    ifval = "0";
+  else if (cmpop == ">")
+    ifval = "1";
+  else
+    throw std::runtime_error("Invalid compare operator: " + cmpop +
+                             " at line: " + std::to_string(linenum));
+  // TODO: implement
+  throw std::runtime_error("Not implemented yet, somehow need to identify block correctly... !");
+
+  std::vector<Instruction> block;
+  program[ctx].push_back({
+      .kind = InstructionKind::If,
+      .operand = {.value = ifval, .type = asa::Integer},
+      .id = "",
+      .block = block,
+  });
+}
+
 void parseIfHalt(
     std::vector<std::string> instParts, int linenum,
     std::unordered_map<std::string, std::vector<Instruction>> &program,
@@ -276,7 +309,8 @@ loadProgramFromMemory(std::string source) {
   std::unordered_map<std::string, std::vector<Instruction>> program;
   std::vector<std::string> lines = splitStr(source, '\n');
   int linenum = 1;
-  std::string ctx = "";
+  std::vector<std::string> ctx;
+  int depth = 0;
 
   for (std::string line : lines) {
     // to support indentation (optional)
@@ -297,142 +331,148 @@ loadProgramFromMemory(std::string source) {
           throw std::runtime_error(
               "No name for beginning block defined at line " +
               std::to_string(linenum));
-        ctx = instParts[1];
+        ctx[depth++] = instParts[1];
         linenum++;
         continue;
       }
 
-      if (ctx == "")
+      if (ctx[depth] == "")
         throw std::runtime_error(
-            "Instructions must be inside a BEGIN...END block, line: " +
+            "Instructions must be inside a block, line: " +
             std::to_string(linenum));
 
       if (instkw == "SHOW") {
-        parseShow(instParts, linenum, program, ctx);
+        parseShow(instParts, linenum, program, ctx[depth]);
         linenum++;
         continue;
       }
 
       if (instkw == "DEF") {
-        parseDef(instParts, linenum, program, ctx);
+        parseDef(instParts, linenum, program, ctx[depth]);
         linenum++;
         continue;
       }
 
       if (instkw == "SET") {
-        parseSet(instParts, linenum, program, ctx);
+        parseSet(instParts, linenum, program, ctx[depth]);
         linenum++;
         continue;
       }
 
       if (instkw == "LABEL") {
-        parseLabel(instParts, linenum, program, ctx);
+        parseLabel(instParts, linenum, program, ctx[depth]);
         linenum++;
         continue;
       }
 
       if (instkw == "GET") {
-        parseGet(instParts, linenum, program, ctx);
+        parseGet(instParts, linenum, program, ctx[depth]);
         linenum++;
         continue;
       }
 
       if (instkw == "ADD") {
-        parseAdd(instParts, linenum, program, ctx);
+        parseAdd(instParts, linenum, program, ctx[depth]);
         linenum++;
         continue;
       }
 
       if (instkw == "SUB") {
-        parseSub(instParts, linenum, program, ctx);
+        parseSub(instParts, linenum, program, ctx[depth]);
         linenum++;
         continue;
       }
 
       if (instkw == "MUL") {
-        parseMul(instParts, linenum, program, ctx);
+        parseMul(instParts, linenum, program, ctx[depth]);
         linenum++;
         continue;
       }
 
       if (instkw == "DIV") {
-        parseDiv(instParts, linenum, program, ctx);
+        parseDiv(instParts, linenum, program, ctx[depth]);
         linenum++;
         continue;
       }
 
       if (instkw == "HALT") {
-        parseHalt(instParts, linenum, program, ctx);
+        parseHalt(instParts, linenum, program, ctx[depth]);
         linenum++;
         continue;
       }
 
       if (instkw == "CLEAR") {
-        parseClear(instParts, linenum, program, ctx);
+        parseClear(instParts, linenum, program, ctx[depth]);
         linenum++;
         continue;
       }
 
       if (instkw == "GOTO") {
-        parseGoto(instParts, linenum, program, ctx);
+        parseGoto(instParts, linenum, program, ctx[depth]);
         linenum++;
         continue;
       }
 
       if (instkw == "INCR") {
-        parseIncr(instParts, linenum, program, ctx);
+        parseIncr(instParts, linenum, program, ctx[depth]);
         linenum++;
         continue;
       }
 
       if (instkw == "DECR") {
-        parseDecr(instParts, linenum, program, ctx);
+        parseDecr(instParts, linenum, program, ctx[depth]);
         linenum++;
         continue;
       }
 
       if (instkw == "IF") {
-        if (instParts.size() < 6)
-          throw std::runtime_error("Invalid amount of arguments at line " +
-                                   std::to_string(linenum) + ": " + line);
-        std::string action = instParts[5];
+        // if must be inside a begin...end block => therefore depth must be atleast 1
+        if (depth < 1) throw std::runtime_error(
+          "Unexpected IF at line: " + std::to_string(linenum) + " (IF must be inside a BEGIN...END block)"); 
+        
+        ctx[depth++] = "if"; 
+        parseIf(instParts, linenum, program, ctx[depth]);
+        linenum++;
+        continue;
+      }
 
-        if (action == "GOTO" || action == "goto") {
-          parseIfGoto(instParts, linenum, program, ctx);
-        } else if (action == "HALT" || action == "halt") {
-          parseIfHalt(instParts, linenum, program, ctx);
-        } else {
-          throw std::runtime_error("Unsupported action in if: " + action +
-                                   ", on line " + std::to_string(linenum));
-        }
+      if (instkw == "ENDIF") {
+        if (ctx[depth] != "if")
+          throw std::runtime_error("Unexpected ENDIF at line: " + std::to_string(linenum));
 
+        if (instParts.size() != 1)
+          throw std::runtime_error("Invalid amount of arguments at line: " + std::to_string(linenum));
+        
+        ctx.pop_back();
+        depth--;
         linenum++;
         continue;
       }
 
       if (instkw == "END") {
         if (instParts.size() != 1)
-          throw std::runtime_error("Invalid amount of arguments at line: " +
-                                   std::to_string(linenum));
-        ctx = "";
+          throw std::runtime_error("Invalid amount of arguments at line: " + std::to_string(linenum));
+        
+        ctx.pop_back();
+        depth--;
         linenum++;
         continue;
       }
 
       if (instkw == "PUSH") {
-        parsePush(instParts, linenum, program, ctx);
+        parsePush(instParts, linenum, program, ctx[depth]);
         linenum++;
         continue;
       }
 
       if (instkw == "CALL") {
-        parseCall(instParts, linenum, program, ctx);
+        parseCall(instParts, linenum, program, ctx[depth]);
         linenum++;
         continue;
       }
 
       if (instkw == "CMP") {
-        parseCmp(instParts, linenum, program, ctx);
+        parseCmp(instParts, linenum, program, ctx[depth]);
         linenum++;
         continue;
       }

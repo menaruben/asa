@@ -1,18 +1,25 @@
-BEGIN factorial
-    DEF n 0 Integer
-    SET n
-    DEF ans 1 Integer
-    DEF i 1 Integer
-    LABEL fact
-        GET ans; GET i; MUL; SET ans
-        INCR i
-        IF i < n THEN GOTO fact
-        IF i == n THEN GOTO fact
-    GET ans
-END
+begin factorial:
+    n = pop;
+    ans = 1;
 
-BEGIN main
-    PUSH 10 Integer
-    CALL factorial
-    SHOW
-END
+    i = 1;
+    label fact;
+        ans = ans * i;
+        i = i + 1;
+
+        if i < n:
+            goto fact;
+        end
+        
+        if i == n:
+            goto fact;
+        end
+
+    push ans;
+end
+
+begin main
+    push 10;
+    call factorial;
+    show;
+end

@@ -3,6 +3,7 @@
 #include "vector"
 #include <exception>
 #include <string>
+#include <vector>
 
 namespace instructions {
 
@@ -19,6 +20,7 @@ enum InstructionKind {
   SetVar,
   GetVar,
   Cmp,
+  If,
   IfGoto,
   IfHalt,
   Halt,
@@ -32,6 +34,7 @@ struct Instruction {
   InstructionKind kind;
   asa::Object operand;
   std::string id;
+  std::vector<Instruction> block;
 };
 
 asa::Object add(asa::Object a, asa::Object b) {
