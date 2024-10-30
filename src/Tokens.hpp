@@ -36,6 +36,7 @@ enum TokenKind {
   Println,
   Print,
   Call,
+  EndOfFile,
 };
 
 std::string tokenKindToStr(TokenKind k) {
@@ -72,6 +73,7 @@ std::string tokenKindToStr(TokenKind k) {
     case Println:      return "Println";
     case Print:        return "Print";
     case Call:         return "Call";
+    case EndOfFile:    return "EndOfFile";
     default:           return "Unknown TokenKind";
   }
 }

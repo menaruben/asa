@@ -89,7 +89,7 @@ std::vector<Token> tokenize(std::string source) {
     t = tokenFromStr(currentToken.str());
     tokens.push_back(t);
   }
-  
+  tokens.push_back({.kind = EndOfFile });
   return tokens;
 }
 } // namespace lexer

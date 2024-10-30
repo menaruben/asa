@@ -28,20 +28,16 @@ int main(int argc, char** argv) {
   std::string sourcepath = argv[1];
   std::string source = readFile(sourcepath);
   std::vector<Token> tokens = lexer::tokenize(source);
-  for (Token t : tokens) {
-    std::cout << "value: " << std::setw(15) << t.value << ", kind: " << tokenKindToStr(t.kind) << std::endl; 
+  std::unordered_map<std::string, std::vector<Instruction>> program = transpiler::load_program(source);
+  std::list<asa::Object> stack;
+  if (program.find("main") == program.end()) {
+    std::cout << "[ERROR]: No entry point 'main' found!" << std::endl;
   }
   
-  // std::unordered_map<std::string, std::vector<Instruction>> program = transpiler::loadProgramFromMemory(source);
-  // std::list<asa::Object> stack;
-  // if (program.find("main") == program.end()) {
-  //   std::cout << "[ERROR]: No entry point 'main' found!" << std::endl;
-  // }
-  
-  // Object result = eval(program, "main", &stack);
-  // if (result.error != Ok) {
-  //   std::cout << "[ERROR]: " << result.value << std::endl;
-  //   return -1;
-  // }
+  Object result = eval(program, "main", &stack);
+  if (result.error != Ok) {
+    std::cout << "[ERROR]: " << result.value << std::endl;
+    return -1;
+  }
   return 0;
 }
