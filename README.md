@@ -16,30 +16,37 @@ a:::::aaaa::::::as::::::::::::::s a:::::aaaa::::::a
 > I am not a C++ developer so keep that in mind but I will definitely clean up and refactor a lot :D
 
 ```asm
-BEGIN factorial
-  DEF n 0 Integer
-  SET n
-  DEF ans 1 Integer
-  DEF i 1 Integer
-  LABEL fact
-    GET ans; GET i; MUL; SET ans
-    INCR i
-    IF i < n THEN GOTO fact
-    IF i == n THEN GOTO fact
-  GET ans
-END
+begin fib:
+	n = pop;
+	if n < 0:  push "not allowed"; halt; end
+	if n == 0: push 0; halt; end
+	if n == 1: push 1; halt; end
+	
+	first = 0;
+	second = 1;
+	result = 0;
 
-BEGIN main
-  PUSH 10 Integer
-  CALL factorial
-  SHOW
-END
+	i = 3;
+	label fib_loop;
+		result = first + second;
+		first = second;
+		second = result;
+
+		if i == n:
+			push result;
+			halt;
+		end
+		i = i + 1;
+	goto fib_loop
+end
+
+begin main:
+	push 10;
+	CALL fib;
+	SHOW;
+end
 ```
-```asm
-Stack:
-    Value: 3628800, Type: Integer
-```
-As we can see the "function"/block `factorial` above pushes the factorial of 10 to the stack!
+As we can see the "function"/block `fib` above pushes the 10th fib to the stack!
 
 # Instructions
 ## SHOW

@@ -1,3 +1,4 @@
+
 begin fib:
 	n = pop;
 	if n < 0:  push "not allowed"; halt; end
