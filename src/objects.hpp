@@ -36,11 +36,16 @@ std::string typeToStr(Type t) {
 }
 
 Type strToType(std::string t) {
-  if (t == "Integer") return Integer;
-  if (t == "Float")   return Float;
-  if (t == "Double")  return Double;
-  if (t == "String")  return String;
-  if (t == "Bool")    return Bool;
+  if (t == "Integer")
+    return Integer;
+  if (t == "Float")
+    return Float;
+  if (t == "Double")
+    return Double;
+  if (t == "String")
+    return String;
+  if (t == "Bool")
+    return Bool;
   throw std::runtime_error("Invalid type: " + t);
 }
 

@@ -20,10 +20,10 @@ vector<Token> tokenize(string source) {
   LexCtx ctx = Normal;
   Token t;
   char ch;
-  
+
   for (int i = 0; i < source.length(); i++) {
     ch = source[i];
-    
+
     // special cases:
     if (ctx == Normal && current_token.str().length() == 0 && isspace(ch))
       continue; // skip whitespace
@@ -63,7 +63,7 @@ vector<Token> tokenize(string source) {
       current_token.str("");
       continue;
     }
-    
+
     // handle symbols
     if (is_separator(ch)) {
       if (current_token.str().length() > 0) {
@@ -72,9 +72,9 @@ vector<Token> tokenize(string source) {
         current_token.str("");
       }
       current_token << ch;
-      if (ch == '=' && source[i+1] == '=') {
+      if (ch == '=' && source[i + 1] == '=') {
         current_token << source[++i];
-      } 
+      }
       t = token_from_str(current_token.str());
       tokens.push_back(t);
       current_token.str("");
@@ -88,7 +88,7 @@ vector<Token> tokenize(string source) {
     t = token_from_str(current_token.str());
     tokens.push_back(t);
   }
-  tokens.push_back({.kind = EndOfFile });
+  tokens.push_back({.kind = EndOfFile});
   return tokens;
 }
 } // namespace lexer

@@ -1,5 +1,5 @@
-#include "interpreter.hpp"
 #include "Lexer.hpp"
+#include "interpreter.hpp"
 #include <fstream>
 #include <iostream>
 #include <ostream>
@@ -15,15 +15,15 @@ using namespace transpiler;
 string readFile(const string &filename, string comment_delim) {
   ifstream file(filename);
   if (!file.is_open()) {
-      cerr << "Error opening file." << endl;
-      return "";
+    cerr << "Error opening file." << endl;
+    return "";
   }
 
   stringstream ss;
   string line;
   while (getline(file, line)) {
-      line = line.substr(0, line.find(comment_delim));
-      ss << line << endl;
+    line = line.substr(0, line.find(comment_delim));
+    ss << line << endl;
   }
   return ss.str();
 }
@@ -34,7 +34,8 @@ int main(int argc, char **argv) {
   string sourcepath = argv[1];
   string source = readFile(sourcepath, "//");
   vector<Token> tokens = lexer::tokenize(source);
-  Program program = load_program(tokens); list<asa::Object> stack; 
+  Program program = load_program(tokens);
+  list<asa::Object> stack;
   if (program.find("main") == program.end()) {
     cout << "[ERROR]: No entry point 'main' found!" << endl;
   }

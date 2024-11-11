@@ -21,8 +21,10 @@
   { .kind = InstructionKind::Call, .id = name }
 
 #define LABEL(name, pos)                                                       \
-  { .kind = InstructionKind::Label,                                            \
-  .operand = {.value = pos, .type = asa::Integer}, .id = name, }
+  {                                                                            \
+    .kind = InstructionKind::Label,                                            \
+    .operand = {.value = pos, .type = asa::Integer}, .id = name,               \
+  }
 
 #define GOTO(name)                                                             \
   { .kind = InstructionKind::Goto, .id = name, }
@@ -47,8 +49,10 @@
   { .kind = InstructionKind::If, .block = codeblock }
 
 #define IFGOTO(val, label)                                                     \
-  { .kind = InstructionKind::IfGoto, \
-  .operand = {.value=val, .type=asa::Integer}, .id = label }
+  {                                                                            \
+    .kind = InstructionKind::IfGoto,                                           \
+    .operand = {.value = val, .type = asa::Integer}, .id = label               \
+  }
 
 #define ADD                                                                    \
   { .kind = InstructionKind::Add }

@@ -35,8 +35,8 @@ struct Block {
 typedef unordered_map<string, Block> Program;
 
 void parse_begin(int &index, vector<Token> *tokens, Program *program,
-  string &current_block) {
-  
+                 string &current_block) {
+
   index++; // skip begin
   current_block = (*tokens)[index++].value;
   if (current_block == "")
@@ -104,8 +104,6 @@ void parse_label(int &index, vector<Token> *tokens, Program *program,
   }
   int pos = (*program)[current_block].instructions.size();
   (*program)[current_block].labels[labeltoken.value] = pos;
-  // Instruction labelinst = LABEL(labeltoken.value, pos);
-  // (*program)[current_block].instructions.push_back(labelinst);
 }
 
 void parse_goto(int &index, vector<Token> *tokens, Program *program,
@@ -135,13 +133,15 @@ void parse_ifgoto(int &index, vector<Token> *tokens, Program *program,
   index++; // skip ifgoto
   Token expected = (*tokens)[index++];
   if (expected.kind != TokenKind::Integer) {
-    throw runtime_error("Expected integer, got " + 
-      token_kind_to_str(expected.kind) + "with value " + expected.value);
+    throw runtime_error("Expected integer, got " +
+                        token_kind_to_str(expected.kind) + "with value " +
+                        expected.value);
   }
   if (expected.value != "-1" && expected.value != "0" &&
       expected.value != "1") {
-    throw runtime_error(
-      "Expected value must be either -1 (less), 0 (equal) or 1 (greater), got " + expected.value);
+    throw runtime_error("Expected value must be either -1 (less), 0 (equal) or "
+                        "1 (greater), got " +
+                        expected.value);
   }
   Token label = (*tokens)[index++];
   if (label.kind != TokenKind::Identifier) {
@@ -228,7 +228,7 @@ Program load_program(vector<Token> tokens) {
 
     case TokenKind::Add: {
       program[current_block].instructions.push_back(ADD);
-      Token sc = tokens[++i]; 
+      Token sc = tokens[++i];
       if (sc.kind != TokenKind::Semicolon) {
         throw runtime_error("Expected semicolon!");
       }
@@ -237,7 +237,7 @@ Program load_program(vector<Token> tokens) {
 
     case TokenKind::Sub: {
       program[current_block].instructions.push_back(SUB);
-      Token sc = tokens[++i]; 
+      Token sc = tokens[++i];
       if (sc.kind != TokenKind::Semicolon) {
         throw runtime_error("Expected semicolon!");
       }
@@ -246,7 +246,7 @@ Program load_program(vector<Token> tokens) {
 
     case TokenKind::Mul: {
       program[current_block].instructions.push_back(MUL);
-      Token sc = tokens[++i]; 
+      Token sc = tokens[++i];
       if (sc.kind != TokenKind::Semicolon) {
         throw runtime_error("Expected semicolon!");
       }
@@ -264,7 +264,7 @@ Program load_program(vector<Token> tokens) {
 
     case TokenKind::Show: {
       program[current_block].instructions.push_back(SHOW);
-      Token sc = tokens[++i]; 
+      Token sc = tokens[++i];
       if (sc.kind != TokenKind::Semicolon) {
         throw runtime_error("Expected semicolon!");
       }
@@ -278,7 +278,7 @@ Program load_program(vector<Token> tokens) {
 
     case TokenKind::Cmp: {
       program[current_block].instructions.push_back(CMP);
-      Token sc = tokens[++i]; 
+      Token sc = tokens[++i];
       if (sc.kind != TokenKind::Semicolon) {
         throw runtime_error("Expected semicolon!");
       }
