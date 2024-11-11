@@ -1,42 +1,47 @@
 #include "interpreter.hpp"
+#include "Lexer.hpp"
 #include <fstream>
-#include <iomanip>
 #include <iostream>
 #include <ostream>
 #include <pthread.h>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include "Lexer.hpp"
 
-using namespace instructions;
+using namespace std;
 using namespace asa;
-using namespace interpreter;
+using namespace transpiler;
 
+string readFile(const string &filename, string comment_delim) {
+  ifstream file(filename);
+  if (!file.is_open()) {
+      cerr << "Error opening file." << endl;
+      return "";
+  }
 
-std::string readFile(const std::string& filename) {
-    std::ifstream file(filename);
-    if (!file.is_open()) {
-        throw std::runtime_error("Could not open file");
-    }
-    return std::string((std::istreambuf_iterator<char>(file)),
-                        std::istreambuf_iterator<char>());
+  stringstream ss;
+  string line;
+  while (getline(file, line)) {
+      line = line.substr(0, line.find(comment_delim));
+      ss << line << endl;
+  }
+  return ss.str();
 }
 
-int main(int argc, char** argv) {
-  if (argc < 2) throw std::runtime_error("Please enter a file path!");
-  std::string sourcepath = argv[1];
-  std::string source = readFile(sourcepath);
-  std::vector<Token> tokens = lexer::tokenize(source);
-  std::unordered_map<std::string, std::vector<Instruction>> program = transpiler::load_program(source);
-  std::list<asa::Object> stack;
+int main(int argc, char **argv) {
+  if (argc < 2)
+    throw runtime_error("Please enter a file path!");
+  string sourcepath = argv[1];
+  string source = readFile(sourcepath, "//");
+  vector<Token> tokens = lexer::tokenize(source);
+  Program program = load_program(tokens); list<asa::Object> stack; 
   if (program.find("main") == program.end()) {
-    std::cout << "[ERROR]: No entry point 'main' found!" << std::endl;
+    cout << "[ERROR]: No entry point 'main' found!" << endl;
   }
-  
-  Object result = eval(program, "main", &stack);
+
+  Object result = interpreter::eval(program, "main", &stack);
   if (result.error != Ok) {
-    std::cout << "[ERROR]: " << result.value << std::endl;
+    cout << "[ERROR]: " << result.value << endl;
     return -1;
   }
   return 0;

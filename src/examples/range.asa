@@ -1,0 +1,17 @@
+begin range:
+    pop until;                               // Get the upper limit
+    pop from;                                // Get the lower limit
+    push from; pop i;                        // Initialize i to start from 'from'
+    label loop;
+        push i;                              // Push the current value of i onto the stack
+        push i; push 1; add; pop i;          // Increment i by 1
+    push i; push until; cmp; ifgoto -1 loop;
+    push i; push until; cmp; ifgoto 0 loop;
+end
+
+begin main:
+    push 3;
+    push 9;
+    call range;
+    show;
+end

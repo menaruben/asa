@@ -15,108 +15,33 @@ a:::::aaaa::::::as::::::::::::::s a:::::aaaa::::::a
 > This is a toy project and should not be taken seriously, which means it is NOT for production at all. The goal of this project is to have fun!
 > I am not a C++ developer so keep that in mind but I will definitely clean up and refactor a lot :D
 
-```asm
+```c
 begin fib:
-	n = pop;
-	if n < 0:  push "not allowed"; halt; end
-	if n == 0: push 0; halt; end
-	if n == 1: push 1; halt; end
-	
-	first = 0;
-	second = 1;
-	result = 0;
+    pop n;              // store top of stack to variable n
+    push 0; pop first;  // first = 0
+    push 1; pop second; // second = 1
 
-	i = 3;
-	label fib_loop;
-		result = first + second;
-		first = second;
-		second = result;
-
-		if i == n:
-			push result;
-			halt;
-		end
-		i = i + 1;
-	goto fib_loop
+    push 2; pop i;
+		// creates a label called "loop"
+    label loop;
+				// result = first + second
+        push first; push second; add; pop result;
+        push second; pop first;          // first = second
+        push result; pop second;         // second = result
+				push i; push 1; add; pop i;      // i = i + 1
+    push i; push n; cmp; ifgoto -1 loop; // if i  < n then goto loop
+    push i; push n; cmp; ifgoto 0 loop;  // if i == n then goto loop
+	push result;
 end
 
 begin main:
 	push 10;
-	CALL fib;
-	SHOW;
+	call fib;
+	show;
 end
 ```
+```
+Stack:
+    Value: 55, Type: Integer
+```
 As we can see the "function"/block `fib` above pushes the 10th fib to the stack!
-
-# Instructions
-## SHOW
-Prints the current stack to the terminal
-
-## PUSH v t
-Pushes the value `v` with type `t` to the stack
-
-## ADD
-Adds the two elements at the top in the stack (popping them)
-and pushes the result to the stack
-
-## SUB
-Subtracts the last element from the second last element in the stack (popping them)
-and pushes the result to the stack
-
-## MUL 
-Multiplies the two elements at the top in the stack (popping them)
-and pushes the result to the stack
-
-## DIV
-Divides the second last element by the last element in the stack (popping them)
-and pushes the result to the stack
-
-## LABEL n 
-Creates a label with the name `n`. You can jump to that
-label using the `GOTO` instruction or in `IF` instructions:
-```
-IF i < n THEN GOTO mylabel
-```
-
-## GOTO n
-Jumps to the label with the name `n`. 
-
-## DEF n v t
-Defines a variable with the name `n` with the value `v` and type `t`.
-
-## SET n
-Sets the value of the variable to the element at the top of the stack.
-
-## GET n
-Pushes the value of the variable to the stack.
-
-## CMP
-Compares the second last element (a) to the last element (b) in the stack (top) (popping them).
-When...
-  - a < b  => pushes -1 to the stack
-  - a == b => pushes  0 to the stack
-  - a > b  => pushes  1 to the stack
-
-## IF
-Jump to a label or halt if a condition is met.
-```
-IF i < n THEN GOTO mylabel
-IF i == n then HALT
-```
-Keep in mind that the condition must be separated by spaces and that the values
-compared must be two variables! Valid compare operators are `<`, `==` and `>`.
-
-## HALT
-Stops the program. 
-
-## CLEAR
-Clears the stack
-
-## INCR n
-Increments the value of the variable n by 1
-
-## DECR n
-Decrements the value of the variable by 1
-
-## CALL n
-Calls the block/function with the name `n`. Please see the factorial example.

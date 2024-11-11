@@ -4,20 +4,19 @@
 #include <vector>
 
 using namespace tokens;
+using namespace std;
 
 namespace lexer {
 
-bool isSymbol(char value) {
-  return value == '+' || value == '-' || value == '*' || value == '/' ||
-         value == ',' || value == ':' || value == ';' || value == '<' ||
-         value == '=';
+bool is_separator(char value) {
+  return value == ',' || value == ':' || value == ';';
 }
 
 enum LexCtx { InString, Normal };
 
-std::vector<Token> tokenize(std::string source) {
-  std::vector<Token> tokens;
-  std::stringstream currentToken;
+vector<Token> tokenize(string source) {
+  vector<Token> tokens;
+  stringstream current_token;
   LexCtx ctx = Normal;
   Token t;
   char ch;
@@ -26,31 +25,31 @@ std::vector<Token> tokenize(std::string source) {
     ch = source[i];
     
     // special cases:
-    if (ctx == Normal && currentToken.str().length() == 0 && isspace(ch))
+    if (ctx == Normal && current_token.str().length() == 0 && isspace(ch))
       continue; // skip whitespace
 
     if (ctx == InString && ch != '"') {
-      currentToken << ch;
+      current_token << ch;
       continue;
     }
 
     // handle double quotes:
     if (ch == '"') {
       if (ctx == Normal) {
-        if (currentToken.str().length() > 0) {
-          t = tokenFromStr(currentToken.str());
+        if (current_token.str().length() > 0) {
+          t = token_from_str(current_token.str());
           tokens.push_back(t);
-          currentToken.str("");
+          current_token.str("");
         }
         ctx = InString;
-        currentToken << ch;
+        current_token << ch;
         continue;
       }
       if (ctx == InString) {
-        currentToken << ch;
-        t = tokenFromStr(currentToken.str());
+        current_token << ch;
+        t = token_from_str(current_token.str());
         tokens.push_back(t);
-        currentToken.str(""); // clear stringstream
+        current_token.str(""); // clear stringstream
         ctx = Normal;
         continue;
       }
@@ -59,34 +58,34 @@ std::vector<Token> tokenize(std::string source) {
     /* handle whitespace with non-empty
     stringstream in non-string context */
     if (isspace(ch)) {
-      t = tokenFromStr(currentToken.str());
+      t = token_from_str(current_token.str());
       tokens.push_back(t);
-      currentToken.str("");
+      current_token.str("");
       continue;
     }
     
     // handle symbols
-    if (isSymbol(ch)) {
-      if (currentToken.str().length() > 0) {
-        t = tokenFromStr(currentToken.str());
+    if (is_separator(ch)) {
+      if (current_token.str().length() > 0) {
+        t = token_from_str(current_token.str());
         tokens.push_back(t);
-        currentToken.str("");
+        current_token.str("");
       }
-      currentToken << ch;
+      current_token << ch;
       if (ch == '=' && source[i+1] == '=') {
-        currentToken << source[++i];
+        current_token << source[++i];
       } 
-      t = tokenFromStr(currentToken.str());
+      t = token_from_str(current_token.str());
       tokens.push_back(t);
-      currentToken.str("");
+      current_token.str("");
       continue;
     }
 
-    currentToken << ch;
+    current_token << ch;
   }
 
-  if (currentToken.str().length() > 0) {
-    t = tokenFromStr(currentToken.str());
+  if (current_token.str().length() > 0) {
+    t = token_from_str(current_token.str());
     tokens.push_back(t);
   }
   tokens.push_back({.kind = EndOfFile });

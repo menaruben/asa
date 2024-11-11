@@ -5,11 +5,72 @@
 #include <string>
 #include <vector>
 
+#define HALT                                                                   \
+  { .kind = InstructionKind::Halt }
+
+#define CLEAR                                                                  \
+  { .kind = InstructionKind::Clear }
+
+#define PUSH(val, t)                                                           \
+  { .kind = InstructionKind::Push, .operand = {.value = val, .type = t}, }
+
+#define POP                                                                    \
+  { .kind = InstructionKind::Pop }
+
+#define CALL(name)                                                             \
+  { .kind = InstructionKind::Call, .id = name }
+
+#define LABEL(name, pos)                                                       \
+  { .kind = InstructionKind::Label,                                            \
+  .operand = {.value = pos, .type = asa::Integer}, .id = name, }
+
+#define GOTO(name)                                                             \
+  { .kind = InstructionKind::Goto, .id = name, }
+
+#define DEF(name, val, t)                                                      \
+  {                                                                            \
+    .kind = InstructionKind::DefVar, .operand = {.value = val, .type = t},     \
+    .id = name,                                                                \
+  }
+
+// basically SET n == POP n <=> pop top of stack to var n
+#define SET(name)                                                              \
+  { .kind = InstructionKind::SetVar, .id = name }
+
+#define GET(name)                                                              \
+  { .kind = InstructionKind::GetVar, .id = name }
+
+#define CMP                                                                    \
+  { .kind = InstructionKind::Cmp }
+
+#define IF(val, codeblock)                                                     \
+  { .kind = InstructionKind::If, .block = codeblock }
+
+#define IFGOTO(val, label)                                                     \
+  { .kind = InstructionKind::IfGoto, \
+  .operand = {.value=val, .type=asa::Integer}, .id = label }
+
+#define ADD                                                                    \
+  { .kind = InstructionKind::Add }
+
+#define SUB                                                                    \
+  { .kind = InstructionKind::Subtract }
+
+#define MUL                                                                    \
+  { .kind = InstructionKind::Multiply }
+
+#define DIV                                                                    \
+  { .kind = InstructionKind::Divide }
+
+#define SHOW                                                                   \
+  { .kind = InstructionKind::Show }
+
 namespace instructions {
 
 enum InstructionKind {
   Show,
   Push,
+  Pop,
   Add,
   Subtract,
   Multiply,
@@ -222,7 +283,7 @@ asa::Object compare(asa::Object a, asa::Object b) {
   }
 }
 
-std::vector<asa::Object> pop(std::list<asa::Object> *stack, int count) {
+std::vector<asa::Object> popArgs(std::list<asa::Object> *stack, int count) {
   std::vector<asa::Object> args;
   std::list<asa::Object>::iterator it;
   if (stack->size() < count) {
@@ -241,4 +302,61 @@ std::vector<asa::Object> pop(std::list<asa::Object> *stack, int count) {
   }
   return args;
 }
+
+std::string instructionkind_to_str(InstructionKind k) {
+  switch (k) {
+  case Show:
+    return "Show";
+  case Push:
+    return "Push";
+  case Pop:
+    return "Pop";
+  case Add:
+    return "Add";
+  case Subtract:
+    return "Subtract";
+  case Multiply:
+    return "Multiply";
+  case Divide:
+    return "Divide";
+  case Label:
+    return "Label";
+  case Goto:
+    return "Goto";
+  case DefVar:
+    return "DefVar";
+  case SetVar:
+    return "SetVar";
+  case GetVar:
+    return "GetVar";
+  case Cmp:
+    return "Cmp";
+  case If:
+    return "If";
+  case IfGoto:
+    return "IfGoto";
+  case IfHalt:
+    return "IfHalt";
+  case Halt:
+    return "Halt";
+  case Clear:
+    return "Clear";
+  case Increment:
+    return "Increment";
+  case Decrement:
+    return "Decrement";
+  case Call:
+    return "Call";
+  default:
+    throw std::runtime_error("Unsupported instruction kind");
+  }
+}
+
+std::string instruction_to_str(Instruction inst) {
+  std::string typestr = instructionkind_to_str(inst.kind);
+  std::string operand = inst.operand.value;
+  std::string id = inst.id;
+  return "kind: " + typestr + ", operand: " + operand + ", id: " + id;
+}
+
 } // namespace instructions

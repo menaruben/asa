@@ -6,95 +6,21 @@
 #include <vector>
 
 using namespace instructions;
+using namespace transpiler;
 namespace interpreter {
 
 #define MAX_STACK_SIZE 8192
 
-#define HALT                                                                   \
-  { .kind = InstructionKind::Halt }
+asa::Object eval(Program program,
+     string entryPoint, list<asa::Object> *stack) {
 
-#define CLEAR                                                                  \
-  { .kind = InstructionKind::Clear }
-
-#define PUSH(val, t)                                                           \
-  { .kind = InstructionKind::Push, .operand = {.value = val, .type = t}, }
-
-#define CALL(name)                                                             \
-  { .kind = InstructionKind::Call, .id = name }
-
-#define LABEL(name)                                                            \
-  { .kind = InstructionKind::Label, .id = name, }
-
-#define GOTO(name)                                                             \
-  { .kind = InstructionKind::Goto, .id = name, }
-
-#define DEF(name, val, t)                                                      \
-  {                                                                            \
-    .kind = InstructionKind::DefVar, .operand = {.value = val, .type = t},     \
-    .id = name,                                                                \
-  }
-
-#define SET(name)                                                              \
-  { .kind = InstructionKind::SetVar, .id = name }
-
-#define GET(name)                                                              \
-  { .kind = InstructionKind::GetVar, .id = name }
-
-#define CMP                                                                    \
-  { .kind = InstructionKind::Cmp }
-
-#define IF(val, codeblock)                                                     \
-  { .kind = InstructionKind::If, .block = codeblock }
-
-#define IFGOTO(val, gotoLabel)                                                 \
-  {                                                                            \
-    .kind = InstructionKind::IfGoto,                                           \
-    .operand =                                                                 \
-        {                                                                      \
-            .value = val,                                                      \
-            .type = asa::Integer,                                              \
-        },                                                                     \
-    .id = gotoLabel                                                            \
-  }
-
-#define IFHALT(val)                                                            \
-  {                                                                            \
-    .kind = InstructionKind::IfHalt, .operand = {                              \
-      .value = val,                                                            \
-      .type = asa::Integer                                                     \
-    }                                                                          \
-  }
-
-#define INCR(var)                                                              \
-  { .kind = InstructionKind::Increment, .id = var }
-
-#define DECR(var)                                                              \
-  { .kind = InstructionKind::Decrement, .id = var }
-
-#define ADD                                                                    \
-  { .kind = InstructionKind::Add }
-
-#define SUB                                                                    \
-  { .kind = InstructionKind::Subtract }
-
-#define MUL                                                                    \
-  { .kind = InstructionKind::Multiply }
-
-#define DIV                                                                    \
-  { .kind = InstructionKind::Divide }
-
-#define SHOW                                                                   \
-  { .kind = InstructionKind::Show }
-
-asa::Object
-eval(std::unordered_map<std::string, std::vector<Instruction>> program,
-     std::string entryPoint, std::list<asa::Object> *stack) {
-  std::unordered_map<std::string, int> labels;
-  std::unordered_map<std::string, asa::Object> variables;
-  std::list<asa::Object>::iterator it;
+  unordered_map<string, unordered_map<string, int>> labels;
+  unordered_map<string, asa::Object> variables;
+  list<asa::Object>::iterator it;
   int instPosition = 0;
   Instruction inst;
   bool halt = false;
+  string blockctx = entryPoint;
 
   while (!halt) {
     if (instPosition >= program[entryPoint].size()) {
@@ -104,93 +30,95 @@ eval(std::unordered_map<std::string, std::vector<Instruction>> program,
 
     inst = program[entryPoint][instPosition++];
     switch (inst.kind) {
-    case Halt: {
+    case InstructionKind::Halt: {
       halt = true;
       break;
     }
 
-    case Clear: {
+    case InstructionKind::Clear: {
       stack->clear();
       break;
     }
 
-    case Push:
+    case InstructionKind::Push: {
       if (stack->size() + 1 > MAX_STACK_SIZE)
         return asa::ERROR_STACKOVERFLOW;
 
       stack->push_back(inst.operand);
       break;
+    }
 
-    case Label:
-      labels[inst.id] = instPosition;
+    case InstructionKind::Pop: {
+      if (stack->size() <= 0)
+        return asa::ERROR_STACKUNDERFLOW;
+
+      stack->pop_back();
+      break;
+    }
+
+    case InstructionKind::Label:
+      labels[blockctx][inst.id] = instPosition;
       break;
 
-    case Goto: {
-      if (labels.find(inst.id) == labels.end()) {
+    case InstructionKind::Goto: {
+      // if (program[blockctx].labels.find(inst.id) == program[blockctx].labels.end()) {
+      //   return asa::ERROR_LABEL_NOT_FOUND;
+      // }
+      // instPosition = program[blockctx].labels[inst.id];
+      if (labels[blockctx].find(inst.id) == labels[blockctx].end()) {
         return asa::ERROR_LABEL_NOT_FOUND;
       }
-      instPosition = labels[inst.id];
+      instPosition = labels[blockctx][inst.id];
       break;
     }
 
-    case If: {
-      if (stack->size() < 2)
-        return asa::ERROR_STACKUNDERFLOW;
-
-      std::vector<asa::Object> objs = pop(stack, 2);
-      asa::Object result = compare(objs[1], objs[0]);
-      if (result.value == inst.operand.value) {
-        for (const auto& blockInst : inst.block) {
-          if (halt) break;
-          eval({{entryPoint, {blockInst}}}, entryPoint, stack);
-        }
-      }
-      break;
-    }
-
-    case IfGoto: {
+    case InstructionKind::IfGoto: {
       if (stack->size() < 1)
         return asa::ERROR_STACKUNDERFLOW;
-      if (labels.find(inst.id) == labels.end()) {
+
+      // if (program[blockctx].labels.find(inst.id) == program[blockctx].labels.end()) {
+      //   return asa::ERROR_LABEL_NOT_FOUND;
+      // }
+      if (labels[blockctx].find(inst.id) == labels[blockctx].end()) {
         return asa::ERROR_LABEL_NOT_FOUND;
       }
-      
-      asa::Object top = pop(stack, 1)[0];
-      if (top.value == inst.operand.value) {
-        instPosition = labels[inst.id];
-      }
+
+      asa::Object top = popArgs(stack, 1)[0];
+      if (top.value == inst.operand.value)
+        // instPosition = program[blockctx].labels[inst.id];
+        instPosition = labels[blockctx][inst.id];
       break;
     }
 
-    case IfHalt: {
+    case InstructionKind::IfHalt: {
       if (stack->size() < 1)
         return asa::ERROR_STACKUNDERFLOW;
-      asa::Object top = pop(stack, 1)[0];
+      asa::Object top = popArgs(stack, 1)[0];
       if (top.value == inst.operand.value) {
         halt = true;
         break;
       }
     }
 
-    case DefVar: {
+    case InstructionKind::DefVar: {
       variables[inst.id] = {.value = inst.operand.value,
                             .type = inst.operand.type};
       break;
     }
 
-    case SetVar: {
+    case InstructionKind::SetVar: {
       if (stack->size() < 1)
         return asa::ERROR_STACKUNDERFLOW;
 
-      if (variables.find(inst.id) == variables.end())
-        return asa::ERROR_UNDEFINED_VARIABLE;
+      // if (variables.find(inst.id) == variables.end())
+      //   return asa::ERROR_UNDEFINED_VARIABLE;
 
-      asa::Object o = pop(stack, 1)[0];
+      asa::Object o = popArgs(stack, 1)[0];
       variables[inst.id] = o;
       break;
     }
 
-    case GetVar: {
+    case InstructionKind::GetVar: {
       if (variables.find(inst.id) == variables.end()) {
         return asa::ERROR_UNDEFINED_VARIABLE;
       }
@@ -199,7 +127,7 @@ eval(std::unordered_map<std::string, std::vector<Instruction>> program,
       break;
     }
 
-    case Increment: {
+    case InstructionKind::Increment: {
       if (variables.find(inst.id) == variables.end()) {
         return asa::ERROR_UNDEFINED_VARIABLE;
       }
@@ -208,7 +136,7 @@ eval(std::unordered_map<std::string, std::vector<Instruction>> program,
       break;
     }
 
-    case Decrement: {
+    case InstructionKind::Decrement: {
       if (variables.find(inst.id) == variables.end()) {
         return asa::ERROR_UNDEFINED_VARIABLE;
       }
@@ -217,16 +145,16 @@ eval(std::unordered_map<std::string, std::vector<Instruction>> program,
       break;
     }
 
-    case Cmp: {
+    case InstructionKind::Cmp: {
       if (stack->size() < 2)
         return asa::ERROR_STACKUNDERFLOW;
-      std::vector<asa::Object> objs = pop(stack, 2);
+      vector<asa::Object> objs = popArgs(stack, 2);
       stack->push_back(compare(objs[1], objs[0]));
       break;
     }
 
-    case Add: {
-      std::vector<asa::Object> args = pop(stack, 2);
+    case InstructionKind::Add: {
+      vector<asa::Object> args = popArgs(stack, 2);
       if (args.size() < 2)
         return asa::ERROR_STACKUNDERFLOW;
       asa::Object a = args[0];
@@ -238,8 +166,8 @@ eval(std::unordered_map<std::string, std::vector<Instruction>> program,
       break;
     }
 
-    case Subtract: {
-      std::vector<asa::Object> args = pop(stack, 2);
+    case InstructionKind::Subtract: {
+      vector<asa::Object> args = popArgs(stack, 2);
       if (args.size() < 2)
         return asa::ERROR_STACKUNDERFLOW;
       asa::Object a = args[0];
@@ -251,8 +179,8 @@ eval(std::unordered_map<std::string, std::vector<Instruction>> program,
       break;
     }
 
-    case Multiply: {
-      std::vector<asa::Object> args = pop(stack, 2);
+    case InstructionKind::Multiply: {
+      vector<asa::Object> args = popArgs(stack, 2);
       if (args.size() < 2)
         return asa::ERROR_STACKUNDERFLOW;
       asa::Object a = args[0];
@@ -264,8 +192,8 @@ eval(std::unordered_map<std::string, std::vector<Instruction>> program,
       break;
     }
 
-    case Divide: {
-      std::vector<asa::Object> args = pop(stack, 2);
+    case InstructionKind::Divide: {
+      vector<asa::Object> args = popArgs(stack, 2);
       if (args.size() < 2)
         return asa::ERROR_STACKUNDERFLOW;
       asa::Object a = args[0];
@@ -277,11 +205,12 @@ eval(std::unordered_map<std::string, std::vector<Instruction>> program,
       break;
     }
 
-    case Call: {
+    case InstructionKind::Call: {
       if (program.find(inst.id) == program.end()) {
         return asa::ERROR_ILLEGALINSTRUCTION;
       }
-      std::vector<Instruction> funcinsts = program[inst.id];
+      // vector<Instruction> funcinsts = program[inst.id].instructions;
+      vector<Instruction> funcinsts = program[inst.id];
       asa::Object result = eval(program, inst.id, stack);
       if (result.error != asa::Ok) {
         return result;
@@ -289,7 +218,7 @@ eval(std::unordered_map<std::string, std::vector<Instruction>> program,
       break;
     }
 
-    case Show:
+    case InstructionKind::Show:
       printf("Stack:\n");
       if (stack->empty()) {
         printf("    [ EMPTY ]\n");
@@ -298,8 +227,8 @@ eval(std::unordered_map<std::string, std::vector<Instruction>> program,
 
       stack->reverse();
       for (asa::Object o : *stack) {
-        std::cout << "    Value: " << o.value
-                  << ", Type: " << asa::typeToStr(o.type) << std::endl;
+        cout << "    Value: " << o.value
+                  << ", Type: " << asa::typeToStr(o.type) << endl;
       }
       printf("\n");
       stack->reverse();

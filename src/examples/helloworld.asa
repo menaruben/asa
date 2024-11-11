@@ -1,8 +1,4 @@
 begin main:
-	msg = "Hello World!";
-	get msg;
-	if msg == "Hi Ruby":
-		PUSH "They are equal!";
-	end
-	SHOW;
+	push "Hello World!";
+	show;
 end
