@@ -33,3 +33,7 @@
 
 # ides
 .idea/
+.vscode/
+
+# TODO
+src/TODO.md
