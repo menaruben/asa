@@ -1,16 +1,12 @@
 begin factorial:
     pop n;
     push 1; pop ans;
-
     push 1; pop i;
     label fact;
-        push ans;
         // ans = ans * i
         push ans; push i; mul; pop ans;
-
         // i = i + 1
         push i; push 1; add; pop i;
-
         // if n > i goto fact
         push n; push i; cmp; ifgoto 1 fact;
     push ans;
