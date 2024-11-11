@@ -15,7 +15,7 @@ a:::::aaaa::::::as::::::::::::::s a:::::aaaa::::::a
 > This is a toy project and should not be taken seriously, which means it is NOT for production at all. The goal of this project is to have fun!
 > I am not a C++ developer so keep that in mind but I will definitely clean up and refactor a lot :D
 
-```c
+```pascal
 // define new 'fib' block/function
 begin fib:
   pop n;
