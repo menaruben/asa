@@ -17,27 +17,26 @@ a:::::aaaa::::::as::::::::::::::s a:::::aaaa::::::a
 
 ```c
 begin fib:
-    pop n;              // store top of stack to variable n
+    pop n;              // store top variable n
     push 0; pop first;  // first = 0
     push 1; pop second; // second = 1
-
     push 2; pop i;
-		// creates a label called "loop"
+    // creates a label called "loop"
     label loop;
-				// result = first + second
+        // result = first + second
         push first; push second; add; pop result;
         push second; pop first;          // first = second
         push result; pop second;         // second = result
-				push i; push 1; add; pop i;      // i = i + 1
+    push i; push 1; add; pop i;      // i = i + 1
     push i; push n; cmp; ifgoto -1 loop; // if i  < n then goto loop
     push i; push n; cmp; ifgoto 0 loop;  // if i == n then goto loop
-	push result;
+    push result;
 end
 
 begin main:
-	push 10;
-	call fib;
-	show;
+    push 10;
+    call fib;
+    show;
 end
 ```
 ```
