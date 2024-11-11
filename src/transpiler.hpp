@@ -28,7 +28,11 @@ vector<string> splitStr(const string &str, char delimiter) {
   return tokens;
 }
 
-typedef unordered_map<string, vector<Instruction>> Program;
+struct Block {
+  vector<Instruction> instructions;
+  unordered_map<string, int> labels;
+};
+typedef unordered_map<string, Block> Program;
 
 void parse_begin(int &index, vector<Token> *tokens, Program *program,
   string &current_block) {
@@ -37,7 +41,7 @@ void parse_begin(int &index, vector<Token> *tokens, Program *program,
   current_block = (*tokens)[index++].value;
   if (current_block == "")
     throw runtime_error("Missing block name!");
-  (*program)[current_block] = {};
+  (*program)[current_block] = Block();
   Token colonToken = (*tokens)[index];
   if (colonToken.kind != TokenKind::Colon) {
     throw runtime_error("Expected colon after block name!");
@@ -53,10 +57,10 @@ void parse_push(int &index, vector<Token> *tokens, Program *program,
   index++; // skip push
   Token t = (*tokens)[index++];
   if (t.kind == TokenKind::Identifier) {
-    (*program)[current_block].push_back(GET(t.value));
+    (*program)[current_block].instructions.push_back(GET(t.value));
   } else {
     asa::Type type = token_kind_to_asatype(t.kind);
-    (*program)[current_block].push_back(PUSH(t.value, type));
+    (*program)[current_block].instructions.push_back(PUSH(t.value, type));
   }
   t = (*tokens)[index];
   if (t.kind != TokenKind::Semicolon) {
@@ -73,7 +77,7 @@ void parse_pop(int &index, vector<Token> *tokens, Program *program,
   index++; // skip pop
   Token t = (*tokens)[index++];
   if (t.kind == TokenKind::Identifier) {
-    (*program)[current_block].push_back(SET(t.value));
+    (*program)[current_block].instructions.push_back(SET(t.value));
   } else {
     throw runtime_error("Expected identifier!");
   }
@@ -98,9 +102,10 @@ void parse_label(int &index, vector<Token> *tokens, Program *program,
   if (semicolon.kind != TokenKind::Semicolon) {
     throw runtime_error("Expected semicolon!");
   }
-  string pos = to_string((*program)[current_block].size());
-  Instruction labelinst = LABEL(labeltoken.value, pos);
-  (*program)[current_block].push_back(labelinst);
+  int pos = (*program)[current_block].instructions.size();
+  (*program)[current_block].labels[labeltoken.value] = pos;
+  // Instruction labelinst = LABEL(labeltoken.value, pos);
+  // (*program)[current_block].instructions.push_back(labelinst);
 }
 
 void parse_goto(int &index, vector<Token> *tokens, Program *program,
@@ -114,7 +119,7 @@ void parse_goto(int &index, vector<Token> *tokens, Program *program,
   if (t.kind != TokenKind::Identifier) {
     throw runtime_error("Expected identifier!");
   }
-  (*program)[current_block].push_back(GOTO(t.value));
+  (*program)[current_block].instructions.push_back(GOTO(t.value));
   t = (*tokens)[index];
   if (t.kind != TokenKind::Semicolon) {
     throw runtime_error("Expected semicolon!");
@@ -142,7 +147,7 @@ void parse_ifgoto(int &index, vector<Token> *tokens, Program *program,
   if (label.kind != TokenKind::Identifier) {
     throw runtime_error("Expected identifier!");
   }
-  (*program)[current_block].push_back(
+  (*program)[current_block].instructions.push_back(
       IFGOTO(expected.value, label.value));
   Token t = (*tokens)[index];
   if (t.kind != TokenKind::Semicolon) {
@@ -162,7 +167,7 @@ void parse_var(int &index, vector<Token> *tokens, Program *program,
     throw runtime_error("Expected identifier!");
   }
   Token value = (*tokens)[index++];
-  (*program)[current_block].push_back(
+  (*program)[current_block].instructions.push_back(
       DEF(id.value, value.value, token_kind_to_asatype(value.kind)));
   Token t = (*tokens)[index];
   if (t.kind != TokenKind::Semicolon) {
@@ -181,7 +186,7 @@ void parse_call(int &index, vector<Token> *tokens, Program *program,
   if (t.kind != TokenKind::Identifier) {
     throw runtime_error("Expected identifier!");
   }
-  (*program)[current_block].push_back(CALL(t.value));
+  (*program)[current_block].instructions.push_back(CALL(t.value));
   t = (*tokens)[index];
   if (t.kind != TokenKind::Semicolon) {
     throw runtime_error("Expected semicolon!");
@@ -222,7 +227,7 @@ Program load_program(vector<Token> tokens) {
     }
 
     case TokenKind::Add: {
-      program[current_block].push_back(ADD);
+      program[current_block].instructions.push_back(ADD);
       Token sc = tokens[++i]; 
       if (sc.kind != TokenKind::Semicolon) {
         throw runtime_error("Expected semicolon!");
@@ -231,7 +236,7 @@ Program load_program(vector<Token> tokens) {
     }
 
     case TokenKind::Sub: {
-      program[current_block].push_back(SUB);
+      program[current_block].instructions.push_back(SUB);
       Token sc = tokens[++i]; 
       if (sc.kind != TokenKind::Semicolon) {
         throw runtime_error("Expected semicolon!");
@@ -240,7 +245,7 @@ Program load_program(vector<Token> tokens) {
     }
 
     case TokenKind::Mul: {
-      program[current_block].push_back(MUL);
+      program[current_block].instructions.push_back(MUL);
       Token sc = tokens[++i]; 
       if (sc.kind != TokenKind::Semicolon) {
         throw runtime_error("Expected semicolon!");
@@ -249,7 +254,7 @@ Program load_program(vector<Token> tokens) {
     }
 
     case TokenKind::Div: {
-      program[current_block].push_back(DIV);
+      program[current_block].instructions.push_back(DIV);
       Token sc = tokens[++i];
       if (sc.kind != TokenKind::Semicolon) {
         throw runtime_error("Expected semicolon!");
@@ -258,7 +263,7 @@ Program load_program(vector<Token> tokens) {
     }
 
     case TokenKind::Show: {
-      program[current_block].push_back(SHOW);
+      program[current_block].instructions.push_back(SHOW);
       Token sc = tokens[++i]; 
       if (sc.kind != TokenKind::Semicolon) {
         throw runtime_error("Expected semicolon!");
@@ -272,7 +277,7 @@ Program load_program(vector<Token> tokens) {
     }
 
     case TokenKind::Cmp: {
-      program[current_block].push_back(CMP);
+      program[current_block].instructions.push_back(CMP);
       Token sc = tokens[++i]; 
       if (sc.kind != TokenKind::Semicolon) {
         throw runtime_error("Expected semicolon!");

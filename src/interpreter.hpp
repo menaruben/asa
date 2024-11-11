@@ -14,7 +14,7 @@ namespace interpreter {
 asa::Object eval(Program program,
      string entryPoint, list<asa::Object> *stack) {
 
-  unordered_map<string, unordered_map<string, int>> labels;
+  // unordered_map<string, unordered_map<string, int>> labels;
   unordered_map<string, asa::Object> variables;
   list<asa::Object>::iterator it;
   int instPosition = 0;
@@ -23,12 +23,12 @@ asa::Object eval(Program program,
   string blockctx = entryPoint;
 
   while (!halt) {
-    if (instPosition >= program[entryPoint].size()) {
+    if (instPosition >= program[entryPoint].instructions.size()) {
       halt = true;
       continue;
     }
 
-    inst = program[entryPoint][instPosition++];
+    inst = program[entryPoint].instructions[instPosition++];
     switch (inst.kind) {
     case InstructionKind::Halt: {
       halt = true;
@@ -57,18 +57,14 @@ asa::Object eval(Program program,
     }
 
     case InstructionKind::Label:
-      labels[blockctx][inst.id] = instPosition;
+      // labels[blockctx][inst.id] = instPosition;
       break;
 
     case InstructionKind::Goto: {
-      // if (program[blockctx].labels.find(inst.id) == program[blockctx].labels.end()) {
-      //   return asa::ERROR_LABEL_NOT_FOUND;
-      // }
-      // instPosition = program[blockctx].labels[inst.id];
-      if (labels[blockctx].find(inst.id) == labels[blockctx].end()) {
+      if (program[entryPoint].labels.find(inst.id) == program[entryPoint].labels.end()) {
         return asa::ERROR_LABEL_NOT_FOUND;
       }
-      instPosition = labels[blockctx][inst.id];
+      instPosition = program[entryPoint].labels[inst.id];
       break;
     }
 
@@ -76,17 +72,13 @@ asa::Object eval(Program program,
       if (stack->size() < 1)
         return asa::ERROR_STACKUNDERFLOW;
 
-      // if (program[blockctx].labels.find(inst.id) == program[blockctx].labels.end()) {
-      //   return asa::ERROR_LABEL_NOT_FOUND;
-      // }
-      if (labels[blockctx].find(inst.id) == labels[blockctx].end()) {
+      if (program[entryPoint].labels.find(inst.id) == program[entryPoint].labels.end()) {
         return asa::ERROR_LABEL_NOT_FOUND;
       }
 
       asa::Object top = popArgs(stack, 1)[0];
       if (top.value == inst.operand.value)
-        // instPosition = program[blockctx].labels[inst.id];
-        instPosition = labels[blockctx][inst.id];
+        instPosition = program[entryPoint].labels[inst.id];
       break;
     }
 
@@ -109,9 +101,6 @@ asa::Object eval(Program program,
     case InstructionKind::SetVar: {
       if (stack->size() < 1)
         return asa::ERROR_STACKUNDERFLOW;
-
-      // if (variables.find(inst.id) == variables.end())
-      //   return asa::ERROR_UNDEFINED_VARIABLE;
 
       asa::Object o = popArgs(stack, 1)[0];
       variables[inst.id] = o;
@@ -209,8 +198,7 @@ asa::Object eval(Program program,
       if (program.find(inst.id) == program.end()) {
         return asa::ERROR_ILLEGALINSTRUCTION;
       }
-      // vector<Instruction> funcinsts = program[inst.id].instructions;
-      vector<Instruction> funcinsts = program[inst.id];
+      vector<Instruction> funcinsts = program[inst.id].instructions;
       asa::Object result = eval(program, inst.id, stack);
       if (result.error != asa::Ok) {
         return result;

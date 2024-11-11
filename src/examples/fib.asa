@@ -1,8 +1,11 @@
+
 begin fib:
     pop n;
+	push n; push 0; cmp; ifgoto 0 base_zero;
+	push n; push 1; cmp; ifgoto 0 base_one;
+	
     push 0; pop first;
     push 1; pop second;
-
     push 2; pop i;
     label loop;
         push first; push second; add; pop result;
@@ -11,11 +14,24 @@ begin fib:
 				push i; push 1; add; pop i;
     push i; push n; cmp; ifgoto -1 loop;
     push i; push n; cmp; ifgoto 0 loop;
-	push result;
+	push second; pop result; goto return;
+
+	label base_zero;
+		push 0; pop result; 
+		goto return;
+
+	label base_one;
+		push 1; pop result; 
+		goto return;
+
+	label return;
+		push result;
 end
 
 begin main:
-	push 10;
-	call fib;
+	push 0;  call fib;
+	push 1;  call fib;
+	push 7;  call fib;
+	push 10; call fib;
 	show;
 end
