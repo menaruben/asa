@@ -48,11 +48,11 @@ end
 
 // define main entrypoint
 begin main:
-	push 0;  call fib;
-	push 1;  call fib;
-	push 7;  call fib;
-	push 10; call fib;
-	show;
+  push 0;  call fib;
+  push 1;  call fib;
+  push 7;  call fib;
+  push 10; call fib;
+  show;
 end
 ```
 ```
