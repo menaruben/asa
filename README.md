@@ -169,3 +169,6 @@ begin main:
 end
 ```
 The result of this code correctly shows `"Hi User"` in the stack.
+
+# stdlib
+The stdlib is work in progress and can be found [here](./src/stdlib/)

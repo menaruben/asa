@@ -136,7 +136,7 @@ const std::regex
     FLOAT_PATTERN("^[+-]?\\d*\\.\\d+f$"); // example: 0.325f or .45f
 const std::regex DOUBLE_PATTERN("^[+-]?\\d*\\.\\d+$"); // example: 0.325  or .45
 const std::regex BOOL_PATTERN("^(true|false)$");
-const std::regex IDENTIFIER_PATTERN("^[a-zA-Z_][a-zA-Z0-9_]*$");
+const std::regex IDENTIFIER_PATTERN("^[a-zA-Z_][a-zA-Z0-9_]*\\??$"); // allow ? as suffix
 
 // keyword patterns (case insensitive)
 const std::regex BEGIN_PATTERN("^Begin$", std::regex_constants::icase);
