@@ -80,7 +80,7 @@ Object ERROR_LABEL_NOT_FOUND = {.value = "LabelNotFound",
 Object ERROR_UNDEFINED_VARIABLE = {.value = "UndefinedVariable",
                                    .error = Error::UndefinedVariable};
 
-bool isNumericType(Object o) {
+bool is_numeric_type(Object o) {
   return o.type == Type::Float || o.type == Type::Double ||
          o.type == Type::Integer;
 }

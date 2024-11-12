@@ -76,7 +76,7 @@ asa::Object eval(Program program,
         return asa::ERROR_LABEL_NOT_FOUND;
       }
 
-      asa::Object top = popArgs(stack, 1)[0];
+      asa::Object top = pop_args(stack, 1)[0];
       if (top.value == inst.operand.value)
         instPosition = program[entryPoint].labels[inst.id];
       break;
@@ -85,7 +85,7 @@ asa::Object eval(Program program,
     case InstructionKind::IfHalt: {
       if (stack->size() < 1)
         return asa::ERROR_STACKUNDERFLOW;
-      asa::Object top = popArgs(stack, 1)[0];
+      asa::Object top = pop_args(stack, 1)[0];
       if (top.value == inst.operand.value) {
         halt = true;
         break;
@@ -102,7 +102,7 @@ asa::Object eval(Program program,
       if (stack->size() < 1)
         return asa::ERROR_STACKUNDERFLOW;
 
-      asa::Object o = popArgs(stack, 1)[0];
+      asa::Object o = pop_args(stack, 1)[0];
       variables[inst.id] = o;
       break;
     }
@@ -137,13 +137,13 @@ asa::Object eval(Program program,
     case InstructionKind::Cmp: {
       if (stack->size() < 2)
         return asa::ERROR_STACKUNDERFLOW;
-      vector<asa::Object> objs = popArgs(stack, 2);
+      vector<asa::Object> objs = pop_args(stack, 2);
       stack->push_back(compare(objs[1], objs[0]));
       break;
     }
 
     case InstructionKind::Add: {
-      vector<asa::Object> args = popArgs(stack, 2);
+      vector<asa::Object> args = pop_args(stack, 2);
       if (args.size() < 2)
         return asa::ERROR_STACKUNDERFLOW;
       asa::Object a = args[0];
@@ -156,7 +156,7 @@ asa::Object eval(Program program,
     }
 
     case InstructionKind::Subtract: {
-      vector<asa::Object> args = popArgs(stack, 2);
+      vector<asa::Object> args = pop_args(stack, 2);
       if (args.size() < 2)
         return asa::ERROR_STACKUNDERFLOW;
       asa::Object a = args[0];
@@ -169,7 +169,7 @@ asa::Object eval(Program program,
     }
 
     case InstructionKind::Multiply: {
-      vector<asa::Object> args = popArgs(stack, 2);
+      vector<asa::Object> args = pop_args(stack, 2);
       if (args.size() < 2)
         return asa::ERROR_STACKUNDERFLOW;
       asa::Object a = args[0];
@@ -182,7 +182,7 @@ asa::Object eval(Program program,
     }
 
     case InstructionKind::Divide: {
-      vector<asa::Object> args = popArgs(stack, 2);
+      vector<asa::Object> args = pop_args(stack, 2);
       if (args.size() < 2)
         return asa::ERROR_STACKUNDERFLOW;
       asa::Object a = args[0];

@@ -106,7 +106,7 @@ asa::Object add(asa::Object a, asa::Object b) {
   if (a.type != b.type)
     return asa::ERROR_TYPEMISMATCH;
 
-  if (!isNumericType(a) || !isNumericType(b))
+  if (!is_numeric_type(a) || !is_numeric_type(b))
     return asa::ERROR_ARITHMETIC;
 
   switch (a.type) {
@@ -138,7 +138,7 @@ asa::Object subtract(asa::Object a, asa::Object b) {
   if (a.type != b.type)
     return asa::ERROR_TYPEMISMATCH;
 
-  if (!isNumericType(a) || !isNumericType(b))
+  if (!is_numeric_type(a) || !is_numeric_type(b))
     return asa::ERROR_ARITHMETIC;
 
   switch (a.type) {
@@ -168,7 +168,7 @@ asa::Object multiply(asa::Object a, asa::Object b) {
   if (a.type != b.type)
     return asa::ERROR_TYPEMISMATCH;
 
-  if (!isNumericType(a) || !isNumericType(b))
+  if (!is_numeric_type(a) || !is_numeric_type(b))
     return asa::ERROR_ARITHMETIC;
 
   switch (a.type) {
@@ -199,7 +199,7 @@ asa::Object divide(asa::Object a, asa::Object b) {
   if (a.type != b.type)
     return asa::ERROR_TYPEMISMATCH;
 
-  if (!isNumericType(a) || !isNumericType(b))
+  if (!is_numeric_type(a) || !is_numeric_type(b))
     return asa::ERROR_ARITHMETIC;
 
   switch (a.type) {
@@ -287,7 +287,7 @@ asa::Object compare(asa::Object a, asa::Object b) {
   }
 }
 
-std::vector<asa::Object> popArgs(std::list<asa::Object> *stack, int count) {
+std::vector<asa::Object> pop_args(std::list<asa::Object> *stack, int count) {
   std::vector<asa::Object> args;
   std::list<asa::Object>::iterator it;
   if (stack->size() < count) {
