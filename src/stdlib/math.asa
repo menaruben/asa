@@ -68,3 +68,24 @@ begin min:
   label a_lesser_b; push a; pop res; goto return;
   label return; push res;
 end
+
+// power pushes the result of a to the power of b to the stack
+begin power:
+  pop b; pop a;
+  push 1; pop res;                         // initialize res to 1
+  label loop;
+    push b; push 0; cmp; ifgoto 0 return;  // if b is 0 return res
+    push res; push a; mul; pop res;        // res = res * a
+    push b; push 1; sub; pop b;            // decrement b
+    goto loop;                             // repeat...
+  label return; push res;
+end
+
+// abs pushes the absolute value of the element on top of the stack
+begin abs:
+  pop n;
+  push n; push 0; cmp; ifgoto -1 negative;        // if n < 0 return -1 * n
+  push n; pop res; goto return;                   // else     return n
+  label negative; push n; push -1; mul; pop res;
+  label return; push res;
+end

@@ -1,0 +1,4 @@
+begin concat:
+  pop b; pop a;
+  push a; push b; add;
+end
