@@ -34,6 +34,7 @@
 # ides
 .idea/
 .vscode/*
+src/.vscde/*
 
 # TODO
 src/TODO.md
