@@ -35,6 +35,7 @@ enum TokenKind {
   Println,
   Print,
   Call,
+  Import,
   EndOfFile,
 };
 
@@ -94,6 +95,8 @@ std::string token_kind_to_str(TokenKind k) {
     return "Print";
   case Call:
     return "Call";
+  case Import:
+    return "Import";
   case EndOfFile:
     return "EndOfFile";
   default:
@@ -138,6 +141,7 @@ const std::regex IDENTIFIER_PATTERN("^[a-zA-Z_][a-zA-Z0-9_]*$");
 // keyword patterns (case insensitive)
 const std::regex BEGIN_PATTERN("^Begin$", std::regex_constants::icase);
 const std::regex END_PATTERN("^End$", std::regex_constants::icase);
+const std::regex IMPORT_PATTERN("^Import$", std::regex_constants::icase);
 const std::regex IFGOTO_PATTERN("^Ifgoto$", std::regex_constants::icase);
 const std::regex GOTO_PATTERN("^Goto$", std::regex_constants::icase);
 const std::regex SHOW_PATTERN("^Show$", std::regex_constants::icase);
@@ -171,6 +175,8 @@ Token token_from_str(std::string value, int line, int column) {
     return {.value = value, .kind = Begin, .line = line, .column = column};
   if (std::regex_match(value, END_PATTERN))
     return {.value = value, .kind = End, .line = line, .column = column};
+  if (std::regex_match(value, IMPORT_PATTERN))
+    return {.value = value, .kind = Import, .line = line, .column = column};
   if (std::regex_match(value, IFGOTO_PATTERN))
     return {.value = value, .kind = IfGoto, .line = line, .column = column};
   if (std::regex_match(value, GOTO_PATTERN))

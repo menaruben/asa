@@ -17,7 +17,7 @@ enum LexCtx { InString, Normal };
 vector<Token> tokenize(string source) {
   vector<Token> tokens;
   stringstream current_token;
-  LexCtx ctx = Normal;
+  LexCtx ctx = LexCtx::Normal;
   Token t;
   char ch;
   int line = 1;
@@ -50,7 +50,7 @@ vector<Token> tokenize(string source) {
           tokens.push_back(t);
           current_token.str("");
         }
-        ctx = InString;
+        ctx = LexCtx::InString;
         current_token << ch;
         continue;
       }
@@ -59,7 +59,7 @@ vector<Token> tokenize(string source) {
         t = token_from_str(current_token.str(), line, column);
         tokens.push_back(t);
         current_token.str(""); // clear stringstream
-        ctx = Normal;
+        ctx = LexCtx::Normal;
         continue;
       }
     }

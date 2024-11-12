@@ -1,7 +1,6 @@
 #include "list"
 #include "objects.hpp"
 #include "vector"
-#include <exception>
 #include <string>
 #include <vector>
 

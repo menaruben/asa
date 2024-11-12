@@ -1,5 +1,7 @@
 #include "Tokens.hpp"
+#include "Lexer.hpp"
 #include "instructions.hpp"
+#include "fileread.hpp"
 #include "messages.hpp"
 #include <cstddef>
 #include <sstream>
@@ -7,6 +9,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <iostream>
 
 using namespace instructions;
 using namespace std;
@@ -33,6 +36,41 @@ struct Block {
   unordered_map<string, int> labels;
 };
 typedef unordered_map<string, Block> Program;
+
+// Forward declaration of load_program
+Program load_program(vector<Token> tokens);
+
+// Forward declaration of parse_import
+void parse_import(int &index, vector<Token> *tokens, Program *program, string &current_block);
+
+
+void parse_import(int &index, vector<Token> *tokens, Program *program,
+                 string &current_block) {
+  index++; // skip import
+  string errmsg;
+  Token filepath = (*tokens)[index++];
+  if (filepath.kind != TokenKind::String) {
+    errmsg = msgs::expected_but_got_at_line(
+        "string", token_kind_to_str(filepath.kind), 
+        (*tokens)[index - 1].line);
+    throw runtime_error(errmsg);
+  }
+  string path = filepath.value.substr(1, filepath.value.size() - 2);
+  cout << "Importing file: " << path << endl;
+  string source = read_file(path, "//");
+  vector<Token> importedtoks = lexer::tokenize(source);
+  Program imported = load_program(importedtoks);
+  for (auto &block : imported) {
+    (*program)[block.first] = block.second;
+  }
+  Token semicolon = (*tokens)[index];
+  if (semicolon.kind != TokenKind::Semicolon) {
+    errmsg = msgs::expected_but_got_at_line(
+        "';' (semicolon)", token_kind_to_str(semicolon.kind), 
+        (*tokens)[index].line);
+    throw runtime_error(errmsg);
+  }
+}
 
 void parse_begin(int &index, vector<Token> *tokens, Program *program,
                  string &current_block) {
@@ -248,6 +286,11 @@ Program load_program(vector<Token> tokens) {
     Token t = tokens[i];
 
     switch (t.kind) {
+    case TokenKind::Import: {
+      parse_import(i, &tokens, &program, current_block);
+      break;
+    }
+      
     case TokenKind::Begin: {
       parse_begin(i, &tokens, &program, current_block);
       break;

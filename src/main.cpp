@@ -1,6 +1,4 @@
-#include "Lexer.hpp"
 #include "interpreter.hpp"
-#include <fstream>
 #include <iostream>
 #include <ostream>
 #include <pthread.h>
@@ -12,27 +10,11 @@ using namespace std;
 using namespace asa;
 using namespace transpiler;
 
-string readFile(const string &filename, string comment_delim) {
-  ifstream file(filename);
-  if (!file.is_open()) {
-    cerr << "Error opening file." << endl;
-    return "";
-  }
-
-  stringstream ss;
-  string line;
-  while (getline(file, line)) {
-    line = line.substr(0, line.find(comment_delim));
-    ss << line << endl;
-  }
-  return ss.str();
-}
-
 int main(int argc, char **argv) {
   if (argc < 2)
     throw runtime_error("Please enter a file path!");
   string sourcepath = argv[1];
-  string source = readFile(sourcepath, "//");
+  string source = read_file(sourcepath, "//");
   vector<Token> tokens = lexer::tokenize(source);
   Program program = load_program(tokens);
   list<asa::Object> stack;
