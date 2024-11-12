@@ -1,0 +1,45 @@
+// modulo computes the smallest positive representation of a mod b
+begin modulo:
+  pop b; pop a;
+  push a; push 0; cmp; pop a_to_0;
+
+  push a_to_0; ifgoto 0 rem_0;        // if a == 0, jump to rem_0
+  push a_to_0; ifgoto 1 a_greater_0;  // if a  > 0, jump to a_greater_0
+  // else: here means a < 0 (negativ)
+  // => add b to a until a >= 0
+  label a_lesser_0;
+    push a; push b; add; pop a;
+    push a; push 0; cmp; pop a_to_0;
+  push a_to_0; ifgoto -1 a_lesser_0;
+
+  // If a > 0, jump to a_greater_0
+  push a; push 0; cmp; pop a_to_0;
+  push a_to_0; ifgoto 1 a_greater_0;
+
+  // If a == 0 
+  // or a == b
+  // push 0 to rem and return
+  label rem_0;
+    push 0; pop rem; goto return;
+
+  // If a > 0, compare a with b
+  label a_greater_0;
+    push a; push b; cmp; pop a_to_b;
+    push a_to_b; ifgoto -1 a_lesser_b; // if a  < b, jump to a_lesser_b
+    push a_to_b; ifgoto 0 rem_0;       // if a == b, jump to rem_0
+
+    // If a > b, subtract b from a until a < b
+    label a_greater_b;
+      push a; push b; sub; pop a;
+      push a; push b; cmp; pop a_to_b;
+    push a_to_b; ifgoto 1 a_greater_b;
+    push a_to_b; ifgoto -1 a_lesser_b;
+    goto rem_0;                        // because at this point a == b
+
+  // If a < b, set remainder to a and return
+  label a_lesser_b;
+    push a; pop rem; goto return;
+
+  label return;
+    push rem;
+end
