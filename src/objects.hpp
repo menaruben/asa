@@ -57,35 +57,35 @@ struct Object {
 
 Object ERROR_OK = {.value = "Ok", .error = Error::Ok};
 
-Object ERROR_STACKOVERFLOW(std::string msg) {
+Object error_stackoverflow(std::string msg) {
   return {.value = msg, .error = Error::StackOverflow};
 }
 
-Object ERROR_STACKUNDERFLOW(std::string msg) {
+Object error_stackunderflow(std::string msg) {
   return {.value = msg, .error = Error::StackUnderflow};
 }
 
-Object ERROR_TYPEMISMATCH(std::string msg) {
+Object error_typemismatch(std::string msg) {
   return {.value = msg, .error = Error::TypeMismatch};
 }
 
-Object ERROR_ARITHMETIC(std::string msg) {
+Object error_arithmetic(std::string msg) {
   return {.value = msg, .error = Error::ArithmeticOnNonNumericType};
 }
 
-Object ERROR_DIVBYZERO(std::string msg) {
+Object error_div_by_zero(std::string msg) {
   return {.value = msg, .error = Error::DivByZero};
 }
 
-Object ERROR_ILLEGALINSTRUCTION(std::string msg) {
+Object error_illegal_instruction(std::string msg) {
   return {.value = msg, .error = Error::IllegalInstruction};
 }
 
-Object ERROR_LABEL_NOT_FOUND(std::string msg) {
+Object error_label_not_found(std::string msg) {
   return {.value = msg, .error = Error::LabelNotFound};
 }
 
-Object ERROR_UNDEFINED_VARIABLE(std::string msg) {
+Object error_undefined_variable(std::string msg) {
   return {.value = msg, .error = Error::UndefinedVariable};
 }
 

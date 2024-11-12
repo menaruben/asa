@@ -36,7 +36,6 @@ vector<Token> tokenize(string source) {
       }
       continue; // skip whitespace
     }
-      
 
     if (ctx == InString && ch != '"') {
       current_token << ch;

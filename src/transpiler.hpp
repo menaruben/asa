@@ -1,12 +1,12 @@
 #include "Tokens.hpp"
 #include "instructions.hpp"
+#include "messages.hpp"
 #include <cstddef>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include "messages.hpp"
 
 using namespace instructions;
 using namespace std;
@@ -42,17 +42,16 @@ void parse_begin(int &index, vector<Token> *tokens, Program *program,
   Token current_block_tok = (*tokens)[index++];
   if (current_block_tok.kind != TokenKind::Identifier) {
     errmsg = msgs::expected_but_got_at_line(
-      "block name identifier", token_kind_to_str(current_block_tok.kind),
-      (*tokens)[--index].line);
+        "block name identifier", token_kind_to_str(current_block_tok.kind),
+        (*tokens)[--index].line);
     throw runtime_error(errmsg);
   }
   current_block = current_block_tok.value;
   (*program)[current_block] = Block();
   Token colonToken = (*tokens)[index];
   if (colonToken.kind != TokenKind::Colon) {
-    errmsg = msgs::expected_but_got_at_line(
-      "':' (colon)", colonToken.value,
-      (*tokens)[index].line);
+    errmsg = msgs::expected_but_got_at_line("':' (colon)", colonToken.value,
+                                            (*tokens)[index].line);
     throw runtime_error(errmsg);
   }
 }
@@ -61,9 +60,8 @@ void parse_push(int &index, vector<Token> *tokens, Program *program,
                 string &current_block) {
   string errmsg;
   if (current_block == "") {
-    errmsg = msgs::expected_but_got_at_line(
-      "block", "push",
-      (*tokens)[index].line);
+    errmsg =
+        msgs::expected_but_got_at_line("block", "push", (*tokens)[index].line);
     throw runtime_error(errmsg);
   }
 
@@ -78,11 +76,9 @@ void parse_push(int &index, vector<Token> *tokens, Program *program,
   t = (*tokens)[index];
   if (t.kind != TokenKind::Semicolon) {
     errmsg = msgs::expected_but_got_at_line_column(
-      "';' (semicolon)", t.value,
-      (*tokens)[index-1].line,
-      (*tokens)[index-1].column + (*tokens)[index-1].value.size() 
-      + (*tokens)[index-2].value.size() + 1 + 1
-    );
+        "';' (semicolon)", t.value, (*tokens)[index - 1].line,
+        (*tokens)[index - 1].column + (*tokens)[index - 1].value.size() +
+            (*tokens)[index - 2].value.size() + 1 + 1);
     throw runtime_error(errmsg);
   }
 }
@@ -98,17 +94,15 @@ void parse_pop(int &index, vector<Token> *tokens, Program *program,
   Token t = (*tokens)[index++];
   if (t.kind != TokenKind::Identifier) {
     errmsg = msgs::expected_but_got_at_line(
-      "Identifier", token_kind_to_str(t.kind),
-      (*tokens)[index-1].line);
+        "Identifier", token_kind_to_str(t.kind), (*tokens)[index - 1].line);
     throw runtime_error(errmsg);
   }
   (*program)[current_block].instructions.push_back(SET(t.value));
 
   t = (*tokens)[index];
   if (t.kind != TokenKind::Semicolon) {
-    errmsg = msgs::expected_but_got_at_line(
-      "';' (semicolon)", t.value,
-      (*tokens)[index-1].line);
+    errmsg = msgs::expected_but_got_at_line("';' (semicolon)", t.value,
+                                            (*tokens)[index - 1].line);
     throw runtime_error(errmsg);
   }
 }
@@ -123,16 +117,16 @@ void parse_label(int &index, vector<Token> *tokens, Program *program,
   string errmsg;
   Token labeltoken = (*tokens)[index++];
   if (labeltoken.kind != TokenKind::Identifier) {
-    errmsg = msgs::expected_but_got_at_line(
-      "Identifier", token_kind_to_str(labeltoken.kind),
-      (*tokens)[index-1].line);
+    errmsg = msgs::expected_but_got_at_line("Identifier",
+                                            token_kind_to_str(labeltoken.kind),
+                                            (*tokens)[index - 1].line);
     throw runtime_error(errmsg);
   }
   Token semicolon = (*tokens)[index];
   if (semicolon.kind != TokenKind::Semicolon) {
-    errmsg = msgs::expected_but_got_at_line(
-      "';' (semicolon)", token_kind_to_str(semicolon.kind),
-      (*tokens)[index].line);
+    errmsg = msgs::expected_but_got_at_line("';' (semicolon)",
+                                            token_kind_to_str(semicolon.kind),
+                                            (*tokens)[index].line);
     throw runtime_error(errmsg);
   }
   int pos = (*program)[current_block].instructions.size();
@@ -150,16 +144,14 @@ void parse_goto(int &index, vector<Token> *tokens, Program *program,
   Token t = (*tokens)[index++];
   if (t.kind != TokenKind::Identifier) {
     errmsg = msgs::expected_but_got_at_line(
-      "Identifier", token_kind_to_str(t.kind),
-      (*tokens)[index-1].line);
+        "Identifier", token_kind_to_str(t.kind), (*tokens)[index - 1].line);
     throw runtime_error(errmsg);
   }
   (*program)[current_block].instructions.push_back(GOTO(t.value));
   t = (*tokens)[index];
   if (t.kind != TokenKind::Semicolon) {
     errmsg = msgs::expected_but_got_at_line(
-      "';' (semicolon)", token_kind_to_str(t.kind),
-      (*tokens)[index].line);
+        "';' (semicolon)", token_kind_to_str(t.kind), (*tokens)[index].line);
     throw runtime_error(errmsg);
   }
 }
@@ -175,22 +167,19 @@ void parse_ifgoto(int &index, vector<Token> *tokens, Program *program,
   Token expected = (*tokens)[index++];
   if (expected.kind != TokenKind::Integer) {
     errmsg = msgs::expected_but_got_at_line(
-      "integer", token_kind_to_str(expected.kind),
-      (*tokens)[index-1].line);
+        "integer", token_kind_to_str(expected.kind), (*tokens)[index - 1].line);
     throw runtime_error(errmsg);
   }
   if (expected.value != "-1" && expected.value != "0" &&
       expected.value != "1") {
-    errmsg = msgs::expected_but_got_at_line(
-      "-1, 0 or 1", expected.value,
-      (*tokens)[index-1].line);    
+    errmsg = msgs::expected_but_got_at_line("-1, 0 or 1", expected.value,
+                                            (*tokens)[index - 1].line);
     throw runtime_error(errmsg);
   }
   Token label = (*tokens)[index++];
   if (label.kind != TokenKind::Identifier) {
     errmsg = msgs::expected_but_got_at_line(
-      "Identifier", token_kind_to_str(label.kind),
-      (*tokens)[index-1].line);
+        "Identifier", token_kind_to_str(label.kind), (*tokens)[index - 1].line);
     throw runtime_error(errmsg);
   }
   (*program)[current_block].instructions.push_back(
@@ -198,8 +187,7 @@ void parse_ifgoto(int &index, vector<Token> *tokens, Program *program,
   Token t = (*tokens)[index];
   if (t.kind != TokenKind::Semicolon) {
     errmsg = msgs::expected_but_got_at_line(
-      "';' (semicolon)", token_kind_to_str(t.kind),
-      (*tokens)[index].line);
+        "';' (semicolon)", token_kind_to_str(t.kind), (*tokens)[index].line);
     throw runtime_error(errmsg);
   }
 }
@@ -215,8 +203,7 @@ void parse_var(int &index, vector<Token> *tokens, Program *program,
   Token id = (*tokens)[index++];
   if (id.kind != TokenKind::Identifier) {
     errmsg = msgs::expected_but_got_at_line(
-      "Identifier", token_kind_to_str(id.kind),
-      (*tokens)[index-1].line);
+        "Identifier", token_kind_to_str(id.kind), (*tokens)[index - 1].line);
     throw runtime_error(errmsg);
   }
   Token value = (*tokens)[index++];
@@ -225,8 +212,7 @@ void parse_var(int &index, vector<Token> *tokens, Program *program,
   Token t = (*tokens)[index];
   if (t.kind != TokenKind::Semicolon) {
     errmsg = msgs::expected_but_got_at_line(
-      "';' (semicolon)", token_kind_to_str(t.kind),
-      (*tokens)[index].line);
+        "';' (semicolon)", token_kind_to_str(t.kind), (*tokens)[index].line);
     throw runtime_error(errmsg);
   }
 }
@@ -242,16 +228,14 @@ void parse_call(int &index, vector<Token> *tokens, Program *program,
   Token t = (*tokens)[index++];
   if (t.kind != TokenKind::Identifier) {
     errmsg = msgs::expected_but_got_at_line(
-      "Identifier", token_kind_to_str(t.kind),
-      (*tokens)[index-1].line);
+        "Identifier", token_kind_to_str(t.kind), (*tokens)[index - 1].line);
     throw runtime_error(errmsg);
   }
   (*program)[current_block].instructions.push_back(CALL(t.value));
   t = (*tokens)[index];
   if (t.kind != TokenKind::Semicolon) {
     errmsg = msgs::expected_but_got_at_line(
-      "';' (semicolon)", token_kind_to_str(t.kind),
-      (*tokens)[index].line);
+        "';' (semicolon)", token_kind_to_str(t.kind), (*tokens)[index].line);
     throw runtime_error(errmsg);
   }
 }
@@ -294,8 +278,7 @@ Program load_program(vector<Token> tokens) {
       Token sc = tokens[++i];
       if (sc.kind != TokenKind::Semicolon) {
         string errmsg = msgs::expected_but_got_at_line(
-          "';' (semicolon)", token_kind_to_str(sc.kind),
-          tokens[i].line);
+            "';' (semicolon)", token_kind_to_str(sc.kind), tokens[i].line);
         throw runtime_error(errmsg);
       }
       break;
@@ -306,8 +289,7 @@ Program load_program(vector<Token> tokens) {
       Token sc = tokens[++i];
       if (sc.kind != TokenKind::Semicolon) {
         string errmsg = msgs::expected_but_got_at_line(
-          "';' (semicolon)", token_kind_to_str(sc.kind),
-          tokens[i].line);
+            "';' (semicolon)", token_kind_to_str(sc.kind), tokens[i].line);
         throw runtime_error(errmsg);
       }
       break;
@@ -318,8 +300,7 @@ Program load_program(vector<Token> tokens) {
       Token sc = tokens[++i];
       if (sc.kind != TokenKind::Semicolon) {
         string errmsg = msgs::expected_but_got_at_line(
-          "';' (semicolon)", token_kind_to_str(sc.kind),
-          tokens[i].line);
+            "';' (semicolon)", token_kind_to_str(sc.kind), tokens[i].line);
         throw runtime_error(errmsg);
       }
       break;
@@ -330,8 +311,7 @@ Program load_program(vector<Token> tokens) {
       Token sc = tokens[++i];
       if (sc.kind != TokenKind::Semicolon) {
         string errmsg = msgs::expected_but_got_at_line(
-          "';' (semicolon)", token_kind_to_str(sc.kind),
-          tokens[i].line);
+            "';' (semicolon)", token_kind_to_str(sc.kind), tokens[i].line);
         throw runtime_error(errmsg);
       }
       break;
@@ -342,8 +322,7 @@ Program load_program(vector<Token> tokens) {
       Token sc = tokens[++i];
       if (sc.kind != TokenKind::Semicolon) {
         string errmsg = msgs::expected_but_got_at_line(
-          "';' (semicolon)", token_kind_to_str(sc.kind),
-          tokens[i].line);
+            "';' (semicolon)", token_kind_to_str(sc.kind), tokens[i].line);
         throw runtime_error(errmsg);
       }
       break;
@@ -359,8 +338,7 @@ Program load_program(vector<Token> tokens) {
       Token sc = tokens[++i];
       if (sc.kind != TokenKind::Semicolon) {
         string errmsg = msgs::expected_but_got_at_line(
-          "';' (semicolon)", token_kind_to_str(sc.kind),
-          tokens[i].line);
+            "';' (semicolon)", token_kind_to_str(sc.kind), tokens[i].line);
         throw runtime_error(errmsg);
       }
       break;
@@ -386,9 +364,8 @@ Program load_program(vector<Token> tokens) {
 
     case TokenKind::End: {
       if (current_block == "") {
-        string errmsg = msgs::expected_but_got_at_line(
-          "block", "end",
-          tokens[i].line);
+        string errmsg =
+            msgs::expected_but_got_at_line("block", "end", tokens[i].line);
         throw runtime_error(errmsg);
       }
       current_block = "";
