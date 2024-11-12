@@ -21,19 +21,16 @@ vector<Token> tokenize(string source) {
   Token t;
   char ch;
   int line = 1;
-  int column = 0;
+  int column = 1; // always 1 as of now...
 
   for (int i = 0; i < source.length(); i++) {
     ch = source[i];
 
-    // special cases:
+    // handling when not in string, current token is
+    // empty and ch is whitespace
     if (ctx == Normal && current_token.str().length() == 0 && isspace(ch)) {
-      if (ch == '\n') {
+      if (ch == '\n')
         line++;
-        column = 1;
-      } else {
-        column++;
-      }
       continue; // skip whitespace
     }
 
@@ -44,6 +41,7 @@ vector<Token> tokenize(string source) {
 
     // handle double quotes:
     if (ch == '"') {
+      // opening string
       if (ctx == Normal) {
         if (current_token.str().length() > 0) {
           t = token_from_str(current_token.str(), line, column);
@@ -54,11 +52,12 @@ vector<Token> tokenize(string source) {
         current_token << ch;
         continue;
       }
+      // closing string
       if (ctx == InString) {
         current_token << ch;
         t = token_from_str(current_token.str(), line, column);
         tokens.push_back(t);
-        current_token.str(""); // clear stringstream
+        current_token.str("");
         ctx = LexCtx::Normal;
         continue;
       }
@@ -70,6 +69,8 @@ vector<Token> tokenize(string source) {
       t = token_from_str(current_token.str(), line, column);
       tokens.push_back(t);
       current_token.str("");
+      if (ch == '\n')
+        line++;
       continue;
     }
 
@@ -81,15 +82,11 @@ vector<Token> tokenize(string source) {
         current_token.str("");
       }
       current_token << ch;
-      if (ch == '=' && source[i + 1] == '=') {
-        current_token << source[++i];
-      }
       t = token_from_str(current_token.str(), line, column);
       tokens.push_back(t);
       current_token.str("");
       continue;
     }
-
     current_token << ch;
   }
 

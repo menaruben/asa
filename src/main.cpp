@@ -16,6 +16,7 @@ int main(int argc, char **argv) {
   string sourcepath = argv[1];
   string source = read_file(sourcepath, "//");
   vector<Token> tokens = lexer::tokenize(source);
+
   Program program = load_program(tokens);
   list<asa::Object> stack;
   if (program.find("main") == program.end()) {
