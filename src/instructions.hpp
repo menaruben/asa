@@ -104,12 +104,17 @@ struct Instruction {
 
 asa::Object add(asa::Object a, asa::Object b) {
   if (a.type != b.type)
-    return asa::ERROR_TYPEMISMATCH;
-
-  if (!is_numeric_type(a) || !is_numeric_type(b))
-    return asa::ERROR_ARITHMETIC;
+    return asa::ERROR_TYPEMISMATCH("TYPE MISMATCH: Cannot add " + a.value +
+                                   " and " + b.value);
 
   switch (a.type) {
+  case asa::String: {
+    std::string as = a.value.substr(0, a.value.size() - 1);
+    std::string bs = b.value.substr(1, b.value.size());
+    std::string sum = as + bs;
+    return {.value = sum, .type = asa::String};
+  }
+
   case asa::Integer: {
     int ai = std::stoi(a.value);
     int bi = std::stoi(b.value);
@@ -130,16 +135,18 @@ asa::Object add(asa::Object a, asa::Object b) {
   }
 
   default:
-    return asa::ERROR_ILLEGALINSTRUCTION;
+    return asa::ERROR_ILLEGALINSTRUCTION("Unsupported type for addition");
   }
 }
 
 asa::Object subtract(asa::Object a, asa::Object b) {
   if (a.type != b.type)
-    return asa::ERROR_TYPEMISMATCH;
+    return asa::ERROR_TYPEMISMATCH("TYPE MISMATCH: Cannot subtract " + a.value +
+                                   " and " + b.value);
 
   if (!is_numeric_type(a) || !is_numeric_type(b))
-    return asa::ERROR_ARITHMETIC;
+    return asa::ERROR_ARITHMETIC("ARITHMETIC ERROR: Cannot subtract non-numeric " +
+                                 a.value + " and " + b.value);
 
   switch (a.type) {
   case asa::Integer: {
@@ -161,15 +168,17 @@ asa::Object subtract(asa::Object a, asa::Object b) {
     return {.value = std::to_string(delta), .type = asa::Double};
   }
   default:
-    return asa::ERROR_ILLEGALINSTRUCTION;
+    return asa::ERROR_ILLEGALINSTRUCTION("Unsupported type for subtraction");
   }
 }
 asa::Object multiply(asa::Object a, asa::Object b) {
   if (a.type != b.type)
-    return asa::ERROR_TYPEMISMATCH;
+    return asa::ERROR_TYPEMISMATCH("TYPE MISMATCH: Cannot multiply " + a.value +
+                                   " and " + b.value);
 
   if (!is_numeric_type(a) || !is_numeric_type(b))
-    return asa::ERROR_ARITHMETIC;
+    return asa::ERROR_ARITHMETIC("ARITHMETIC ERROR: Cannot multiply non-numeric " +
+                                 a.value + " and " + b.value);
 
   switch (a.type) {
   case asa::Integer: {
@@ -191,16 +200,18 @@ asa::Object multiply(asa::Object a, asa::Object b) {
     return {.value = std::to_string(prod), .type = asa::Double};
   }
   default:
-    return asa::ERROR_ILLEGALINSTRUCTION;
+    return asa::ERROR_ILLEGALINSTRUCTION("Unsupported type for multiplication");
   }
 }
 
 asa::Object divide(asa::Object a, asa::Object b) {
   if (a.type != b.type)
-    return asa::ERROR_TYPEMISMATCH;
+    return asa::ERROR_TYPEMISMATCH("TYPE MISMATCH: Cannot divide " + a.value +
+                                   " and " + b.value);
 
   if (!is_numeric_type(a) || !is_numeric_type(b))
-    return asa::ERROR_ARITHMETIC;
+    return asa::ERROR_ARITHMETIC("ARITHMETIC ERROR: Cannot divide non-numeric " +
+                                 a.value + " and " + b.value);
 
   switch (a.type) {
   case asa::Integer: {
@@ -222,13 +233,14 @@ asa::Object divide(asa::Object a, asa::Object b) {
     return {.value = std::to_string(quotient), .type = asa::Double};
   }
   default:
-    return asa::ERROR_ILLEGALINSTRUCTION;
+    return asa::ERROR_ILLEGALINSTRUCTION("Unsupported type for division");
   }
 }
 
 asa::Object compare(asa::Object a, asa::Object b) {
   if (a.type != b.type)
-    return asa::ERROR_TYPEMISMATCH;
+    return asa::ERROR_TYPEMISMATCH("TYPE MISMATCH: Cannot compare " + a.value +
+                                   " and " + b.value);
   asa::Type returnType = a.type;
 
   switch (returnType) {
@@ -283,7 +295,7 @@ asa::Object compare(asa::Object a, asa::Object b) {
   }
 
   default:
-    throw std::exception(); // unreachable
+    throw std::runtime_error("Unsupported type for comparison");
   }
 }
 
@@ -291,7 +303,9 @@ std::vector<asa::Object> pop_args(std::list<asa::Object> *stack, int count) {
   std::vector<asa::Object> args;
   std::list<asa::Object>::iterator it;
   if (stack->size() < count) {
-    args.push_back(asa::ERROR_STACKUNDERFLOW);
+    args.push_back(asa::ERROR_STACKUNDERFLOW(
+      "STACK UNDERFLOW: Cannot popargs without at least " + std::to_string(count) +
+      " elements on the stack"));
     return args;
   };
 

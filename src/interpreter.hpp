@@ -13,8 +13,6 @@ namespace interpreter {
 
 asa::Object eval(Program program,
      string entryPoint, list<asa::Object> *stack) {
-
-  // unordered_map<string, unordered_map<string, int>> labels;
   unordered_map<string, asa::Object> variables;
   list<asa::Object>::iterator it;
   int instPosition = 0;
@@ -42,7 +40,8 @@ asa::Object eval(Program program,
 
     case InstructionKind::Push: {
       if (stack->size() + 1 > MAX_STACK_SIZE)
-        return asa::ERROR_STACKOVERFLOW;
+        return asa::ERROR_STACKOVERFLOW("STACK OVERFLOW: Cannot push more than " +
+                                        to_string(MAX_STACK_SIZE) + " elements");
 
       stack->push_back(inst.operand);
       break;
@@ -50,19 +49,18 @@ asa::Object eval(Program program,
 
     case InstructionKind::Pop: {
       if (stack->size() <= 0)
-        return asa::ERROR_STACKUNDERFLOW;
+        return asa::ERROR_STACKUNDERFLOW("STACK UNDERFLOW: Cannot pop from an empty stack");
 
       stack->pop_back();
       break;
     }
 
     case InstructionKind::Label:
-      // labels[blockctx][inst.id] = instPosition;
       break;
 
     case InstructionKind::Goto: {
       if (program[entryPoint].labels.find(inst.id) == program[entryPoint].labels.end()) {
-        return asa::ERROR_LABEL_NOT_FOUND;
+        return asa::ERROR_LABEL_NOT_FOUND("LABEL NOT FOUND: " + inst.id);
       }
       instPosition = program[entryPoint].labels[inst.id];
       break;
@@ -70,10 +68,11 @@ asa::Object eval(Program program,
 
     case InstructionKind::IfGoto: {
       if (stack->size() < 1)
-        return asa::ERROR_STACKUNDERFLOW;
+        return asa::ERROR_STACKUNDERFLOW(
+          "STACK UNDERFLOW: Cannot perform IfGoto without at least one element (-1, 0 or 1) on the stack");
 
       if (program[entryPoint].labels.find(inst.id) == program[entryPoint].labels.end()) {
-        return asa::ERROR_LABEL_NOT_FOUND;
+        return asa::ERROR_LABEL_NOT_FOUND("LABEL NOT FOUND: " + inst.id);
       }
 
       asa::Object top = pop_args(stack, 1)[0];
@@ -84,7 +83,8 @@ asa::Object eval(Program program,
 
     case InstructionKind::IfHalt: {
       if (stack->size() < 1)
-        return asa::ERROR_STACKUNDERFLOW;
+        return asa::ERROR_STACKUNDERFLOW(
+          "STACK UNDERFLOW: Cannot perform IfHalt without at least one element (-1, 0 or 1) on the stack");
       asa::Object top = pop_args(stack, 1)[0];
       if (top.value == inst.operand.value) {
         halt = true;
@@ -98,9 +98,11 @@ asa::Object eval(Program program,
       break;
     }
 
+    // SetVar <=> Pop
     case InstructionKind::SetVar: {
       if (stack->size() < 1)
-        return asa::ERROR_STACKUNDERFLOW;
+        return asa::ERROR_STACKUNDERFLOW(
+          "STACK UNDERFLOW: Cannot pop value to variable in an empty stack");
 
       asa::Object o = pop_args(stack, 1)[0];
       variables[inst.id] = o;
@@ -109,7 +111,7 @@ asa::Object eval(Program program,
 
     case InstructionKind::GetVar: {
       if (variables.find(inst.id) == variables.end()) {
-        return asa::ERROR_UNDEFINED_VARIABLE;
+        return asa::ERROR_UNDEFINED_VARIABLE("UNDEFINED VARIABLE: " + inst.id);
       }
       asa::Object o = variables[inst.id];
       stack->push_back(o);
@@ -118,7 +120,7 @@ asa::Object eval(Program program,
 
     case InstructionKind::Increment: {
       if (variables.find(inst.id) == variables.end()) {
-        return asa::ERROR_UNDEFINED_VARIABLE;
+        return asa::ERROR_UNDEFINED_VARIABLE("UNDEFINED VARIABLE: " + inst.id);
       }
       asa::Object o = variables[inst.id];
       variables[inst.id] = add(o, {.value = "1", .type = o.type});
@@ -127,7 +129,7 @@ asa::Object eval(Program program,
 
     case InstructionKind::Decrement: {
       if (variables.find(inst.id) == variables.end()) {
-        return asa::ERROR_UNDEFINED_VARIABLE;
+        return asa::ERROR_UNDEFINED_VARIABLE("UNDEFINED VARIABLE: " + inst.id);
       }
       asa::Object o = variables[inst.id];
       variables[inst.id] = subtract(o, {.value = "1", .type = o.type});
@@ -136,7 +138,8 @@ asa::Object eval(Program program,
 
     case InstructionKind::Cmp: {
       if (stack->size() < 2)
-        return asa::ERROR_STACKUNDERFLOW;
+        return asa::ERROR_STACKUNDERFLOW(
+          "STACK UNDERFLOW: Cannot compare without at least two elements on the stack");
       vector<asa::Object> objs = pop_args(stack, 2);
       stack->push_back(compare(objs[1], objs[0]));
       break;
@@ -145,7 +148,8 @@ asa::Object eval(Program program,
     case InstructionKind::Add: {
       vector<asa::Object> args = pop_args(stack, 2);
       if (args.size() < 2)
-        return asa::ERROR_STACKUNDERFLOW;
+        return asa::ERROR_STACKUNDERFLOW(
+          "STACK UNDERFLOW: Cannot add without at least two elements on the stack");
       asa::Object a = args[0];
       asa::Object b = args[1];
       asa::Object c = add(b, a);
@@ -158,7 +162,8 @@ asa::Object eval(Program program,
     case InstructionKind::Subtract: {
       vector<asa::Object> args = pop_args(stack, 2);
       if (args.size() < 2)
-        return asa::ERROR_STACKUNDERFLOW;
+        return asa::ERROR_STACKUNDERFLOW(
+          "STACK UNDERFLOW: Cannot subtract without at least two elements on the stack");
       asa::Object a = args[0];
       asa::Object b = args[1];
       asa::Object c = subtract(b, a);
@@ -171,7 +176,8 @@ asa::Object eval(Program program,
     case InstructionKind::Multiply: {
       vector<asa::Object> args = pop_args(stack, 2);
       if (args.size() < 2)
-        return asa::ERROR_STACKUNDERFLOW;
+        return asa::ERROR_STACKUNDERFLOW(
+          "STACK UNDERFLOW: Cannot multiply without at least two elements on the stack");
       asa::Object a = args[0];
       asa::Object b = args[1];
       asa::Object c = multiply(b, a);
@@ -184,7 +190,8 @@ asa::Object eval(Program program,
     case InstructionKind::Divide: {
       vector<asa::Object> args = pop_args(stack, 2);
       if (args.size() < 2)
-        return asa::ERROR_STACKUNDERFLOW;
+        return asa::ERROR_STACKUNDERFLOW(
+          "STACK UNDERFLOW: Cannot divide without at least two elements on the stack");
       asa::Object a = args[0];
       asa::Object b = args[1];
       asa::Object c = divide(b, a);
@@ -196,7 +203,7 @@ asa::Object eval(Program program,
 
     case InstructionKind::Call: {
       if (program.find(inst.id) == program.end()) {
-        return asa::ERROR_ILLEGALINSTRUCTION;
+        return asa::ERROR_ILLEGALINSTRUCTION("ILLEGAL INSTRUCTION/BLOCK: " + inst.id);
       }
       vector<Instruction> funcinsts = program[inst.id].instructions;
       asa::Object result = eval(program, inst.id, stack);

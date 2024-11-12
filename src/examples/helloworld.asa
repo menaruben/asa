@@ -1,5 +1,4 @@
 begin main:
-	push "Hello World!";
-	push 2; pop;
+	push "Hello,"; push " World!"; add;
 	show;
 end
