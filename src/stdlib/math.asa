@@ -43,3 +43,28 @@ begin modulo:
   label return;
     push rem;
 end
+
+// max returns the maximum of two values
+begin max:
+  pop a; pop b;
+  push a; push b; cmp; pop a_to_b;
+  push a_to_b; ifgoto 0 a_eq_b;       // if a == b return a
+  push a_to_b; ifgoto -1 a_lesser_b;  // if a  < b return b
+  push a; pop res; goto return;       // else      return a
+
+  label a_eq_b;     push a; pop res; goto return;
+  label a_lesser_b; push b; pop res; goto return;
+  label return; push res;
+end
+
+// min returns the minimum of two values
+begin min:
+  pop a; pop b;
+  push a; push b; cmp; pop a_to_b;
+  push a_to_b; ifgoto 0 a_eq_b;       // if a == b return a
+  push a_to_b; ifgoto -1 a_lesser_b;  // if a  < b return a
+  push b; pop res; goto return;       // else      return b
+  label a_eq_b;     push a; pop res; goto return;
+  label a_lesser_b; push a; pop res; goto return;
+  label return; push res;
+end
