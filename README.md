@@ -63,3 +63,108 @@ Stack:
     Value: 0, Type: Integer
 ```
 As we can see we successfully calculated `fib(0)`, `fib(1)`, `fib(7)` and `fib(10)`.
+
+# Instructions / Keywords
+## Functions / Blocks
+In asa you can define functions by using the `begin` and `end` keyword. These functions are then called by using the
+`call` instruction. Here is a quick example:
+```pascal
+begin do_something:
+  push "doing something...";
+end
+
+begin main:
+  call do_something;
+  show;
+end
+```
+The `main` function is the entrypoint of the program if we try to run it. 
+
+## Variables
+In order to store something in a variable we usually `push` a value onto the stack and then `pop` it into a variable:
+```pascal
+begin main:
+  push 1; pop x; // x = 1
+  push 2; pop x; // variables are mutable, therefore x = 2 now
+  push x;        // we can also push the value of the variable to the stack
+end
+```
+
+## Comparing data
+Asa has a `cmp` instruction which takes the two top values of the stack and compares them:
+```pascal
+begin main:
+  push 1; push 2; cmp; // pushes -1 to stack because 1  < 2
+  push 2; push 2; cmp; // pushes  0 to stack because 2 == 2
+  push 3; push 2; cmp; // pushes  1 to stack because 3  > 2
+end
+```
+
+## Labels + Goto (and Ifgoto)
+Labels are used to mark a position in the program and Gotos are used to jump to the position. The following program pushes 1 to the stack until we get
+a stack overflow:
+```pascal
+begin main:
+  label loop;
+  push 1;
+  goto loop;
+end
+```
+Loops can also be used to skip a portion of code. 
+```pascal
+begin main:
+  push 21; pop age;
+  push 18; push age; cmp; pop 18_to_age;  // 18 < 21 <=> 18_to_age = -1
+
+  // if 18 <= age then goto over_18
+  push 18_to_age; ifgoto -1 over_18;
+  push 18_to_age; ifgoto 0 over_18;
+
+  // otherwise do this and goto return:
+  push "not allowed to drink"; pop verdict;
+  goto return; // skips the over_18 body
+
+  label over_18;
+    push "allowed to drink"; pop verdict;
+    goto return; // not really needed here since it is the next instruction anyways...
+
+  label return;
+    push verdict;
+
+  show;
+end
+```
+
+## Math Operations
+In asa there are `add`, `sub`, `mul` and `div`. The
+```pascal
+begin main:
+  // evaluate (3*5 + 1)/4 - 3 = 1
+  push 3; push 5; mul;   // 3 * 5  = 15 
+  push 1; add;           // 15 + 1 = 16
+  push 4; div;           // 16 / 4 =  4
+  push 3; sub;           // 4 - 3  =  1
+  show;                  // shows 1 in stack
+end
+```
+
+## Importing
+asa also allows us to modularize our code because it supports `import` statements. Let's say that we have the following file (in the same directory):
+stringlib.asa:
+```pascal
+begin concat:
+    pop b; pop a;
+    push a; push b; add;
+end
+```
+We can import `stringlib.asa` into our code by using `import`:
+```pascal
+import "stringlib.asa";
+
+begin main:
+    push "Hi"; push " User!";
+    call concat;
+    show;
+end
+```
+The result of this code correctly shows `"Hi User"` in the stack.
