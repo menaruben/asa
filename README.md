@@ -62,4 +62,4 @@ Stack:
     Value: 1, Type: Integer
     Value: 0, Type: Integer
 ```
-As we can see we successfully calculated `fib(0)`, `fib(1)`, `fib(7)` and `fib(8)`.
+As we can see we successfully calculated `fib(0)`, `fib(1)`, `fib(7)` and `fib(10)`.
