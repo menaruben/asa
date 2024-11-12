@@ -56,7 +56,6 @@ void parse_import(int &index, vector<Token> *tokens, Program *program,
     throw runtime_error(errmsg);
   }
   string path = filepath.value.substr(1, filepath.value.size() - 2);
-  cout << "Importing file: " << path << endl;
   string source = read_file(path, "//");
   vector<Token> importedtoks = lexer::tokenize(source);
   Program imported = load_program(importedtoks);
