@@ -97,5 +97,5 @@ end
 // even pushes 1 to the stack if the number is even
 begin even?:
   pop n; push n; push 2; call math/modulo;
-  push 0; call logical/eq?;
+  push 0; call logical/equals?;
 end
