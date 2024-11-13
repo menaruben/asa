@@ -1,3 +1,7 @@
+// ------------ math.asa ------------
+// Contains functions for doing math
+import "logical.asa";
+
 // modulo computes the smallest positive representation of a mod b
 begin modulo:
   pop b; pop a;
@@ -76,7 +80,7 @@ begin power:
   label loop;
     push b; push 0; cmp; ifgoto 0 return;  // if b is 0 return res
     push res; push a; mul; pop res;        // res = res * a
-    push b; push 1; sub; pop b;            // decrement b
+    decr b;                                // decrement b
     goto loop;                             // repeat...
   label return; push res;
 end
@@ -88,4 +92,10 @@ begin abs:
   push n; pop res; goto return;                   // else     return n
   label negative; push n; push -1; mul; pop res;
   label return; push res;
+end
+
+// even pushes 1 to the stack if the number is even
+begin even?:
+  pop n; push n; push 2; call math/modulo;
+  push 0; call logical/eq?;
 end

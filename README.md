@@ -210,5 +210,10 @@ Stack:
     Value: "Hello ruby", Type: String
 ```
 
+If you are developing libraries and your functions depend on functions inside the own 
+namespace you still must use the namespace infront of the identifier. One example would be the `even?` function
+in the [`math.asa`](./src/stdlib/math.asa). It uses the `modulo` function from the same namespace but it still 
+has to use the full identifier `math/modulo` instead of just `modulo`. 
+
 # stdlib
 The stdlib is work in progress and can be found [here](./src/stdlib/)
