@@ -10,6 +10,7 @@ namespace tokens {
 enum TokenKind {
   Char,
   String,
+  Str,
   Integer,
   Bool,
   Float,
@@ -46,6 +47,7 @@ std::string token_kind_to_str(TokenKind k) {
   switch (k) {
   case Char:        return "Char";
   case String:      return "String";
+  case Str:         return "tostr";  // used for to_string 
   case Integer:     return "Integer";
   case Bool:        return "Bool";
   case Float:       return "Float";
@@ -132,9 +134,12 @@ const std::regex MUL_PATTERN("^Mul$", std::regex_constants::icase);
 const std::regex DIV_PATTERN("^Div$", std::regex_constants::icase);
 const std::regex INCREMENT_PATTERN("^Incr$", std::regex_constants::icase);
 const std::regex DECREMENT_PATTERN("^Decr$", std::regex_constants::icase);
+const std::regex STR_PATTERN("^Str$", std::regex_constants::icase);
+
 
 Token token_from_str(std::string value, int line, int column) {
-  if (std::regex_match(value, STRING_PATTERN))     return {.value = value, .kind = String, .line = line, .column = column};
+  if (std::regex_match(value, STRING_PATTERN))     return {.value = value.substr(1, value.size()-2), 
+                                                           .kind = String, .line = line, .column = column};
   if (std::regex_match(value, INT_PATTERN))        return {.value = value, .kind = Integer, .line = line, .column = column};
   if (std::regex_match(value, FLOAT_PATTERN))      return {.value = value, .kind = Float, .line = line, .column = column};
   if (std::regex_match(value, DOUBLE_PATTERN))     return {.value = value, .kind = Double, .line = line, .column = column};
@@ -160,6 +165,7 @@ Token token_from_str(std::string value, int line, int column) {
   if (std::regex_match(value, DIV_PATTERN))        return {.value = value, .kind = Div, .line = line, .column = column};
   if (std::regex_match(value, INCREMENT_PATTERN))  return {.value = value, .kind = Increment, .line = line, .column = column};
   if (std::regex_match(value, DECREMENT_PATTERN))  return {.value = value, .kind = Decrement, .line = line, .column = column};
+  if (std::regex_match(value, STR_PATTERN))        return {.value = value, .kind = Str, .line = line, .column = column};
   if (std::regex_match(value, IDENTIFIER_PATTERN)) return {.value = value, .kind = Identifier, .line = line, .column = column};
 
   if (value == ",") return {.value = value, .kind = Comma, .line = line, .column = column};

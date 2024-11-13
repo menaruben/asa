@@ -1,0 +1,209 @@
+import "logical.asa";
+import "testing.asa";
+
+
+begin equals_test:
+  // 0 equals 1 => 0
+  push 0; pop want;
+  push 0; push 1; call logical/equals?; pop have;
+  push have; push want; push "equals_test_1"; call testing/assert; println;
+
+  // 0 equals 0 => 1
+  push 1; pop want;
+  push 0; push 0; call logical/equals?; pop have;
+  push have; push want; push "equals_test_2"; call testing/assert; println;
+  
+  // 1 equals 0 => 0
+  push 0; pop want;
+  push 1; push 0; call logical/equals?; pop have;
+  push have; push want; push "equals_test_1"; call testing/assert; println;
+end
+
+begin not_equals_test:
+  // 0 not_equals 1 => 1
+  push 1; pop want;
+  push 0; push 1; call logical/not_equals?; pop have;
+  push have; push want; push "not_equals_test_1"; call testing/assert; println;
+
+  // 0 not_equals 0 => 0
+  push 0; pop want;
+  push 0; push 0; call logical/not_equals?; pop have;
+  push have; push want; push "not_equals_test_2"; call testing/assert; println;
+  
+  // 1 not_equals 0 => 1
+  push 1; pop want;
+  push 1; push 0; call logical/not_equals?; pop have;
+  push have; push want; push "not_equals_test_1"; call testing/assert; println;
+end
+
+begin not_test:
+  // not 1  => 0
+  push 0; pop want;
+  push 1; call logical/not; pop have;
+  push have; push want; push "not_test_1"; call testing/assert; println;
+
+  // not 0  => 1
+  push 1; pop want;
+  push 0; call logical/not; pop have;
+  push have; push want; push "not_test_2"; call testing/assert; println;
+  
+  // not 5  => 0
+  push 0; pop want;
+  push 5; call logical/not; pop have;
+  push have; push want; push "not_test_3"; call testing/assert; println;
+  
+  // not -3 => 0
+  push 0; pop want;
+  push -3; call logical/not; pop have;
+  push have; push want; push "not_test_4"; call testing/assert; println;
+end
+
+
+begin or_test:
+  // 0 or 0 => 0
+  push 0; pop want;
+  push 0; push 0; call logical/or?; pop have;
+  push have; push want; push "or_test_1"; call testing/assert; println;
+
+  // 0 or 1 => 1
+  push 1; pop want;
+  push 0; push 1; call logical/or?; pop have;
+  push have; push want; push "or_test_2"; call testing/assert; println;
+
+  // 1 or 0 => 1
+  push 1; pop want;
+  push 1; push 0; call logical/or?; pop have;
+  push have; push want; push "or_test_3"; call testing/assert; println;
+
+  // 1 or 1 => 1
+  push 1; pop want;
+  push 1; push 1; call logical/or?; pop have;
+  push have; push want; push "or_test_4"; call testing/assert; println;
+end
+
+
+begin and_test:
+  // 0 and 0 => 0
+  push 0; pop want;
+  push 0; push 0; call logical/and?; pop have;
+  push have; push want; push "and_test_1"; call testing/assert; println;
+
+  // 0 and 1 => 0
+  push 0; pop want;
+  push 0; push 1; call logical/and?; pop have;
+  push have; push want; push "and_test_2"; call testing/assert; println;
+
+  // 1 and 0 => 0
+  push 0; pop want;
+  push 1; push 0; call logical/and?; pop have;
+  push have; push want; push "and_test_3"; call testing/assert; println;
+
+  // 1 and 1 => 1
+  push 1; pop want;
+  push 1; push 1; call logical/and?; pop have;
+  push have; push want; push "and_test_4"; call testing/assert; println;
+end
+
+begin xor_test:
+  // 0 xor 0 => 0
+  push 0; pop want;
+  push 0; push 0; call logical/xor?; pop have;
+  push have; push want; push "xor_test_1"; call testing/assert; println;
+
+  // 0 xor 1 => 1
+  push 1; pop want;
+  push 0; push 1; call logical/xor?; pop have;
+  push have; push want; push "xor_test_2"; call testing/assert; println;
+
+  // 1 xor 0 => 1
+  push 1; pop want;
+  push 1; push 0; call logical/xor?; pop have;
+  push have; push want; push "xor_test_3"; call testing/assert; println;
+
+  // 1 xor 1 => 0
+  push 0; pop want;
+  push 1; push 1; call logical/xor?; pop have;
+  push have; push want; push "xor_test_4"; call testing/assert; println;
+end
+
+begin lesser_test:
+  // 0 < 1 => 1
+  push 1; pop want;
+  push 0; push 1; call logical/lesser?; pop have;
+  push have; push want; push "lesser_test_1"; call testing/assert; println;
+  
+  // 1 < 1 => 0
+  push 0; pop want;
+  push 1; push 1; call logical/lesser?; pop have;
+  push have; push want; push "lesser_test_2"; call testing/assert; println;
+  
+  // 1 < 0 => 0
+  push 0; pop want;
+  push 1; push 0; call logical/lesser?; pop have;
+  push have; push want; push "lesser_test_3"; call testing/assert; println;
+end
+
+begin lesser_or_eq_test:
+  // 0 <= 1 => 1
+  push 1; pop want;
+  push 0; push 1; call logical/lesser_or_eq?; pop have;
+  push have; push want; push "lesser_or_eq_test_1"; call testing/assert; println;
+  
+  // 1 <= 1 => 1
+  push 1; pop want;
+  push 1; push 1; call logical/lesser_or_eq?; pop have;
+  push have; push want; push "lesser_or_eq_test_2"; call testing/assert; println;
+  
+  // 1 <= 0 => 0
+  push 0; pop want;
+  push 1; push 0; call logical/lesser_or_eq?; pop have;
+  push have; push want; push "lesser_or_eq_test_3"; call testing/assert; println;
+end
+
+begin greater_test:
+  // 0 > 1 => 0
+  push 0; pop want;
+  push 0; push 1; call logical/greater?; pop have;
+  push have; push want; push "greater_test_1"; call testing/assert; println;
+  
+  // 1 > 1 => 0
+  push 0; pop want;
+  push 1; push 1; call logical/greater?; pop have;
+  push have; push want; push "greater_test_2"; call testing/assert; println;
+  
+  // 1 > 0 => 1
+  push 1; pop want;
+  push 1; push 0; call logical/greater?; pop have;
+  push have; push want; push "greater_test_3"; call testing/assert; println;
+end
+
+begin greater_or_eq_test:
+  // 0 >= 1 => 0
+  push 0; pop want;
+  push 0; push 1; call logical/greater_or_eq?; pop have;
+  push have; push want; push "greater_or_eq_test_1"; call testing/assert; println;
+  
+  // 1 >= 1 => 1
+  push 1; pop want;
+  push 1; push 1; call logical/greater_or_eq?; pop have;
+  push have; push want; push "greater_or_eq_test_2"; call testing/assert; println;
+  
+  // 1 >= 0 => 1
+  push 1; pop want;
+  push 1; push 0; call logical/greater_or_eq?; pop have;
+  push have; push want; push "greater_or_eq_test_3"; call testing/assert; println;
+end
+
+begin main:
+  push "logical.asa test results: "; println;
+  call equals_test;
+  call not_equals_test;
+  call not_test;
+  call or_test;
+  call and_test;
+  call xor_test;
+  call lesser_test;
+  call lesser_or_eq_test;
+  call greater_test;
+  call greater_or_eq_test;
+end

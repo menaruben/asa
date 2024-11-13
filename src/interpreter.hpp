@@ -57,6 +57,18 @@ asa::Object eval(Program program, string entryPoint, list<asa::Object> *stack) {
       break;
     }
 
+    // str <=> to_string
+    case InstructionKind::Str: {
+      if (stack->size() < 1)
+        return asa::error_stackunderflow(
+          "STACK UNDERFLOW: Cannot convert 'nothing' to string (stack empty)");
+
+      asa::Object o = pop_args(stack, 1)[0];
+      o.type = asa::String;
+      stack->push_back(o);
+      break;
+    }
+
     case InstructionKind::Label:
       break;
 

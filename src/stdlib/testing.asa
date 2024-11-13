@@ -1,0 +1,22 @@
+begin failure:
+  pop name; pop want; pop have;
+  push "[FAILURE]: "; push name; add;
+  push ", want: "; add; push want; str; add;
+  push ", have: "; add; push have; str; add;
+end
+
+begin success:
+  pop name;
+  push "[SUCCESS]: "; push name; add;
+end
+
+begin assert:
+  pop name; pop want; pop have;
+  push want; push have; cmp; ifgoto 0 successful;
+  push have; push want; push name; call testing/failure; goto return;
+
+  label successful;
+    push name; call testing/success;
+
+  label return;
+end

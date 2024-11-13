@@ -13,10 +13,10 @@
 #define PUSH(val, t)                                                           \
   { .kind = InstructionKind::Push, .operand = {.value = val, .type = t}, }
 
-#define INCREMENT(name) \
+#define INCREMENT(name)                                                        \
   { .kind = InstructionKind::Increment, .id = name }
 
-#define DECREMENT(name) \
+#define DECREMENT(name)                                                        \
   { .kind = InstructionKind::Decrement, .id = name }
 
 #define POP                                                                    \
@@ -47,6 +47,9 @@
 #define GET(name)                                                              \
   { .kind = InstructionKind::GetVar, .id = name }
 
+#define STR                                                                    \
+  { .kind = InstructionKind::Str }
+  
 #define CMP                                                                    \
   { .kind = InstructionKind::Cmp }
 
@@ -74,16 +77,17 @@
 #define SHOW                                                                   \
   { .kind = InstructionKind::Show }
 
-#define PRINT \
+#define PRINT                                                                  \
   { .kind = InstructionKind::Print }
   
-#define PRINTLN \
+#define PRINTLN                                                                \
   { .kind = InstructionKind::Println }
 
 namespace instructions {
 
 enum InstructionKind {
   Show,
+  Str,
   Print,
   Println,
   Push,
@@ -122,8 +126,8 @@ asa::Object add(asa::Object a, asa::Object b) {
 
   switch (a.type) {
   case asa::String: {
-    std::string as = a.value.substr(0, a.value.size() - 1);
-    std::string bs = b.value.substr(1, b.value.size());
+    std::string as = a.value;
+    std::string bs = b.value;
     std::string sum = as + bs;
     return {.value = sum, .type = asa::String};
   }

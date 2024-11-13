@@ -75,7 +75,7 @@ void parse_import(int &index, vector<Token> *tokens, Program *program,
         (*tokens)[index - 1].line);
     throw runtime_error(errmsg);
   }
-  string path = filepath.value.substr(1, filepath.value.size() - 2);
+  string path = filepath.value;
   string source = read_file(path, "//");
   vector<Token> importedtoks = lexer::tokenize(source);
   Program imported = load_program(importedtoks);
@@ -125,6 +125,14 @@ void parse_push(int &index, vector<Token> *tokens, Program *program,
   check_expected(TokenKind::Semicolon, sc.kind, sc.line);
 }
 
+void parse_str(int &index, vector<Token> *tokens, Program *program,
+                string &current_block) {
+  check_current_block(current_block, TokenKind::Str, (*tokens)[index].line);
+  index++;
+  (*program)[current_block].instructions.push_back(STR);
+  Token sc = (*tokens)[index];
+  check_expected(TokenKind::Semicolon, sc.kind, sc.line);
+}
 
 void parse_incr(int &index, vector<Token> *tokens, Program *program,
                string &current_block) {
@@ -247,6 +255,11 @@ Program load_program(vector<Token> tokens) {
 
     case TokenKind::Push: {
       parse_push(i, &tokens, &program, current_block);
+      break;
+    }
+
+    case TokenKind::Str: {
+      parse_str(i, &tokens, &program, current_block);
       break;
     }
 
