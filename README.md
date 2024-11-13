@@ -152,7 +152,7 @@ end
 
 ## Importing
 asa also allows us to modularize our code because it supports `import` statements. Let's say that we have the following file (in the same directory):
-stringlib.asa:
+> stringlib.asa:
 ```pascal
 begin concat:
     pop b; pop a;
@@ -164,12 +164,38 @@ We can import `stringlib.asa` into our code by using `import`:
 import "stringlib.asa";
 
 begin main:
-    push "Hi"; push " User!";
-    call concat;
+    push "Hi"; push " ruby!";
+    call stringlib/concat; // adds namespace "stringlib"
     show;
 end
 ```
-The result of this code correctly shows `"Hi User"` in the stack.
+The result of this code correctly shows `"Hi ruby!"` in the stack. As we can see, asa also has namespaces. Let's assume we want to write a 
+`greet` function. We can import `stringlib.asa` and define the `greet` as follows:
+> greeting.asa:
+```pascal
+import "stringlib.asa";
+
+begin greet:
+  pop name;
+  push "Hello "; push name; call stringlib/concat;
+end
+```
+We can then import the `greeting.asa` and use the `greeting/greet` function and the `stringlib/concat` function:
+> main.asa
+```
+import "greeting.asa";
+
+begin main:
+  push "ruby"; call greeting/greet;
+  push "a"; push b; call stringlib/concat;
+  show;
+end
+```
+```
+Stack:
+    Value: "ab", Type: String
+    Value: "Hello ruby", Type: String
+```
 
 # stdlib
 The stdlib is work in progress and can be found [here](./src/stdlib/)

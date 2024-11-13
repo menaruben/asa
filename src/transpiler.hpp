@@ -43,6 +43,9 @@ Program load_program(vector<Token> tokens);
 // Forward declaration of parse_import
 void parse_import(int &index, vector<Token> *tokens, Program *program, string &current_block);
 
+bool has_namespace(const string &blockname) {
+  return blockname.find('/') != string::npos;
+}
 
 void parse_import(int &index, vector<Token> *tokens, Program *program,
                  string &current_block) {
@@ -59,8 +62,15 @@ void parse_import(int &index, vector<Token> *tokens, Program *program,
   string source = read_file(path, "//");
   vector<Token> importedtoks = lexer::tokenize(source);
   Program imported = load_program(importedtoks);
+
+  string namespaceid = path.substr(0, path.find(".asa"));
   for (auto &block : imported) {
-    (*program)[block.first] = block.second;
+    string blockname = block.first;
+    // if namespace not there, add one depending on name of file
+    if (!has_namespace(blockname)) {
+      blockname = namespaceid + "/" + blockname; 
+    }
+    (*program)[blockname] = block.second;
   }
   Token semicolon = (*tokens)[index];
   if (semicolon.kind != TokenKind::Semicolon) {

@@ -1,3 +1,8 @@
+// ------------ logical.asa ------------
+// Contains functions to simplify conditions.
+// These are *not* bitwise operations but logical, meaning that they work with 0 (False) and 1 (True)
+// However, if you wish to find the bitwise operations you can find them in bitwise.asa
+
 // eq? pushes 1 to stack if the values on top of the stack are equal, 0 otherwise
 begin eq?:
   pop a; pop b;

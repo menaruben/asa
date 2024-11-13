@@ -2,6 +2,6 @@ import "stringlib.asa";
 
 begin main:
     push "Hi"; push " User!";
-    call concat;
+    call stringlib/concat;
     show;
 end
