@@ -174,9 +174,9 @@ We can import `stringlib.asa` into our code by using `import`:
 import "stringlib.asa";
 
 begin main:
-    push "Hi"; push " ruby!";
-    call stringlib/concat; // adds namespace "stringlib"
-    show;
+  push "Hi"; push " ruby!";
+  call stringlib/concat; // adds namespace "stringlib"
+  show;
 end
 ```
 The result of this code correctly shows `"Hi ruby!"` in the stack. As we can see, asa also has namespaces. Let's assume we want to write a 
