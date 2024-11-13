@@ -165,8 +165,8 @@ asa also allows us to modularize our code because it supports `import` statement
 > stringlib.asa:
 ```pascal
 begin concat:
-    pop b; pop a;
-    push a; push b; add;
+  pop b; pop a;
+  push a; push b; add;
 end
 ```
 We can import `stringlib.asa` into our code by using `import`:
