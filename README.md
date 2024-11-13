@@ -192,7 +192,7 @@ end
 ```
 We can then import the `greeting.asa` and use the `greeting/greet` function and the `stringlib/concat` function:
 > main.asa
-```
+```pascal
 import "greeting.asa";
 
 begin main:
