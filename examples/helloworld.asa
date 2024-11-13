@@ -1,4 +1,3 @@
 begin main:
-	push "Hello,"; push " World!"; add;
-	show;
+	push "Hello World!"; show; println;
 end

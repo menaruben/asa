@@ -9,7 +9,6 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <iostream>
 
 using namespace instructions;
 using namespace std;
@@ -371,6 +370,28 @@ Program load_program(vector<Token> tokens) {
 
     case TokenKind::Show: {
       program[current_block].instructions.push_back(SHOW);
+      Token sc = tokens[++i];
+      if (sc.kind != TokenKind::Semicolon) {
+        string errmsg = msgs::expected_but_got_at_line(
+            "';' (semicolon)", token_kind_to_str(sc.kind), tokens[i].line);
+        throw runtime_error(errmsg);
+      }
+      break;
+    }
+
+    case TokenKind::Print: {
+      program[current_block].instructions.push_back(PRINT);
+      Token sc = tokens[++i];
+      if (sc.kind != TokenKind::Semicolon) {
+        string errmsg = msgs::expected_but_got_at_line(
+            "';' (semicolon)", token_kind_to_str(sc.kind), tokens[i].line);
+        throw runtime_error(errmsg);
+      }
+      break;
+    }
+
+    case TokenKind::Println: {
+      program[current_block].instructions.push_back(PRINTLN);
       Token sc = tokens[++i];
       if (sc.kind != TokenKind::Semicolon) {
         string errmsg = msgs::expected_but_got_at_line(

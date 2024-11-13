@@ -8,6 +8,7 @@
 namespace tokens {
 
 enum TokenKind {
+  Char,
   String,
   Integer,
   Bool,
@@ -41,6 +42,7 @@ enum TokenKind {
 
 std::string token_kind_to_str(TokenKind k) {
   switch (k) {
+  case Char:        return "Char";
   case String:      return "String";
   case Integer:     return "Integer";
   case Bool:        return "Bool";
@@ -76,6 +78,7 @@ std::string token_kind_to_str(TokenKind k) {
 
 asa::Type token_kind_to_asatype(TokenKind k) {
   switch (k) {
+  case Char:     return asa::Char;
   case String:   return asa::String;
   case Integer:  return asa::Integer;
   case Bool:     return asa::Bool;
@@ -95,6 +98,7 @@ struct Token {
 };
 
 // literal patterns
+const std::regex CHAR_PATTERN("^'.'");
 const std::regex STRING_PATTERN("^\".*\"");
 const std::regex INT_PATTERN("^[+-]?\\d+$");
 const std::regex
@@ -125,65 +129,36 @@ const std::regex MUL_PATTERN("^Mul$", std::regex_constants::icase);
 const std::regex DIV_PATTERN("^Div$", std::regex_constants::icase);
 
 Token token_from_str(std::string value, int line, int column) {
-  if (std::regex_match(value, STRING_PATTERN))
-    return {.value = value, .kind = String, .line = line, .column = column};
-  if (std::regex_match(value, INT_PATTERN))
-    return {.value = value, .kind = Integer, .line = line, .column = column};
-  if (std::regex_match(value, FLOAT_PATTERN))
-    return {.value = value, .kind = Float, .line = line, .column = column};
-  if (std::regex_match(value, DOUBLE_PATTERN))
-    return {.value = value, .kind = Double, .line = line, .column = column};
-  if (std::regex_match(value, BOOL_PATTERN))
-    return {.value = value, .kind = Bool, .line = line, .column = column};
+  if (std::regex_match(value, STRING_PATTERN))     return {.value = value, .kind = String, .line = line, .column = column};
+  if (std::regex_match(value, INT_PATTERN))        return {.value = value, .kind = Integer, .line = line, .column = column};
+  if (std::regex_match(value, FLOAT_PATTERN))      return {.value = value, .kind = Float, .line = line, .column = column};
+  if (std::regex_match(value, DOUBLE_PATTERN))     return {.value = value, .kind = Double, .line = line, .column = column};
+  if (std::regex_match(value, BOOL_PATTERN))       return {.value = value, .kind = Bool, .line = line, .column = column};
 
-  if (std::regex_match(value, BEGIN_PATTERN))
-    return {.value = value, .kind = Begin, .line = line, .column = column};
-  if (std::regex_match(value, END_PATTERN))
-    return {.value = value, .kind = End, .line = line, .column = column};
-  if (std::regex_match(value, IMPORT_PATTERN))
-    return {.value = value, .kind = Import, .line = line, .column = column};
-  if (std::regex_match(value, IFGOTO_PATTERN))
-    return {.value = value, .kind = IfGoto, .line = line, .column = column};
-  if (std::regex_match(value, GOTO_PATTERN))
-    return {.value = value, .kind = Goto, .line = line, .column = column};
-  if (std::regex_match(value, SHOW_PATTERN))
-    return {.value = value, .kind = Show, .line = line, .column = column};
-  if (std::regex_match(value, VAR_PATTERN))
-    return {.value = value, .kind = Var, .line = line, .column = column};
-  if (std::regex_match(value, PUSH_PATTERN))
-    return {.value = value, .kind = Push, .line = line, .column = column};
-  if (std::regex_match(value, POP_PATTERN))
-    return {.value = value, .kind = Pop, .line = line, .column = column};
-  if (std::regex_match(value, PRINTLN_PATTERN))
-    return {.value = value, .kind = Println, .line = line, .column = column};
-  if (std::regex_match(value, PRINT_PATTERN))
-    return {.value = value, .kind = Print, .line = line, .column = column};
-  if (std::regex_match(value, CALL_PATTERN))
-    return {.value = value, .kind = Call, .line = line, .column = column};
-  if (std::regex_match(value, CMP_PATTERN))
-    return {.value = value, .kind = Cmp, .line = line, .column = column};
-  if (std::regex_match(value, LABEL_PATTERN))
-    return {.value = value, .kind = Label, .line = line, .column = column};
-  if (std::regex_match(value, ADD_PATTERN))
-    return {.value = value, .kind = Add, .line = line, .column = column};
-  if (std::regex_match(value, SUB_PATTERN))
-    return {.value = value, .kind = Sub, .line = line, .column = column};
-  if (std::regex_match(value, MUL_PATTERN))
-    return {.value = value, .kind = Mul, .line = line, .column = column};
-  if (std::regex_match(value, DIV_PATTERN))
-    return {.value = value, .kind = Div, .line = line, .column = column};
-  if (std::regex_match(value, IDENTIFIER_PATTERN))
-    return {.value = value, .kind = Identifier, .line = line, .column = column};
+  if (std::regex_match(value, BEGIN_PATTERN))      return {.value = value, .kind = Begin, .line = line, .column = column};
+  if (std::regex_match(value, END_PATTERN))        return {.value = value, .kind = End, .line = line, .column = column};
+  if (std::regex_match(value, IMPORT_PATTERN))     return {.value = value, .kind = Import, .line = line, .column = column};
+  if (std::regex_match(value, IFGOTO_PATTERN))     return {.value = value, .kind = IfGoto, .line = line, .column = column};
+  if (std::regex_match(value, GOTO_PATTERN))       return {.value = value, .kind = Goto, .line = line, .column = column};
+  if (std::regex_match(value, SHOW_PATTERN))       return {.value = value, .kind = Show, .line = line, .column = column};
+  if (std::regex_match(value, VAR_PATTERN))        return {.value = value, .kind = Var, .line = line, .column = column};
+  if (std::regex_match(value, PUSH_PATTERN))       return {.value = value, .kind = Push, .line = line, .column = column};
+  if (std::regex_match(value, POP_PATTERN))        return {.value = value, .kind = Pop, .line = line, .column = column};
+  if (std::regex_match(value, PRINTLN_PATTERN))    return {.value = value, .kind = Println, .line = line, .column = column};
+  if (std::regex_match(value, PRINT_PATTERN))      return {.value = value, .kind = Print, .line = line, .column = column};
+  if (std::regex_match(value, CALL_PATTERN))       return {.value = value, .kind = Call, .line = line, .column = column};
+  if (std::regex_match(value, CMP_PATTERN))        return {.value = value, .kind = Cmp, .line = line, .column = column};
+  if (std::regex_match(value, LABEL_PATTERN))      return {.value = value, .kind = Label, .line = line, .column = column};
+  if (std::regex_match(value, ADD_PATTERN))        return {.value = value, .kind = Add, .line = line, .column = column};
+  if (std::regex_match(value, SUB_PATTERN))        return {.value = value, .kind = Sub, .line = line, .column = column};
+  if (std::regex_match(value, MUL_PATTERN))        return {.value = value, .kind = Mul, .line = line, .column = column};
+  if (std::regex_match(value, DIV_PATTERN))        return {.value = value, .kind = Div, .line = line, .column = column};
+  if (std::regex_match(value, IDENTIFIER_PATTERN)) return {.value = value, .kind = Identifier, .line = line, .column = column};
 
-  if (value == ",")
-    return {.value = value, .kind = Comma, .line = line, .column = column};
-  if (value == ";")
-    return {.value = value, .kind = Semicolon, .line = line, .column = column};
-  if (value == ":")
-    return {.value = value, .kind = Colon, .line = line, .column = column};
-  if (value == "=")
-    return {.value = value, .kind = Assign, .line = line, .column = column};
-
+  if (value == ",") return {.value = value, .kind = Comma, .line = line, .column = column};
+  if (value == ";") return {.value = value, .kind = Semicolon, .line = line, .column = column};
+  if (value == ":") return {.value = value, .kind = Colon, .line = line, .column = column};
+  if (value == "=") return {.value = value, .kind = Assign, .line = line, .column = column};
   throw std::runtime_error("Invalid token: " + value);
 }
 

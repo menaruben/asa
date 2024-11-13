@@ -1,3 +1,4 @@
+#include "objects.hpp"
 #include "transpiler.hpp"
 #include <iostream>
 #include <list>
@@ -223,19 +224,39 @@ asa::Object eval(Program program, string entryPoint, list<asa::Object> *stack) {
       break;
     }
 
+    case InstructionKind::Print: {
+      if (stack->size() < 1) {
+        return asa::error_stackunderflow("STACK UNDERFLOW: Cannot print from empty stack");
+      }
+      asa::Object top = stack->back();
+      std::cout << top.value;
+      break;
+    }
+    
+    case InstructionKind::Println: {
+      if (stack->size() < 1) {
+        return asa::error_stackunderflow("STACK UNDERFLOW: Cannot print from empty stack");
+      }
+      asa::Object top = stack->back();
+      std::cout << top.value << std::endl;
+      break;
+    }
+    
     case InstructionKind::Show:
       printf("Stack:\n");
       if (stack->empty()) {
         printf("    [ EMPTY ]\n");
         break;
       }
-
-      stack->reverse();
-      for (asa::Object o : *stack) {
-        cout << "    Value: " << o.value << ", Type: " << asa::typeToStr(o.type)
-             << endl;
+      list<asa::Object>::reverse_iterator it = stack->rbegin();
+      while (it != stack->rend()) {
+        cout << 
+          "    Value: " << it->value << 
+          ", Type: " << asa::typeToStr(it->type) << 
+        endl;
+        it++;
       }
-      printf("\n");
+      cout << endl;
       stack->reverse();
       break;
     }

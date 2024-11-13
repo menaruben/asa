@@ -68,10 +68,18 @@
 #define SHOW                                                                   \
   { .kind = InstructionKind::Show }
 
+#define PRINT \
+  { .kind = InstructionKind::Print }
+  
+#define PRINTLN \
+  { .kind = InstructionKind::Println }
+
 namespace instructions {
 
 enum InstructionKind {
   Show,
+  Print,
+  Println,
   Push,
   Pop,
   Add,
@@ -326,50 +334,30 @@ std::vector<asa::Object> pop_args(std::list<asa::Object> *stack, int count) {
 
 std::string instructionkind_to_str(InstructionKind k) {
   switch (k) {
-  case Show:
-    return "Show";
-  case Push:
-    return "Push";
-  case Pop:
-    return "Pop";
-  case Add:
-    return "Add";
-  case Subtract:
-    return "Subtract";
-  case Multiply:
-    return "Multiply";
-  case Divide:
-    return "Divide";
-  case Label:
-    return "Label";
-  case Goto:
-    return "Goto";
-  case DefVar:
-    return "DefVar";
-  case SetVar:
-    return "SetVar";
-  case GetVar:
-    return "GetVar";
-  case Cmp:
-    return "Cmp";
-  case If:
-    return "If";
-  case IfGoto:
-    return "IfGoto";
-  case IfHalt:
-    return "IfHalt";
-  case Halt:
-    return "Halt";
-  case Clear:
-    return "Clear";
-  case Increment:
-    return "Increment";
-  case Decrement:
-    return "Decrement";
-  case Call:
-    return "Call";
-  default:
-    throw std::runtime_error("Unsupported instruction kind");
+  case Show:      return "Show";
+  case Print:     return "Print";
+  case Println:   return "Println";
+  case Push:      return "Push";
+  case Pop:       return "Pop";
+  case Add:       return "Add";
+  case Subtract:  return "Subtract";
+  case Multiply:  return "Multiply";
+  case Divide:    return "Divide";
+  case Label:     return "Label";
+  case Goto:      return "Goto";
+  case DefVar:    return "DefVar";
+  case SetVar:    return "SetVar";
+  case GetVar:    return "GetVar";
+  case Cmp:       return "Cmp";
+  case If:        return "If";
+  case IfGoto:    return "IfGoto";
+  case IfHalt:    return "IfHalt";
+  case Halt:      return "Halt";
+  case Clear:     return "Clear";
+  case Increment: return "Increment";
+  case Decrement: return "Decrement";
+  case Call:      return "Call";
+  default:        throw std::runtime_error("Unsupported instruction kind");
   }
 }
 

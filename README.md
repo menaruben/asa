@@ -67,6 +67,16 @@ Stack:
 As we can see we successfully calculated `fib(0)`, `fib(1)`, `fib(7)` and `fib(10)`.
 
 # Instructions / Keywords
+The simplest and first function everyone writes when learning a new language is the classic "Hello World" example:
+```pascal
+begin main:
+  push "Hello World!"; println;
+end
+```
+We define the entry point of the program by defining a `main` function. We then push the string "Hello World"
+to the stack and call the instruction println. `println` prints the top of the stack to the terminal appending a new line at the end.
+However if you don't want to append a newline you can just use the `print` instruction. 
+
 ## Functions / Blocks
 In asa you can define functions by using the `begin` and `end` keyword. These functions are then called by using the
 `call` instruction. Here is a quick example:
