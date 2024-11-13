@@ -37,6 +37,8 @@ enum TokenKind {
   Print,
   Call,
   Import,
+  Increment,
+  Decrement,
   EndOfFile,
 };
 
@@ -71,6 +73,8 @@ std::string token_kind_to_str(TokenKind k) {
   case Print:       return "Print";
   case Call:        return "Call";
   case Import:      return "Import";
+  case Increment:   return "Increment";
+  case Decrement:   return "Decrement";
   case EndOfFile:   return "EndOfFile";
   default:          return "Unknown TokenKind";
   }
@@ -101,11 +105,10 @@ struct Token {
 const std::regex CHAR_PATTERN("^'.'");
 const std::regex STRING_PATTERN("^\".*\"");
 const std::regex INT_PATTERN("^[+-]?\\d+$");
-const std::regex
-    FLOAT_PATTERN("^[+-]?\\d*\\.\\d+f$"); // example: 0.325f or .45f
+const std::regex FLOAT_PATTERN("^[+-]?\\d*\\.\\d+f$"); // example: 0.325f or .45f
 const std::regex DOUBLE_PATTERN("^[+-]?\\d*\\.\\d+$"); // example: 0.325  or .45
 const std::regex BOOL_PATTERN("^(true|false)$");
-const std::regex IDENTIFIER_PATTERN("^[a-zA-Z_][a-zA-Z0-9_/]*\\??$"); // allow ? as suffix
+const std::regex IDENTIFIER_PATTERN("^[a-zA-Z_][a-zA-Z0-9_/]*\\??$"); // allow ? as suffix and / for namespaces
 
 // keyword patterns (case insensitive)
 const std::regex BEGIN_PATTERN("^Begin$", std::regex_constants::icase);
@@ -127,6 +130,8 @@ const std::regex ADD_PATTERN("^Add$", std::regex_constants::icase);
 const std::regex SUB_PATTERN("^Sub$", std::regex_constants::icase);
 const std::regex MUL_PATTERN("^Mul$", std::regex_constants::icase);
 const std::regex DIV_PATTERN("^Div$", std::regex_constants::icase);
+const std::regex INCREMENT_PATTERN("^Incr$", std::regex_constants::icase);
+const std::regex DECREMENT_PATTERN("^Decr$", std::regex_constants::icase);
 
 Token token_from_str(std::string value, int line, int column) {
   if (std::regex_match(value, STRING_PATTERN))     return {.value = value, .kind = String, .line = line, .column = column};
@@ -153,6 +158,8 @@ Token token_from_str(std::string value, int line, int column) {
   if (std::regex_match(value, SUB_PATTERN))        return {.value = value, .kind = Sub, .line = line, .column = column};
   if (std::regex_match(value, MUL_PATTERN))        return {.value = value, .kind = Mul, .line = line, .column = column};
   if (std::regex_match(value, DIV_PATTERN))        return {.value = value, .kind = Div, .line = line, .column = column};
+  if (std::regex_match(value, INCREMENT_PATTERN))  return {.value = value, .kind = Increment, .line = line, .column = column};
+  if (std::regex_match(value, DECREMENT_PATTERN))  return {.value = value, .kind = Decrement, .line = line, .column = column};
   if (std::regex_match(value, IDENTIFIER_PATTERN)) return {.value = value, .kind = Identifier, .line = line, .column = column};
 
   if (value == ",") return {.value = value, .kind = Comma, .line = line, .column = column};

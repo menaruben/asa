@@ -36,6 +36,24 @@ struct Block {
 };
 typedef unordered_map<string, Block> Program;
 
+
+void check_expected(TokenKind expected, TokenKind got, int line) {
+  if (expected != got) {
+    string errmsg = msgs::expected_but_got_at_line(
+      token_kind_to_str(expected), 
+      token_kind_to_str(got), line);
+    throw runtime_error(errmsg);
+  }
+}
+
+void check_current_block(string current_block, TokenKind got, int line) {
+  if (current_block == "") {
+    string errmsg = msgs::expected_but_got_at_line(
+      "block", token_kind_to_str(got), line);
+    throw runtime_error(errmsg);
+  }
+}
+
 // Forward declaration of load_program
 Program load_program(vector<Token> tokens);
 
@@ -82,208 +100,131 @@ void parse_import(int &index, vector<Token> *tokens, Program *program,
 
 void parse_begin(int &index, vector<Token> *tokens, Program *program,
                  string &current_block) {
-
   index++; // skip begin
   string errmsg;
   Token current_block_tok = (*tokens)[index++];
-  if (current_block_tok.kind != TokenKind::Identifier) {
-    errmsg = msgs::expected_but_got_at_line(
-        "block name identifier", token_kind_to_str(current_block_tok.kind),
-        (*tokens)[--index].line);
-    throw runtime_error(errmsg);
-  }
+  check_expected(TokenKind::Identifier, current_block_tok.kind, (*tokens)[index-1].line);
   current_block = current_block_tok.value;
   (*program)[current_block] = Block();
   Token colonToken = (*tokens)[index];
-  if (colonToken.kind != TokenKind::Colon) {
-    errmsg = msgs::expected_but_got_at_line("':' (colon)", colonToken.value,
-                                            (*tokens)[index].line);
-    throw runtime_error(errmsg);
-  }
+  check_expected(TokenKind::Colon, colonToken.kind, colonToken.line);
 }
 
 void parse_push(int &index, vector<Token> *tokens, Program *program,
                 string &current_block) {
-  string errmsg;
-  if (current_block == "") {
-    errmsg =
-        msgs::expected_but_got_at_line("block", "push", (*tokens)[index].line);
-    throw runtime_error(errmsg);
-  }
-
+  check_current_block(current_block, TokenKind::Push, (*tokens)[index].line);
   index++; // skip push
-  Token t = (*tokens)[index++];
-  if (t.kind == TokenKind::Identifier) {
-    (*program)[current_block].instructions.push_back(GET(t.value));
+  Token id_tok = (*tokens)[index++];
+  if (id_tok.kind == TokenKind::Identifier) {
+    (*program)[current_block].instructions.push_back(GET(id_tok.value));
   } else {
-    asa::Type type = token_kind_to_asatype(t.kind);
-    (*program)[current_block].instructions.push_back(PUSH(t.value, type));
+    asa::Type type = token_kind_to_asatype(id_tok.kind);
+    (*program)[current_block].instructions.push_back(PUSH(id_tok.value, type));
   }
-  t = (*tokens)[index];
-  if (t.kind != TokenKind::Semicolon) {
-    errmsg = msgs::expected_but_got_at_line_column(
-        "';' (semicolon)", t.value, (*tokens)[index - 1].line,
-        (*tokens)[index - 1].column + (*tokens)[index - 1].value.size() +
-            (*tokens)[index - 2].value.size() + 1 + 1);
-    throw runtime_error(errmsg);
-  }
+  Token sc = (*tokens)[index];
+  check_expected(TokenKind::Semicolon, sc.kind, sc.line);
+}
+
+
+void parse_incr(int &index, vector<Token> *tokens, Program *program,
+               string &current_block) {
+  check_current_block(current_block, TokenKind::Increment, (*tokens)[index].line);
+  index++; // skip incr
+  Token id_token = (*tokens)[index++];
+  check_expected(TokenKind::Identifier, id_token.kind, id_token.line);
+  (*program)[current_block].instructions.push_back(INCREMENT(id_token.value));
+  Token sc = (*tokens)[index];
+  check_expected(TokenKind::Semicolon, sc.kind, sc.line);
+}
+
+void parse_decr(int &index, vector<Token> *tokens, Program *program,
+               string &current_block) {
+  check_current_block(current_block, TokenKind::Decrement, (*tokens)[index].line);
+  index++; // skip decr
+  Token id_token = (*tokens)[index++];
+  check_expected(TokenKind::Identifier, id_token.kind, id_token.line);
+  (*program)[current_block].instructions.push_back(DECREMENT(id_token.value));
+  Token sc = (*tokens)[index];
+  check_expected(TokenKind::Semicolon, sc.kind, sc.line);
 }
 
 void parse_pop(int &index, vector<Token> *tokens, Program *program,
                string &current_block) {
-  if (current_block == "") {
-    throw runtime_error("Pop instruction must be inside a block!");
-  }
-
-  string errmsg;
+  check_current_block(current_block, TokenKind::Pop, (*tokens)[index].line);
   index++; // skip pop
-  Token t = (*tokens)[index++];
-  if (t.kind != TokenKind::Identifier) {
-    errmsg = msgs::expected_but_got_at_line(
-        "Identifier", token_kind_to_str(t.kind), (*tokens)[index - 1].line);
-    throw runtime_error(errmsg);
-  }
-  (*program)[current_block].instructions.push_back(SET(t.value));
-
-  t = (*tokens)[index];
-  if (t.kind != TokenKind::Semicolon) {
-    errmsg = msgs::expected_but_got_at_line("';' (semicolon)", t.value,
-                                            (*tokens)[index - 1].line);
-    throw runtime_error(errmsg);
-  }
+  Token id_tok = (*tokens)[index++];
+  check_expected(TokenKind::Identifier, id_tok.kind, id_tok.line);
+  (*program)[current_block].instructions.push_back(SET(id_tok.value));
+  Token sc = (*tokens)[index];
+  check_expected(TokenKind::Semicolon, sc.kind, sc.column);
 }
 
 void parse_label(int &index, vector<Token> *tokens, Program *program,
                  string &current_block) {
-  if (current_block == "") {
-    throw runtime_error("Label instruction must be inside a block!");
-  }
-
+  check_current_block(current_block, TokenKind::Label, (*tokens)[index].line);
   index++; // skip label
-  string errmsg;
   Token labeltoken = (*tokens)[index++];
-  if (labeltoken.kind != TokenKind::Identifier) {
-    errmsg = msgs::expected_but_got_at_line("Identifier",
-                                            token_kind_to_str(labeltoken.kind),
-                                            (*tokens)[index - 1].line);
-    throw runtime_error(errmsg);
-  }
-  Token semicolon = (*tokens)[index];
-  if (semicolon.kind != TokenKind::Semicolon) {
-    errmsg = msgs::expected_but_got_at_line("';' (semicolon)",
-                                            token_kind_to_str(semicolon.kind),
-                                            (*tokens)[index].line);
-    throw runtime_error(errmsg);
-  }
+  check_expected(TokenKind::Identifier, labeltoken.kind, labeltoken.line);
+  Token sc = (*tokens)[index];
+  check_expected(TokenKind::Semicolon, sc.kind, sc.line);
   int pos = (*program)[current_block].instructions.size();
   (*program)[current_block].labels[labeltoken.value] = pos;
 }
 
 void parse_goto(int &index, vector<Token> *tokens, Program *program,
                 string &current_block) {
-  if (current_block == "") {
-    throw runtime_error("Goto instruction must be inside a block!");
-  }
-
+  check_current_block(current_block, TokenKind::Goto, (*tokens)[index].line);
   index++; // skip goto
-  string errmsg;
-  Token t = (*tokens)[index++];
-  if (t.kind != TokenKind::Identifier) {
-    errmsg = msgs::expected_but_got_at_line(
-        "Identifier", token_kind_to_str(t.kind), (*tokens)[index - 1].line);
-    throw runtime_error(errmsg);
-  }
-  (*program)[current_block].instructions.push_back(GOTO(t.value));
-  t = (*tokens)[index];
-  if (t.kind != TokenKind::Semicolon) {
-    errmsg = msgs::expected_but_got_at_line(
-        "';' (semicolon)", token_kind_to_str(t.kind), (*tokens)[index].line);
-    throw runtime_error(errmsg);
-  }
+  Token id_tok = (*tokens)[index++];
+  check_expected(TokenKind::Identifier, id_tok.kind, id_tok.line);
+  (*program)[current_block].instructions.push_back(GOTO(id_tok.value));
+  Token sc = (*tokens)[index];
+  check_expected(TokenKind::Semicolon, sc.kind, sc.line);
 }
 
 void parse_ifgoto(int &index, vector<Token> *tokens, Program *program,
                   string &current_block) {
-  if (current_block == "") {
-    throw runtime_error("IfGoto instruction must be inside a block!");
-  }
-
+  check_current_block(current_block, TokenKind::IfGoto, (*tokens)[index].line);
   index++; // skip ifgoto
-  string errmsg;
-  Token expected = (*tokens)[index++];
-  if (expected.kind != TokenKind::Integer) {
-    errmsg = msgs::expected_but_got_at_line(
-        "integer", token_kind_to_str(expected.kind), (*tokens)[index - 1].line);
+  Token expected_num = (*tokens)[index++];
+  check_expected(TokenKind::Integer, expected_num.kind, expected_num.line);
+  if (expected_num.value != "-1" && 
+      expected_num.value != "0" &&
+      expected_num.value != "1") {
+    string errmsg = msgs::expected_but_got_at_line(
+      "-1, 0 or 1", expected_num.value, expected_num.line);
     throw runtime_error(errmsg);
   }
-  if (expected.value != "-1" && expected.value != "0" &&
-      expected.value != "1") {
-    errmsg = msgs::expected_but_got_at_line("-1, 0 or 1", expected.value,
-                                            (*tokens)[index - 1].line);
-    throw runtime_error(errmsg);
-  }
-  Token label = (*tokens)[index++];
-  if (label.kind != TokenKind::Identifier) {
-    errmsg = msgs::expected_but_got_at_line(
-        "Identifier", token_kind_to_str(label.kind), (*tokens)[index - 1].line);
-    throw runtime_error(errmsg);
-  }
+  Token label_id = (*tokens)[index++];
+  check_expected(TokenKind::Identifier, label_id.kind, label_id.line);
   (*program)[current_block].instructions.push_back(
-      IFGOTO(expected.value, label.value));
-  Token t = (*tokens)[index];
-  if (t.kind != TokenKind::Semicolon) {
-    errmsg = msgs::expected_but_got_at_line(
-        "';' (semicolon)", token_kind_to_str(t.kind), (*tokens)[index].line);
-    throw runtime_error(errmsg);
-  }
+      IFGOTO(expected_num.value, label_id.value));
+  Token sc = (*tokens)[index];
+  check_expected(TokenKind::Semicolon, sc.kind, sc.line);
 }
 
 void parse_var(int &index, vector<Token> *tokens, Program *program,
                string &current_block) {
-  if (current_block == "") {
-    throw runtime_error("Var instruction must be inside a block!");
-  }
-
+  check_current_block(current_block, TokenKind::Var, (*tokens)[index].line);
   index++; // skip var
-  string errmsg;
   Token id = (*tokens)[index++];
-  if (id.kind != TokenKind::Identifier) {
-    errmsg = msgs::expected_but_got_at_line(
-        "Identifier", token_kind_to_str(id.kind), (*tokens)[index - 1].line);
-    throw runtime_error(errmsg);
-  }
+  check_expected(TokenKind::Identifier, id.kind, id.line);
   Token value = (*tokens)[index++];
   (*program)[current_block].instructions.push_back(
       DEF(id.value, value.value, token_kind_to_asatype(value.kind)));
-  Token t = (*tokens)[index];
-  if (t.kind != TokenKind::Semicolon) {
-    errmsg = msgs::expected_but_got_at_line(
-        "';' (semicolon)", token_kind_to_str(t.kind), (*tokens)[index].line);
-    throw runtime_error(errmsg);
-  }
+  Token sc = (*tokens)[index];
+  check_expected(TokenKind::Semicolon, sc.kind, sc.line);
 }
 
 void parse_call(int &index, vector<Token> *tokens, Program *program,
                 string &current_block) {
-  if (current_block == "") {
-    throw runtime_error("Call instruction must be inside a block!");
-  }
-
+  check_current_block(current_block, TokenKind::Call, (*tokens)[index].line);
   index++; // skip call
-  string errmsg;
-  Token t = (*tokens)[index++];
-  if (t.kind != TokenKind::Identifier) {
-    errmsg = msgs::expected_but_got_at_line(
-        "Identifier", token_kind_to_str(t.kind), (*tokens)[index - 1].line);
-    throw runtime_error(errmsg);
-  }
-  (*program)[current_block].instructions.push_back(CALL(t.value));
-  t = (*tokens)[index];
-  if (t.kind != TokenKind::Semicolon) {
-    errmsg = msgs::expected_but_got_at_line(
-        "';' (semicolon)", token_kind_to_str(t.kind), (*tokens)[index].line);
-    throw runtime_error(errmsg);
-  }
+  Token id_tok = (*tokens)[index++];
+  check_expected(TokenKind::Identifier, id_tok.kind, id_tok.line);
+  (*program)[current_block].instructions.push_back(CALL(id_tok.value));
+  Token sc = (*tokens)[index];
+  check_expected(TokenKind::Semicolon, sc.kind, sc.line);
 }
 
 Program load_program(vector<Token> tokens) {
@@ -306,6 +247,16 @@ Program load_program(vector<Token> tokens) {
 
     case TokenKind::Push: {
       parse_push(i, &tokens, &program, current_block);
+      break;
+    }
+
+    case TokenKind::Increment: {
+      parse_incr(i, &tokens, &program, current_block);
+      break;
+    }
+
+    case TokenKind::Decrement: {
+      parse_decr(i, &tokens, &program, current_block);
       break;
     }
 

@@ -102,6 +102,9 @@ begin main:
 end
 ```
 
+## Incrementing / Decrementing numbers
+Instead of always needing to do `push x; push 1; add; pop x` to increment you can just use `incr` (increment) and `decr` (decrement)!
+
 ## Comparing data
 Asa has a `cmp` instruction which takes the two top values of the stack and compares them:
 ```pascal

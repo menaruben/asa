@@ -13,6 +13,12 @@
 #define PUSH(val, t)                                                           \
   { .kind = InstructionKind::Push, .operand = {.value = val, .type = t}, }
 
+#define INCREMENT(name) \
+  { .kind = InstructionKind::Increment, .id = name }
+
+#define DECREMENT(name) \
+  { .kind = InstructionKind::Decrement, .id = name }
+
 #define POP                                                                    \
   { .kind = InstructionKind::Pop }
 
