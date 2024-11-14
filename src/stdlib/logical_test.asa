@@ -195,7 +195,6 @@ begin greater_or_eq_test:
 end
 
 begin main:
-  push "logical.asa test results: "; println;
   call equals_test;
   call not_equals_test;
   call not_test;
