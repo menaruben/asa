@@ -59,18 +59,18 @@ end
 
 begin power_test:
   // 2^5 => 32
-  push 32; pop want;
+  var want 32;
   push 2; push 5; call math/power; pop have;
   push have; push want; push "power_test_1"; call testing/assert; println;
 
-  // 8^9 => 134217728
-  push 134217728; pop want;
-  push 8; push 9; call math/power; pop have;
+  // 8^0 => 1
+  var want 1;
+  push 8; push 0; call math/power; pop have;
   push have; push want; push "power_test_2"; call testing/assert; println;
 
-  // 3^4 => 81
-  push 81; pop want;
-  push 3; push 4; call math/power; pop have;
+  // 4^(-3) => 0.015625
+  push 0.015625; pop want;
+  push 4.0f; push -3; call math/power; pop have;
   push have; push want; push "power_test_3"; call testing/assert; println;
 end
 
@@ -108,12 +108,12 @@ begin factorial_test:
   var want 120;
   push 5; call math/factorial; pop have;
   push have; push want; push "factorial_test_1"; call testing/assert; println;
-  
+
   // 8! => 40320
   var want 40320;
   push 8; call math/factorial; pop have;
   push have; push want; push "factorial_test_2"; call testing/assert; println;
-  
+
   // 12! => 479001600
   var want 479001600;
   push 12; call math/factorial; pop have;
@@ -131,12 +131,12 @@ begin binomial_coeff_test:
   var want 10;
   push 5; push 2; call math/binomial_coeff; pop have;
   push have; push want; push "binomial_coeff_test_1"; call testing/assert; println;
-  
+
   // bincoeff(2, 2) => 1
   var want 1;
   push 2; push 2; call math/binomial_coeff; pop have;
   push have; push want; push "binomial_coeff_test_2"; call testing/assert; println;
-  
+
   // bincoeff(8, 5) => 56
   var want 56;
   push 8; push 5; call math/binomial_coeff; pop have;

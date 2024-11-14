@@ -120,10 +120,6 @@ struct Instruction {
 };
 
 asa::Object add(asa::Object a, asa::Object b) {
-  if (a.type != b.type)
-    return asa::error_typemismatch("TYPE MISMATCH: Cannot add " + a.value +
-                                   " and " + b.value);
-
   switch (a.type) {
   case asa::String: {
     std::string as = a.value;
@@ -157,10 +153,6 @@ asa::Object add(asa::Object a, asa::Object b) {
 }
 
 asa::Object subtract(asa::Object a, asa::Object b) {
-  if (a.type != b.type)
-    return asa::error_typemismatch("TYPE MISMATCH: Cannot subtract " + a.value +
-                                   " and " + b.value);
-
   if (!is_numeric_type(a) || !is_numeric_type(b))
     return asa::error_arithmetic(
         "ARITHMETIC ERROR: Cannot subtract non-numeric " + a.value + " and " +
@@ -190,10 +182,6 @@ asa::Object subtract(asa::Object a, asa::Object b) {
   }
 }
 asa::Object multiply(asa::Object a, asa::Object b) {
-  if (a.type != b.type)
-    return asa::error_typemismatch("TYPE MISMATCH: Cannot multiply " + a.value +
-                                   " and " + b.value);
-
   if (!is_numeric_type(a) || !is_numeric_type(b))
     return asa::error_arithmetic(
         "ARITHMETIC ERROR: Cannot multiply non-numeric " + a.value + " and " +
@@ -225,10 +213,6 @@ asa::Object multiply(asa::Object a, asa::Object b) {
 }
 
 asa::Object divide(asa::Object a, asa::Object b) {
-  if (a.type != b.type)
-    return asa::error_typemismatch("TYPE MISMATCH: Cannot divide " + a.value +
-                                   " and " + b.value);
-
   if (!is_numeric_type(a) || !is_numeric_type(b))
     return asa::error_arithmetic(
         "ARITHMETIC ERROR: Cannot divide non-numeric " + a.value + " and " +
@@ -259,9 +243,6 @@ asa::Object divide(asa::Object a, asa::Object b) {
 }
 
 asa::Object compare(asa::Object a, asa::Object b) {
-  if (a.type != b.type)
-    return asa::error_typemismatch("TYPE MISMATCH: Cannot compare " + a.value +
-                                   " and " + b.value);
   asa::Type returnType = a.type;
 
   switch (returnType) {

@@ -68,18 +68,6 @@ begin min:
   add;                        // (a * (a <= b)) + (b * (b > a))
 end
 
-// power: pushes the result of a to the power of b to the stack
-begin power:
-  pop b; pop a;
-  push 1; pop res;                         // initialize res to 1
-  label loop;
-    push b; push 0; cmp; ifgoto 0 return;  // if b is 0 return res
-    push res; push a; mul; pop res;        // res = res * a
-    decr b;                                // decrement b
-    goto loop;                             // repeat...
-  label return; push res;
-end
-
 // abs: pushes the absolute value of the element on top of the stack
 begin abs:
   pop n;
@@ -88,6 +76,23 @@ begin abs:
   label negative; push n; push -1; mul; pop res;
   label return; push res;
 end
+
+// power: pushes the result of a to the power of b to the stack
+begin power:
+  pop b; pop a;
+  var res 1.0f;                                        // initialize res to 1
+  push b; call math/abs; pop b_abs;
+  label loop;
+    push b_abs; push 0; cmp; ifgoto 0 compute_result;  // if b_abs is 0, jump to compute_result
+    push res; push a; mul; pop res;                    // res = res * a
+    decr b_abs;                                        // decrement b_abs
+    goto loop;                                         // repeat...
+  label compute_result;
+    push b; push 0; call logical/lesser?; ifgoto 0 return;  // if b >= 0, jump to return
+    push 1.0f; push res; div; pop res;                      // res = 1 / res for negative b
+  label return; push res;
+end
+
 
 // even?: pushes 1 to the stack if the number is even
 begin even?:
@@ -103,7 +108,7 @@ begin factorial:
       push i; push n; call logical/greater?;
       ifgoto 1 return;                        // if i > n return ans
       push ans; push i; mul; pop ans;         // ans = ans * i
-      incr i;                                 // increment i 
+      incr i;                                 // increment i
       goto fact;
     label return; push ans;
 end
@@ -111,7 +116,7 @@ end
 // binomial_coeff: calculates a choose b <=> a! / ((a-b)! * b!)
 begin binomial_coeff:
   pop b; pop a;
-  push a; push b; call logical/equals?; 
+  push a; push b; call logical/equals?;
   ifgoto 1 ret1;                             // if a == b return 1
   // else...
   push a; call math/factorial;               // a!
