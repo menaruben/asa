@@ -103,6 +103,46 @@ begin even_test:
   push have; push want; push "even_test_2"; call testing/assert; println;
 end
 
+begin factorial_test:
+  // 5! => 120
+  var want 120;
+  push 5; call math/factorial; pop have;
+  push have; push want; push "factorial_test_1"; call testing/assert; println;
+  
+  // 8! => 40320
+  var want 40320;
+  push 8; call math/factorial; pop have;
+  push have; push want; push "factorial_test_2"; call testing/assert; println;
+  
+  // 12! => 479001600
+  var want 479001600;
+  push 12; call math/factorial; pop have;
+  push have; push want; push "factorial_test_3"; call testing/assert; println;
+
+  // wont work with normal ints, because it exceeds int_max value:
+  // 13! => 6227020800
+  // var want 6227020800;
+  // push 123; call math/factorial; pop have;
+  // push have; push want; push "factorial_test_4"; call testing/assert; println;
+end
+
+begin binomial_coeff_test:
+  // bincoeff(5, 2) => 10
+  var want 10;
+  push 5; push 2; call math/binomial_coeff; pop have;
+  push have; push want; push "binomial_coeff_test_1"; call testing/assert; println;
+  
+  // bincoeff(2, 2) => 1
+  var want 1;
+  push 2; push 2; call math/binomial_coeff; pop have;
+  push have; push want; push "binomial_coeff_test_2"; call testing/assert; println;
+  
+  // bincoeff(8, 5) => 56
+  var want 56;
+  push 8; push 5; call math/binomial_coeff; pop have;
+  push have; push want; push "binomial_coeff_test_3"; call testing/assert; println;
+end
+
 begin main:
   call modulo_test;
   call max_test;
@@ -110,4 +150,6 @@ begin main:
   call power_test;
   call abs_test;
   call even_test;
+  call factorial_test;
+  call binomial_coeff_test;
 end

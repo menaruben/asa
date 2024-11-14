@@ -94,3 +94,33 @@ begin even?:
   pop n; push n; push 2; call math/modulo;
   push 0; call logical/equals?;
 end
+
+// factorial: calculates the nth factorial
+begin factorial:
+    pop n;
+    var ans 1; var i 1;
+    label fact;
+      push i; push n; call logical/greater?;
+      ifgoto 1 return;                        // if i > n return ans
+      push ans; push i; mul; pop ans;         // ans = ans * i
+      incr i;                                 // increment i 
+      goto fact;
+    label return; push ans;
+end
+
+// binomial_coeff: calculates a choose b <=> a! / ((a-b)! * b!)
+begin binomial_coeff:
+  pop b; pop a;
+  push a; push b; call logical/equals?; 
+  ifgoto 1 ret1;                             // if a == b return 1
+  // else...
+  push a; call math/factorial;               // a!
+  push a; push b; sub; call math/factorial;  // (a-b)!
+  push b; call math/factorial;               // b!
+  mul;                                       // (a-b)! * b!
+  div;                                       // a! / ((a-b)! * b!)
+  pop res; goto return;
+
+  label ret1;   var res 1;
+  label return; push res;
+end
