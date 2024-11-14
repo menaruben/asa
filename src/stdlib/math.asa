@@ -2,7 +2,7 @@
 // Contains functions for doing math
 import "logical.asa";
 
-// modulo computes the smallest positive representation of a mod b
+// modulo: computes the smallest positive representation of a mod b
 begin modulo:
   pop b; pop a;
   push a; push 0; cmp; pop a_to_0;
@@ -20,7 +20,7 @@ begin modulo:
   push a; push 0; cmp; pop a_to_0;
   push a_to_0; ifgoto 1 a_greater_0;
 
-  // If a == 0 
+  // If a == 0
   // or a == b
   // push 0 to rem and return
   label rem_0;
@@ -48,32 +48,27 @@ begin modulo:
     push rem;
 end
 
-// max returns the maximum of two values
+// max: returns the maximum of two values
 begin max:
   pop a; pop b;
-  push a; push b; cmp; pop a_to_b;
-  push a_to_b; ifgoto 0 a_eq_b;       // if a == b return a
-  push a_to_b; ifgoto -1 a_lesser_b;  // if a  < b return b
-  push a; pop res; goto return;       // else      return a
-
-  label a_eq_b;     push a; pop res; goto return;
-  label a_lesser_b; push b; pop res; goto return;
-  label return; push res;
+  push a; push b; call logical/lesser_or_eq?; pop a_leq_b;
+  push a_leq_b; call logical/not; pop b_gt_a;
+  push a; push b_gt_a; mul;  // a * (b > a)
+  push b; push a_leq_b; mul; // b * (a <= b)
+  add;                       // (a * (b > a)) + (b * (a <= b))
 end
 
-// min returns the minimum of two values
+// min: returns the minimum of two values
 begin min:
   pop a; pop b;
-  push a; push b; cmp; pop a_to_b;
-  push a_to_b; ifgoto 0 a_eq_b;       // if a == b return a
-  push a_to_b; ifgoto -1 a_lesser_b;  // if a  < b return a
-  push b; pop res; goto return;       // else      return b
-  label a_eq_b;     push a; pop res; goto return;
-  label a_lesser_b; push a; pop res; goto return;
-  label return; push res;
+  push a; push b; call logical/lesser_or_eq?; pop a_leq_b;
+  push a_leq_b; call logical/not; pop b_gt_a;
+  push a; push a_leq_b; mul;  // a * (a <= b)
+  push b; push b_gt_a; mul;   // b * (b > a)
+  add;                        // (a * (a <= b)) + (b * (b > a))
 end
 
-// power pushes the result of a to the power of b to the stack
+// power: pushes the result of a to the power of b to the stack
 begin power:
   pop b; pop a;
   push 1; pop res;                         // initialize res to 1
@@ -85,7 +80,7 @@ begin power:
   label return; push res;
 end
 
-// abs pushes the absolute value of the element on top of the stack
+// abs: pushes the absolute value of the element on top of the stack
 begin abs:
   pop n;
   push n; push 0; cmp; ifgoto -1 negative;        // if n < 0 return -1 * n
@@ -94,7 +89,7 @@ begin abs:
   label return; push res;
 end
 
-// even pushes 1 to the stack if the number is even
+// even?: pushes 1 to the stack if the number is even
 begin even?:
   pop n; push n; push 2; call math/modulo;
   push 0; call logical/equals?;
