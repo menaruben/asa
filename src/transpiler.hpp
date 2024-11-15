@@ -368,22 +368,14 @@ Program load_program(vector<Token> tokens) {
     case TokenKind::Print: {
       program[current_block].instructions.push_back(PRINT);
       Token sc = tokens[++i];
-      if (sc.kind != TokenKind::Semicolon) {
-        string errmsg = msgs::expected_but_got_at_line(
-            "';' (semicolon)", token_kind_to_str(sc.kind), tokens[i].line);
-        throw runtime_error(errmsg);
-      }
+      check_expected(TokenKind::Semicolon, sc.kind, sc.line);
       break;
     }
 
     case TokenKind::Println: {
       program[current_block].instructions.push_back(PRINTLN);
       Token sc = tokens[++i];
-      if (sc.kind != TokenKind::Semicolon) {
-        string errmsg = msgs::expected_but_got_at_line(
-            "';' (semicolon)", token_kind_to_str(sc.kind), tokens[i].line);
-        throw runtime_error(errmsg);
-      }
+      check_expected(TokenKind::Semicolon, sc.kind, sc.line);
       break;
     }
 
@@ -395,11 +387,7 @@ Program load_program(vector<Token> tokens) {
     case TokenKind::Cmp: {
       program[current_block].instructions.push_back(CMP);
       Token sc = tokens[++i];
-      if (sc.kind != TokenKind::Semicolon) {
-        string errmsg = msgs::expected_but_got_at_line(
-            "';' (semicolon)", token_kind_to_str(sc.kind), tokens[i].line);
-        throw runtime_error(errmsg);
-      }
+      check_expected(TokenKind::Semicolon, sc.kind, sc.line);
       break;
     }
 
@@ -414,9 +402,7 @@ Program load_program(vector<Token> tokens) {
     }
 
     case TokenKind::Identifier: {
-      if (current_block == "") {
-        throw runtime_error("Unexpected identifier: " + t.value);
-      }
+      check_current_block(current_block, TokenKind::Identifier, t.line);
       throw runtime_error("Unexpected identifier: " + t.value + " in block " +
                           current_block);
     }

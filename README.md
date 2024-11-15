@@ -115,7 +115,7 @@ begin main:
 end
 ```
 
-## Labels + Goto (and Ifgoto)
+## Labels + Goto (and Ifgoto) + Halt
 Labels are used to mark a position in the program and Gotos are used to jump to the position. The following program pushes 1 to the stack until we get
 a stack overflow:
 ```pascal
@@ -260,3 +260,6 @@ has to use the full identifier `math/modulo` instead of just `modulo`.
 
 # stdlib
 The stdlib is work in progress and can be found [here](./src/stdlib/)
+
+# Contributing
+If you are interested in expanding asa you can find some useful information [here](./src/README.md).
