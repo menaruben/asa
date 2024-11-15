@@ -2,6 +2,15 @@
 // Contains functions for doing math
 import "logical.asa";
 
+// precision used in math.asa
+begin precision: push 0.000000000000001f; end
+
+// mathematical constant pi
+begin pi:        push 3.141592653589793f; end
+
+// mathematical constant e (euler's number)
+begin e:         push 2.718281828459045f; end
+
 // modulo: computes the smallest positive representation of a mod b
 begin modulo:
   pop b; pop a;
@@ -77,22 +86,108 @@ begin abs:
   label return; push res;
 end
 
-// power: pushes the result of a to the power of b to the stack
-begin power:
-  pop b; pop a;
-  var res 1.0f;                                        // initialize res to 1
-  push b; call math/abs; pop b_abs;
+// power: pushes the result of base^exponent to the stack
+// begin power:
+//   pop exponent; pop base;
+//   push exponent; call math/abs; pop exponent_abs;
+// end
+
+// power_abs: computes base^n where n is a natural number
+//   => If you have fractional exponents, compute result in
+//      combination with root_nth function
+begin power_abs:
+  pop n; pop base;
+  push n; push 1; call logical/equals?; ifgoto 1 retbase; // if n == 1 return base
+  push n; push 0; call logical/lesser?; pop n_lt_0;       // if n < 0 then n_lt_0 = 1 else 0
+
+  push n; call math/abs; pop n_abs;
+  var res 1.0f;                                                  // initialize result at 1 for x == 0
+  push n_abs; push 0; call logical/equals?; ifgoto 1 ret;         // if x == 0 return 1
+  var i 1;
   label loop;
-    push b_abs; push 0; cmp; ifgoto 0 compute_result;  // if b_abs is 0, jump to compute_result
-    push res; push a; mul; pop res;                    // res = res * a
-    decr b_abs;                                        // decrement b_abs
-    goto loop;                                         // repeat...
-  label compute_result;
-    push b; push 0; call logical/lesser?; ifgoto 0 return;  // if b >= 0, jump to return
-    push 1.0f; push res; div; pop res;                      // res = 1 / res for negative b
-  label return; push res;
+    push i; push n_abs; call logical/lesser_or_eq?; ifgoto 0 ret; // if i > x goto return
+    push res; push base; mul; pop res;                            // res = res * base
+    incr i;                                                       // increment i
+    goto loop;                                                    // repeat...
+
+  label done;
+    push n_lt_0; ifgoto 0 ret;
+    push 1; push res; div; pop res;
+
+  label retbase;
+    push base; pop res; goto ret;
+
+  label ret;
+    push res;
 end
 
+// exp: computes e^x, where x => 0
+begin exp:
+  pop x;
+  call math/e; push x; call math/power_abs;
+end
+
+// ln: computes natural log of x for x => 0 using the taylor sequence
+//   => more info on the taylor series here: https://en.wikipedia.org/wiki/Taylor_series
+begin ln:
+  pop x;
+  push x; push 1; call logical/equals?;      ifgoto 1 ret0; // if x == 1 return 0
+  push x; call math/e; call logical/equals?; ifgoto 1 ret1; // if x == e return 1
+  push 0.693147180559945bd; pop ln2;                        // yes.. I actually saved it in a variable :)
+  push x; push 2; call logical/equals?; ifgoto 1 retln2;    // if x == 2 return ln(2)
+  // else if x > 2:
+  push x; push 0.0bd; add; pop x;                          // convert x to BigDouble
+
+  // simplify x so that 1 <= x <= 2:
+  //   so that we can later use logarithmic identity:
+  //   ln(x) = ln(x/2) + ln(2)
+  //   example:
+  //    ln(10)	= ln(5)    + ln(2)
+	//            = ln(2.5)  + ln(2) + ln(2)
+	//            = ln(1.25) + ln(2) + ln(2) + ln(2) = 2.30259...
+  //    and then we compute ln(1.25) and add the ln(2)'s
+  //    to get the final result
+  push 0; pop n;
+  label simplify;
+    incr n;
+    push x; push 2; div; pop x;            // x = x/2
+    push x; push 2; call logical/lesser?;
+    ifgoto 1 compute_taylor;               // if x < 2 goto compute_taylor
+    goto simplify;                         // else repeat the loop
+
+  // taylor series for ln(x):
+  // (x-1)^1 - 1/2 * (x-1)^2 + 1/3 * (x-1)^3 - ...
+  label compute_taylor;
+    var k 1.0bd;                               // k is used for alternating sign
+    var i 1.0bd;                               // current iteration counter (BigDouble for coefficient computation)
+    var res 0.0bd;                             // result init to 0.0bd (BigDouble)
+    push n; push ln2; mul; pop res;            // res = ln(2) * n
+    var max_iter 100;                           // max amount of iterations to do
+    var term 1.0bd;                            // term = 1.0bd
+    var subterm 1.0bd;                         // subterm = 1.0bd
+    label loop;
+      push k; push i; div; pop coeff;                   // coeff = k/i
+      push x; push 1; sub; push i; call math/power_abs;
+      pop subterm;                                      // subterm sb = (x-1)^i
+      push coeff; push subterm; mul; pop term;          // term = coeff * sb
+
+      // if term < precision return current res
+      push term; call math/abs; call math/precision;
+      call logical/lesser?;
+      ifgoto 1 return;
+
+      push res; push term; add; pop res;           // res = res + term
+      incr i;
+      push k; push -1; mul; pop k;                 // k = -k
+      push i; push max_iter; call logical/lesser?;
+      ifgoto 1 loop;                               // if i < max_iter repeat loop
+  goto return;
+
+  label ret0;    push 0; pop res; goto return;
+  label ret1;    push 1; pop res; goto return;
+  label retln2;  push ln2;  pop res; goto return;
+  label return;  push res;
+end
 
 // even?: pushes 1 to the stack if the number is even
 begin even?:
@@ -103,7 +198,7 @@ end
 // factorial: calculates the nth factorial
 begin factorial:
     pop n;
-    var ans 1; var i 1;
+    var ans 1bi; var i 1;
     label fact;
       push i; push n; call logical/greater?;
       ifgoto 1 return;                        // if i > n return ans
@@ -129,3 +224,25 @@ begin binomial_coeff:
   label ret1;   var res 1;
   label return; push res;
 end
+
+// power: pushes the result of b^n to the stack
+// begin power:
+//   pop n; pop b;
+//   push n; push 0; call logical/equals?; ifgoto 1 ret1; // if n == 0 return 1
+//   push n; push 1; call logical/equals?; ifgoto 1 retb; // if n == 1 return b
+//   push n; push 0; call logical/lesser?; pop n_lt_0;    // if n < 0 then n_lt_0 = 1 else 0
+//   push b; push 0; call logical/equals?; ifgoto 1 ret0; // if b == 0 return 0
+
+//   // b^n = e^ln(b^n) = e^(n * ln(b))
+//   TODO: implement
+
+//   label ret0; push 0; pop res; goto return;
+//   label ret1; push 1; pop res; goto return;
+//   label retb; push b; pop res; goto return;
+//   label return; push res;
+// end
+
+// root_nth: computes the nth root of a where n > 0 and a natural number
+// begin root_nth:
+//   TODO: implement
+// end

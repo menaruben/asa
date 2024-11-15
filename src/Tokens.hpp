@@ -12,9 +12,11 @@ enum TokenKind {
   String,
   Str,
   Integer,
+  BigInteger,
   Bool,
   Float,
   Double,
+  BigDouble,
   Begin,
   End,
   IfGoto,
@@ -40,6 +42,10 @@ enum TokenKind {
   Import,
   Increment,
   Decrement,
+  Lshift,
+  Rshift,
+  Halt,
+  GetType,
   EndOfFile,
 };
 
@@ -47,11 +53,14 @@ std::string token_kind_to_str(TokenKind k) {
   switch (k) {
   case Char:        return "Char";
   case String:      return "String";
-  case Str:         return "tostr";  // used for to_string 
+  case Str:         return "tostr";  // used for to_string
   case Integer:     return "Integer";
+  case BigInteger:  return "BigInteger";
   case Bool:        return "Bool";
   case Float:       return "Float";
   case Double:      return "Double";
+  case BigDouble:   return "BigDouble";
+  case GetType:     return "GetType";
   case Begin:       return "Begin";
   case End:         return "End";
   case Goto:        return "Goto";
@@ -77,6 +86,7 @@ std::string token_kind_to_str(TokenKind k) {
   case Import:      return "Import";
   case Increment:   return "Increment";
   case Decrement:   return "Decrement";
+  case Halt:        return "Halt";
   case EndOfFile:   return "EndOfFile";
   default:          return "Unknown TokenKind";
   }
@@ -84,15 +94,17 @@ std::string token_kind_to_str(TokenKind k) {
 
 asa::Type token_kind_to_asatype(TokenKind k) {
   switch (k) {
-  case Char:     return asa::Char;
-  case String:   return asa::String;
-  case Integer:  return asa::Integer;
-  case Bool:     return asa::Bool;
-  case Float:    return asa::Float;
-  case Double:   return asa::Double;
-  default:       throw std::runtime_error(
-                  "Can not convert" + 
-                  token_kind_to_str(k) + " token to type");
+  case Char:       return asa::Char;
+  case String:     return asa::String;
+  case Integer:    return asa::Integer;
+  case BigInteger: return asa::BigInteger;
+  case Bool:       return asa::Bool;
+  case Float:      return asa::Float;
+  case Double:     return asa::Double;
+  case BigDouble:  return asa::BigDouble;
+  default:         throw std::runtime_error(
+                    "Can not convert " +
+                    token_kind_to_str(k) + " token to type");
   }
 }
 
@@ -107,8 +119,10 @@ struct Token {
 const std::regex CHAR_PATTERN("^'.'");
 const std::regex STRING_PATTERN("^\".*\"");
 const std::regex INT_PATTERN("^[+-]?\\d+$");
-const std::regex FLOAT_PATTERN("^[+-]?\\d*\\.\\d+f$"); // example: 0.325f or .45f
-const std::regex DOUBLE_PATTERN("^[+-]?\\d*\\.\\d+$"); // example: 0.325  or .45
+const std::regex BIGINT_PATTERN("^[+-]?\\d+bi$");           // example: 123bi or -123bi or +123bi
+const std::regex FLOAT_PATTERN("^[+-]?\\d*\\.\\d+f$");      // example: 0.325f or .45f ...
+const std::regex DOUBLE_PATTERN("^[+-]?\\d*\\.\\d+$");      // example: 0.325  or .45 ...
+const std::regex BIGDOUBLE_PATTERN("^[+-]?\\d*\\.\\d+bd$"); // example: 0.325bd  or .45bd ...
 const std::regex BOOL_PATTERN("^(true|false)$");
 const std::regex IDENTIFIER_PATTERN("^[a-zA-Z_][a-zA-Z0-9_/]*\\??$"); // allow ? as suffix and / for namespaces
 
@@ -135,16 +149,22 @@ const std::regex DIV_PATTERN("^Div$", std::regex_constants::icase);
 const std::regex INCREMENT_PATTERN("^Incr$", std::regex_constants::icase);
 const std::regex DECREMENT_PATTERN("^Decr$", std::regex_constants::icase);
 const std::regex STR_PATTERN("^Str$", std::regex_constants::icase);
-
+const std::regex LSHIFT_PATTERN("^Lshift$", std::regex_constants::icase);
+const std::regex RSHIFT_PATTERN("^Rshift$", std::regex_constants::icase);
+const std::regex GETTYPE_PATTERN("^Type$", std::regex_constants::icase);
+const std::regex HALT_PATTERN("^Halt$", std::regex_constants::icase);
 
 Token token_from_str(std::string value, int line, int column) {
-  if (std::regex_match(value, STRING_PATTERN))     return {.value = value.substr(1, value.size()-2), 
+  if (std::regex_match(value, STRING_PATTERN))     return {.value = value.substr(1, value.size()-2),
                                                            .kind = String, .line = line, .column = column};
+
   if (std::regex_match(value, INT_PATTERN))        return {.value = value, .kind = Integer, .line = line, .column = column};
+  if (std::regex_match(value, BIGINT_PATTERN))     return {.value = value, .kind = BigInteger, .line = line, .column = column};
+  if (std::regex_match(value, CHAR_PATTERN))       return {.value = value, .kind = Char, .line = line, .column = column};
   if (std::regex_match(value, FLOAT_PATTERN))      return {.value = value, .kind = Float, .line = line, .column = column};
+  if (std::regex_match(value, BIGDOUBLE_PATTERN))  return {.value = value, .kind = BigDouble, .line = line, .column = column};
   if (std::regex_match(value, DOUBLE_PATTERN))     return {.value = value, .kind = Double, .line = line, .column = column};
   if (std::regex_match(value, BOOL_PATTERN))       return {.value = value, .kind = Bool, .line = line, .column = column};
-
   if (std::regex_match(value, BEGIN_PATTERN))      return {.value = value, .kind = Begin, .line = line, .column = column};
   if (std::regex_match(value, END_PATTERN))        return {.value = value, .kind = End, .line = line, .column = column};
   if (std::regex_match(value, IMPORT_PATTERN))     return {.value = value, .kind = Import, .line = line, .column = column};
@@ -166,7 +186,11 @@ Token token_from_str(std::string value, int line, int column) {
   if (std::regex_match(value, INCREMENT_PATTERN))  return {.value = value, .kind = Increment, .line = line, .column = column};
   if (std::regex_match(value, DECREMENT_PATTERN))  return {.value = value, .kind = Decrement, .line = line, .column = column};
   if (std::regex_match(value, STR_PATTERN))        return {.value = value, .kind = Str, .line = line, .column = column};
-  if (std::regex_match(value, IDENTIFIER_PATTERN)) return {.value = value, .kind = Identifier, .line = line, .column = column};
+  if (std::regex_match(value, LSHIFT_PATTERN))     return {.value = value, .kind = Lshift, .line = line, .column = column};
+  if (std::regex_match(value, RSHIFT_PATTERN))     return {.value = value, .kind = Rshift, .line = line, .column = column};
+  if (std::regex_match(value, GETTYPE_PATTERN))    return {.value = value, .kind = GetType, .line = line, .column = column};
+  if (std::regex_match(value, HALT_PATTERN))       return {.value = value, .kind = Halt, .line = line, .column = column};
+  if (std::regex_match(value, IDENTIFIER_PATTERN)) return {.value = value, .kind = Identifier, .line = line, .column = column}; // must be last
 
   if (value == ",") return {.value = value, .kind = Comma, .line = line, .column = column};
   if (value == ";") return {.value = value, .kind = Semicolon, .line = line, .column = column};
@@ -174,5 +198,4 @@ Token token_from_str(std::string value, int line, int column) {
   if (value == "=") return {.value = value, .kind = Assign, .line = line, .column = column};
   throw std::runtime_error("Invalid token: " + value);
 }
-
 } // namespace tokens

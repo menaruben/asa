@@ -57,21 +57,50 @@ begin min_test:
   push have; push want; push "min_test_3"; call testing/assert; println;
 end
 
-begin power_test:
-  // 2^5 => 32
+// begin power_test:
+//   // 2^5 => 32
+//   var want 32;
+//   push 2; push 5; call math/power; pop have;
+//   push have; push want; push "power_test_1"; call testing/assert; println;
+
+//   // 8^0 => 1
+//   var want 1;
+//   push 8; push 0; call math/power; pop have;
+//   push have; push want; push "power_test_2"; call testing/assert; println;
+
+//   // 4^(-3) => 0.015625
+//   push 0.015625; pop want;
+//   push 4.0f; push -3; call math/power; pop have;
+//   push have; push want; push "power_test_3"; call testing/assert; println;
+// end
+
+begin power_abs_test:
+  // 2^|5| => 32
   var want 32;
-  push 2; push 5; call math/power; pop have;
-  push have; push want; push "power_test_1"; call testing/assert; println;
+  push 2; push 5; call math/power_abs; pop have;
+  push have; push want; push "power_abs_test_1"; call testing/assert; println;
 
-  // 8^0 => 1
+  // 8^|0| => 1
   var want 1;
-  push 8; push 0; call math/power; pop have;
-  push have; push want; push "power_test_2"; call testing/assert; println;
+  push 8; push 0; call math/power_abs; pop have;
+  push have; push want; push "power_abs_test_2"; call testing/assert; println;
 
-  // 4^(-3) => 0.015625
-  push 0.015625; pop want;
-  push 4.0f; push -3; call math/power; pop have;
-  push have; push want; push "power_test_3"; call testing/assert; println;
+  // 4^(|-3|) => 64
+  push 64; pop want;
+  push 4; push -3; call math/power_abs; pop have;
+  push have; push want; push "power_abs_test_3"; call testing/assert; println;
+end
+
+begin exp_test:
+  // e^2 = 7.389056098930650f
+  var want 7.389056098930650f;
+  push 2; call math/exp; pop have;
+  push have; push want; push "exp_test_1"; call testing/assert; println;
+
+  // e^5 = 148.4131591025766f
+  var want 148.4131591025766f;
+  push 5; call math/exp; pop have;
+  push have; push want; push "exp_test_2"; call testing/assert; println;
 end
 
 begin abs_test:
@@ -119,11 +148,10 @@ begin factorial_test:
   push 12; call math/factorial; pop have;
   push have; push want; push "factorial_test_3"; call testing/assert; println;
 
-  // wont work with normal ints, because it exceeds int_max value:
-  // 13! => 6227020800
-  // var want 6227020800;
-  // push 123; call math/factorial; pop have;
-  // push have; push want; push "factorial_test_4"; call testing/assert; println;
+  // 13! => 6227020800 (uses BigInteger <=> long long int)
+  var want 6227020800;
+  push 13; call math/factorial; pop have;
+  push have; push want; push "factorial_test_4"; call testing/assert; println;
 end
 
 begin binomial_coeff_test:
@@ -143,11 +171,30 @@ begin binomial_coeff_test:
   push have; push want; push "binomial_coeff_test_3"; call testing/assert; println;
 end
 
+// begin power_test:
+//   // 2^5 => 32
+//   var want 32;
+//   push 2; push 5; call math/power; pop have;
+//   push have; push want; push "power_test_1"; call testing/assert; println;
+
+//   // 8^0 => 1
+//   var want 1;
+//   push 8; push 0; call math/power; pop have;
+//   push have; push want; push "power_2"; call testing/assert; println;
+
+//   // 4^(-3) => 0.015625
+//   push 0.015625; pop want;
+//   push 4; push -3; call math/power; pop have;
+//   push have; push want; push "power_3"; call testing/assert; println;
+// end
+
 begin main:
   call modulo_test;
   call max_test;
   call min_test;
-  call power_test;
+  call exp_test;
+  call power_abs_test;
+  // call power_test;
   call abs_test;
   call even_test;
   call factorial_test;

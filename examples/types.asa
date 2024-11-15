@@ -1,0 +1,11 @@
+begin main:
+  push 1;              type; println; // Integer
+  push 2147483650bi;   type; println; // BigInteger
+  push .078f;          type; println; // Float
+  push 3.14f;          type; println; // Double
+  push 2.71828bd;      type; println; // BigDouble
+  push "Hello World!"; type; println; // String
+  push true;           type; println; // Boolean
+  push false;          type; println; // Boolean
+  push 'a';            type; println; // Char
+end

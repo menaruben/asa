@@ -5,7 +5,7 @@
 #include <string>
 
 namespace asa {
-enum Type { Integer, Float, Double, String, Char, Bool };
+enum Type { Integer, BigInteger, Float, Double, BigDouble, String, Char, Bool };
 enum Error {
   Ok,
   StackOverflow,
@@ -16,36 +16,34 @@ enum Error {
   IllegalInstruction,
   LabelNotFound,
   UndefinedVariable,
+  IntegerOverflow,
+  IntegerUnderflow,
+  FloatOverflow,
+  FloatUnderflow,
 };
 
 std::string typeToStr(Type t) {
   switch (t) {
-  case Integer:
-    return "Integer";
-  case Float:
-    return "Float";
-  case Double:
-    return "Double";
-  case String:
-    return "String";
-  case Bool:
-    return "Bool";
-  default:
-    throw std::exception(); // unreachable
+  case BigInteger: return "BigInteger";
+  case Integer:    return "Integer";
+  case Float:      return "Float";
+  case Double:     return "Double";
+  case BigDouble:  return "BigDouble";
+  case String:     return "String";
+  case Bool:       return "Bool";
+  case Char:       return "Char";
+  default:         throw std::runtime_error("Invalid type");
   }
 }
 
 Type strToType(std::string t) {
-  if (t == "Integer")
-    return Integer;
-  if (t == "Float")
-    return Float;
-  if (t == "Double")
-    return Double;
-  if (t == "String")
-    return String;
-  if (t == "Bool")
-    return Bool;
+  if (t == "BigInteger") return BigInteger;
+  if (t == "BigDouble")  return BigDouble;
+  if (t == "Integer")    return Integer;
+  if (t == "Float")      return Float;
+  if (t == "Double")     return Double;
+  if (t == "String")     return String;
+  if (t == "Bool")       return Bool;
   throw std::runtime_error("Invalid type: " + t);
 }
 
@@ -89,8 +87,17 @@ Object error_undefined_variable(std::string msg) {
   return {.value = msg, .error = Error::UndefinedVariable};
 }
 
+Object error_integer_overflow(std::string msg) {
+  return {.value = msg, . error = Error::IntegerOverflow};
+}
+
+Object error_integer_underflow(std::string msg) {
+  return {.value = msg, . error = Error::IntegerOverflow};
+}
+
 bool is_numeric_type(Object o) {
   return o.type == Type::Float || o.type == Type::Double ||
-         o.type == Type::Integer;
+         o.type == Type::Integer || o.type == Type::BigInteger ||
+         o.type == Type::BigDouble;
 }
 } // namespace asa

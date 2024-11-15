@@ -69,6 +69,18 @@ asa::Object eval(Program program, string entryPoint, list<asa::Object> *stack) {
       break;
     }
 
+    case InstructionKind::GetType: {
+      if (stack->size() < 1)
+        return asa::error_stackunderflow(
+            "STACK UNDERFLOW: Cannot get type of 'nothing' (stack empty)");
+
+      asa::Object o = pop_args(stack, 1)[0];
+      o.value = asa::typeToStr(o.type);
+      o.type = asa::String;
+      stack->push_back(o);
+      break;
+    }
+
     case InstructionKind::Label:
       break;
 
@@ -223,6 +235,36 @@ asa::Object eval(Program program, string entryPoint, list<asa::Object> *stack) {
       break;
     }
 
+    case InstructionKind::Lshift: {
+            vector<asa::Object> args = pop_args(stack, 2);
+      if (args.size() < 2)
+        return asa::error_stackunderflow(
+            "STACK UNDERFLOW: Cannot lshift without at least two elements on "
+            "the stack");
+      asa::Object a = args[0];
+      asa::Object b = args[1];
+      asa::Object c = lshift(b, a);
+      if (c.error != asa::Ok)
+        return c;
+      stack->push_back(c);
+      break;
+    }
+
+    case InstructionKind::Rshift: {
+            vector<asa::Object> args = pop_args(stack, 2);
+      if (args.size() < 2)
+        return asa::error_stackunderflow(
+            "STACK UNDERFLOW: Cannot rshift without at least two elements on "
+            "the stack");
+      asa::Object a = args[0];
+      asa::Object b = args[1];
+      asa::Object c = rshift(b, a);
+      if (c.error != asa::Ok)
+        return c;
+      stack->push_back(c);
+      break;
+    }
+
     case InstructionKind::Call: {
       if (program.find(inst.id) == program.end()) {
         return asa::error_illegal_instruction("ILLEGAL INSTRUCTION/BLOCK: " +
@@ -241,19 +283,19 @@ asa::Object eval(Program program, string entryPoint, list<asa::Object> *stack) {
         return asa::error_stackunderflow("STACK UNDERFLOW: Cannot print from empty stack");
       }
       asa::Object top = stack->back();
-      std::cout << top.value;
+      std::cout << to_string(top);
       break;
     }
-    
+
     case InstructionKind::Println: {
       if (stack->size() < 1) {
         return asa::error_stackunderflow("STACK UNDERFLOW: Cannot print from empty stack");
       }
       asa::Object top = stack->back();
-      std::cout << top.value << std::endl;
+      std::cout << to_string(top) << std::endl;
       break;
     }
-    
+
     case InstructionKind::Show:
       printf("Stack:\n");
       if (stack->empty()) {
@@ -262,9 +304,9 @@ asa::Object eval(Program program, string entryPoint, list<asa::Object> *stack) {
       }
       list<asa::Object>::reverse_iterator it = stack->rbegin();
       while (it != stack->rend()) {
-        cout << 
-          "    Value: " << it->value << 
-          ", Type: " << asa::typeToStr(it->type) << 
+        cout <<
+          "    Value: " << it->value <<
+          ", Type: " << asa::typeToStr(it->type) <<
         endl;
         it++;
       }

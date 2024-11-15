@@ -40,7 +40,7 @@ typedef unordered_map<string, Block> Program;
 void check_expected(TokenKind expected, TokenKind got, int line) {
   if (expected != got) {
     string errmsg = msgs::expected_but_got_at_line(
-      token_kind_to_str(expected), 
+      token_kind_to_str(expected),
       token_kind_to_str(got), line);
     throw runtime_error(errmsg);
   }
@@ -71,7 +71,7 @@ void parse_import(int &index, vector<Token> *tokens, Program *program,
   Token filepath = (*tokens)[index++];
   if (filepath.kind != TokenKind::String) {
     errmsg = msgs::expected_but_got_at_line(
-        "string", token_kind_to_str(filepath.kind), 
+        "string", token_kind_to_str(filepath.kind),
         (*tokens)[index - 1].line);
     throw runtime_error(errmsg);
   }
@@ -85,14 +85,14 @@ void parse_import(int &index, vector<Token> *tokens, Program *program,
     string blockname = block.first;
     // if namespace not there, add one depending on name of file
     if (!has_namespace(blockname)) {
-      blockname = namespaceid + "/" + blockname; 
+      blockname = namespaceid + "/" + blockname;
     }
     (*program)[blockname] = block.second;
   }
   Token semicolon = (*tokens)[index];
   if (semicolon.kind != TokenKind::Semicolon) {
     errmsg = msgs::expected_but_got_at_line(
-        "';' (semicolon)", token_kind_to_str(semicolon.kind), 
+        "';' (semicolon)", token_kind_to_str(semicolon.kind),
         (*tokens)[index].line);
     throw runtime_error(errmsg);
   }
@@ -118,8 +118,14 @@ void parse_push(int &index, vector<Token> *tokens, Program *program,
   if (id_tok.kind == TokenKind::Identifier) {
     (*program)[current_block].instructions.push_back(GET(id_tok.value));
   } else {
-    asa::Type type = token_kind_to_asatype(id_tok.kind);
-    (*program)[current_block].instructions.push_back(PUSH(id_tok.value, type));
+    try {
+      asa::Type type = token_kind_to_asatype(id_tok.kind);
+      (*program)[current_block].instructions.push_back(PUSH(id_tok.value, type));
+    } catch (runtime_error e) {
+      string errmsg = string(e.what()) + ", at ";
+      errmsg += to_string(id_tok.line) + ", in block " + current_block + '\n';
+      throw runtime_error(errmsg);
+    }
   }
   Token sc = (*tokens)[index];
   check_expected(TokenKind::Semicolon, sc.kind, sc.line);
@@ -196,7 +202,7 @@ void parse_ifgoto(int &index, vector<Token> *tokens, Program *program,
   index++; // skip ifgoto
   Token expected_num = (*tokens)[index++];
   check_expected(TokenKind::Integer, expected_num.kind, expected_num.line);
-  if (expected_num.value != "-1" && 
+  if (expected_num.value != "-1" &&
       expected_num.value != "0" &&
       expected_num.value != "1") {
     string errmsg = msgs::expected_but_got_at_line(
@@ -218,8 +224,16 @@ void parse_var(int &index, vector<Token> *tokens, Program *program,
   Token id = (*tokens)[index++];
   check_expected(TokenKind::Identifier, id.kind, id.line);
   Token value = (*tokens)[index++];
-  (*program)[current_block].instructions.push_back(
-      DEF(id.value, value.value, token_kind_to_asatype(value.kind)));
+
+  try {
+    (*program)[current_block].instructions.push_back(
+        DEF(id.value, value.value, token_kind_to_asatype(value.kind)));
+  } catch (runtime_error e) {
+    string errmsg = string(e.what()) + ", at ";
+    errmsg += to_string(value.line) + ", in block " + current_block + '\n';
+    throw runtime_error(errmsg);
+  }
+
   Token sc = (*tokens)[index];
   check_expected(TokenKind::Semicolon, sc.kind, sc.line);
 }
@@ -247,7 +261,7 @@ Program load_program(vector<Token> tokens) {
       parse_import(i, &tokens, &program, current_block);
       break;
     }
-      
+
     case TokenKind::Begin: {
       parse_begin(i, &tokens, &program, current_block);
       break;
@@ -291,55 +305,63 @@ Program load_program(vector<Token> tokens) {
     case TokenKind::Add: {
       program[current_block].instructions.push_back(ADD);
       Token sc = tokens[++i];
-      if (sc.kind != TokenKind::Semicolon) {
-        string errmsg = msgs::expected_but_got_at_line(
-            "';' (semicolon)", token_kind_to_str(sc.kind), tokens[i].line);
-        throw runtime_error(errmsg);
-      }
+      check_expected(TokenKind::Semicolon, sc.kind, sc.line);
       break;
     }
 
     case TokenKind::Sub: {
       program[current_block].instructions.push_back(SUB);
       Token sc = tokens[++i];
-      if (sc.kind != TokenKind::Semicolon) {
-        string errmsg = msgs::expected_but_got_at_line(
-            "';' (semicolon)", token_kind_to_str(sc.kind), tokens[i].line);
-        throw runtime_error(errmsg);
-      }
+      check_expected(TokenKind::Semicolon, sc.kind, sc.line);
       break;
     }
 
     case TokenKind::Mul: {
       program[current_block].instructions.push_back(MUL);
       Token sc = tokens[++i];
-      if (sc.kind != TokenKind::Semicolon) {
-        string errmsg = msgs::expected_but_got_at_line(
-            "';' (semicolon)", token_kind_to_str(sc.kind), tokens[i].line);
-        throw runtime_error(errmsg);
-      }
+      check_expected(TokenKind::Semicolon, sc.kind, sc.line);
       break;
     }
 
     case TokenKind::Div: {
       program[current_block].instructions.push_back(DIV);
       Token sc = tokens[++i];
-      if (sc.kind != TokenKind::Semicolon) {
-        string errmsg = msgs::expected_but_got_at_line(
-            "';' (semicolon)", token_kind_to_str(sc.kind), tokens[i].line);
-        throw runtime_error(errmsg);
-      }
+      check_expected(TokenKind::Semicolon, sc.kind, sc.line);
+      break;
+    }
+
+    case TokenKind::Lshift: {
+      program[current_block].instructions.push_back(LSHIFT);
+      Token sc = tokens[++i];
+      check_expected(TokenKind::Semicolon, sc.kind, sc.line);
+      break;
+    }
+
+    case TokenKind::Rshift: {
+      program[current_block].instructions.push_back(RSHIFT);
+      Token sc = tokens[++i];
+      check_expected(TokenKind::Semicolon, sc.kind, sc.line);
+      break;
+    }
+
+    case TokenKind::GetType: {
+      program[current_block].instructions.push_back(GETTYPE);
+      Token sc = tokens[++i];
+      check_expected(TokenKind::Semicolon, sc.kind, sc.line);
+      break;
+    }
+
+    case TokenKind::Halt: {
+      program[current_block].instructions.push_back(HALT);
+      Token sc = tokens[++i];
+      check_expected(TokenKind::Semicolon, sc.kind, sc.line);
       break;
     }
 
     case TokenKind::Show: {
       program[current_block].instructions.push_back(SHOW);
       Token sc = tokens[++i];
-      if (sc.kind != TokenKind::Semicolon) {
-        string errmsg = msgs::expected_but_got_at_line(
-            "';' (semicolon)", token_kind_to_str(sc.kind), tokens[i].line);
-        throw runtime_error(errmsg);
-      }
+      check_expected(TokenKind::Semicolon, sc.kind, sc.line);
       break;
     }
 

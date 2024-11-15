@@ -1,8 +1,15 @@
+#include "Tokens.hpp"
 #include "list"
 #include "objects.hpp"
 #include "vector"
+#include <cfloat>
+#include <cstdint>
+#include <cstdio>
+#include <functional>
+#include <stdexcept>
 #include <string>
 #include <vector>
+#include <sstream>
 
 #define HALT                                                                   \
   { .kind = InstructionKind::Halt }
@@ -49,7 +56,7 @@
 
 #define STR                                                                    \
   { .kind = InstructionKind::Str }
-  
+
 #define CMP                                                                    \
   { .kind = InstructionKind::Cmp }
 
@@ -74,42 +81,36 @@
 #define DIV                                                                    \
   { .kind = InstructionKind::Divide }
 
+#define GETTYPE                                                                \
+  { .kind = InstructionKind::GetType }
+
 #define SHOW                                                                   \
   { .kind = InstructionKind::Show }
 
 #define PRINT                                                                  \
   { .kind = InstructionKind::Print }
-  
+
 #define PRINTLN                                                                \
   { .kind = InstructionKind::Println }
+
+#define LSHIFT                                                                 \
+  { .kind = InstructionKind::Lshift }
+
+#define RSHIFT                                                                 \
+  { .kind = InstructionKind::Rshift }
 
 namespace instructions {
 
 enum InstructionKind {
-  Show,
-  Str,
-  Print,
-  Println,
-  Push,
-  Pop,
-  Add,
-  Subtract,
-  Multiply,
-  Divide,
-  Label,
-  Goto,
-  DefVar,
-  SetVar,
-  GetVar,
-  Cmp,
-  If,
-  IfGoto,
-  IfHalt,
-  Halt,
-  Clear,
-  Increment,
-  Decrement,
-  Call
+  Show, Str, Print,  Println,
+  Push, Pop, Add,    Subtract,
+  Multiply,  Divide, Label,
+  Goto, DefVar, SetVar,
+  GetVar, Cmp, If,   IfGoto,
+  IfHalt, Halt, Clear,
+  Increment, Decrement,
+  Call,   Lshift, Rshift,
+  GetType
 };
 
 struct Instruction {
@@ -119,154 +120,191 @@ struct Instruction {
   std::vector<Instruction> block;
 };
 
+asa::Type determine_return_type(asa::Object a, asa::Object b) {
+  if (a.type == asa::BigDouble || b.type == asa::BigDouble)   return asa::Type::BigDouble;
+  if (a.type == asa::BigInteger || b.type == asa::BigInteger) return asa::Type::BigInteger;
+  if (a.type == asa::Double || b.type == asa::Double)         return asa::Type::Double;
+  if (a.type == asa::Float || b.type == asa::Float)           return asa::Type::Float;
+  if (a.type == asa::Integer || b.type == asa::Integer)       return asa::Type::Integer;
+  if (a.type == asa::String || b.type == asa::String)         return asa::Type::String;
+  if (a.type == asa::Char || b.type == asa::Char)             return asa::Type::Char;
+  if (a.type == asa::Bool || b.type == asa::Bool)             return asa::Type::Bool;
+  throw std::runtime_error("Unreachable: Can not determine return_type");
+}
+
+template <typename T>
+std::string to_string_with_precision(const T a_value, const int n = 6) {
+  std::ostringstream out;
+  out.precision(n);
+  out << std::fixed << a_value;
+  return std::move(out).str();
+}
+
+template <typename T>
+asa::Object perform_arithmetic_operation(asa::Object a, asa::Object b, std::function<T(T, T)> op, asa::Type return_t) {
+  a.type = return_t;
+  b.type = return_t;
+
+  switch (return_t) {
+    case asa::BigInteger: {
+      long long int av = std::stoll(a.value);
+      long long int bv = std::stoll(b.value);
+      long long int res = op(av, bv);
+      return {.value = std::to_string(res), .type = asa::BigInteger};
+    }
+    case asa::BigDouble: {
+      long double ad = std::stold(a.value);
+      long double bd = std::stold(b.value);
+      long double res = op(ad, bd);
+      std::string resstr = to_string_with_precision(res, LDBL_DIG);
+      return {.value = resstr, .type = asa::BigDouble};
+    }
+    case asa::Integer: {
+      int ai = std::stoi(a.value);
+      int bi = std::stoi(b.value);
+      int res = op(ai, bi);
+      return {.value = std::to_string(res), .type = asa::Integer};
+    }
+    case asa::Float: {
+      float af = std::stof(a.value);
+      float bf = std::stof(b.value);
+      float res = op(af, bf);
+      std::string resstr = to_string_with_precision(res, FLT_DIG);
+      return {.value = resstr, .type = asa::Float};
+    }
+    case asa::Double: {
+      double ad = std::stod(a.value);
+      double bd = std::stod(b.value);
+      double res = op(ad, bd);
+      std::string resstr = to_string_with_precision(res, DBL_DIG);
+      return {.value = resstr, .type = asa::Double};
+    }
+    case asa::String: {
+      std::string as = a.value;
+      std::string bs = b.value;
+      std::string res = as + bs; // Assuming concatenation for strings
+      return {.value = res, .type = asa::String};
+    }
+    default:
+      return asa::error_illegal_instruction("Unsupported type for arithmetic operation");
+  }
+}
+
 asa::Object add(asa::Object a, asa::Object b) {
-  switch (a.type) {
-  case asa::String: {
-    std::string as = a.value;
-    std::string bs = b.value;
-    std::string sum = as + bs;
-    return {.value = sum, .type = asa::String};
-  }
-
-  case asa::Integer: {
-    int ai = std::stoi(a.value);
-    int bi = std::stoi(b.value);
-    int sum = ai + bi;
-    return {.value = std::to_string(sum), .type = asa::Integer};
-  }
-  case asa::Float: {
-    float af = std::stof(a.value);
-    float bf = std::stof(b.value);
-    float sum = af + bf;
-    return {.value = std::to_string(sum), .type = asa::Float};
-  }
-  case asa::Double: {
-    double ad = std::stod(a.value);
-    double bd = std::stod(b.value);
-    double sum = ad + bd;
-    return {.value = std::to_string(sum), .type = asa::Double};
-  }
-
-  default:
-    return asa::error_illegal_instruction("Unsupported type for addition");
-  }
+  asa::Type return_t = determine_return_type(a, b);
+  return perform_arithmetic_operation<long double>(a, b, std::plus<long double>(), return_t);
 }
 
 asa::Object subtract(asa::Object a, asa::Object b) {
-  if (!is_numeric_type(a) || !is_numeric_type(b))
-    return asa::error_arithmetic(
-        "ARITHMETIC ERROR: Cannot subtract non-numeric " + a.value + " and " +
-        b.value);
-
-  switch (a.type) {
-  case asa::Integer: {
-    int ai = std::stoi(a.value);
-    int bi = std::stoi(b.value);
-    int delta = ai - bi;
-    return {.value = std::to_string(delta), .type = asa::Integer};
-  }
-  case asa::Float: {
-    float af = std::stof(a.value);
-    float bf = std::stof(b.value);
-    float delta = af - bf;
-    return {.value = std::to_string(delta), .type = asa::Float};
-  }
-  case asa::Double: {
-    double ad = std::stod(a.value);
-    double bd = std::stod(b.value);
-    double delta = ad - bd;
-    return {.value = std::to_string(delta), .type = asa::Double};
-  }
-  default:
-    return asa::error_illegal_instruction("Unsupported type for subtraction");
-  }
+  asa::Type return_t = determine_return_type(a, b);
+  return perform_arithmetic_operation<long double>(a, b, std::minus<long double>(), return_t);
 }
-asa::Object multiply(asa::Object a, asa::Object b) {
-  if (!is_numeric_type(a) || !is_numeric_type(b))
-    return asa::error_arithmetic(
-        "ARITHMETIC ERROR: Cannot multiply non-numeric " + a.value + " and " +
-        b.value);
 
-  switch (a.type) {
-  case asa::Integer: {
-    int ai = std::stoi(a.value);
-    int bi = std::stoi(b.value);
-    int prod = ai * bi;
-    return {.value = std::to_string(prod), .type = asa::Integer};
-  }
-  case asa::Float: {
-    float af = std::stof(a.value);
-    float bf = std::stof(b.value);
-    float prod = af * bf;
-    return {.value = std::to_string(prod), .type = asa::Float};
-  }
-  case asa::Double: {
-    double ad = std::stod(a.value);
-    double bd = std::stod(b.value);
-    double prod = ad * bd;
-    return {.value = std::to_string(prod), .type = asa::Double};
-  }
-  default:
-    return asa::error_illegal_instruction(
-        "Unsupported type for multiplication");
-  }
+asa::Object multiply(asa::Object a, asa::Object b) {
+  asa::Type return_t = determine_return_type(a, b);
+  return perform_arithmetic_operation<long double>(a, b, std::multiplies<long double>(), return_t);
 }
 
 asa::Object divide(asa::Object a, asa::Object b) {
-  if (!is_numeric_type(a) || !is_numeric_type(b))
-    return asa::error_arithmetic(
-        "ARITHMETIC ERROR: Cannot divide non-numeric " + a.value + " and " +
-        b.value);
+  asa::Type return_t = determine_return_type(a, b);
+  return perform_arithmetic_operation<long double>(a, b, std::divides<long double>(), return_t);
+}
 
-  switch (a.type) {
-  case asa::Integer: {
-    int ai = std::stoi(a.value);
-    int bi = std::stoi(b.value);
-    int quotient = ai / bi;
-    return {.value = std::to_string(quotient), .type = asa::Integer};
+template <typename T>
+asa::Object perform_bitwise_operation(asa::Object a, asa::Object b, std::function<T(T, T)> op, asa::Type return_t) {
+  a.type = return_t;
+  b.type = return_t;
+
+  T av = std::stoll(a.value);
+  T bv = std::stoll(b.value);
+  T res = op(av, bv);
+  return {.value = std::to_string(res), .type = return_t};
+}
+
+asa::Object lshift(asa::Object a, asa::Object b) {
+  asa::Type return_t = determine_return_type(a, b);
+  if (return_t != asa::Integer && return_t != asa::BigInteger) {
+    return asa::error_illegal_instruction("Unsupported type for bitwise operation: " + asa::typeToStr(return_t));
   }
-  case asa::Float: {
-    float af = std::stof(a.value);
-    float bf = std::stof(b.value);
-    float quotient = af / bf;
-    return {.value = std::to_string(quotient), .type = asa::Float};
+  return perform_bitwise_operation<long long int>(a, b, [](long long int x, long long int y) { return x << y; }, return_t);
+}
+
+asa::Object rshift(asa::Object a, asa::Object b) {
+  asa::Type return_t = determine_return_type(a, b);
+  if (return_t != asa::Integer && return_t != asa::BigInteger) {
+    return asa::error_illegal_instruction("Unsupported type for bitwise operation: " + asa::typeToStr(return_t));
   }
-  case asa::Double: {
-    double ad = std::stod(a.value);
-    double bd = std::stod(b.value);
-    double quotient = ad / bd;
-    return {.value = std::to_string(quotient), .type = asa::Double};
-  }
-  default:
-    return asa::error_illegal_instruction("Unsupported type for division");
-  }
+  return perform_bitwise_operation<long long int>(a, b, [](long long int x, long long int y) { return x >> y; }, return_t);
+}
+
+std::string to_string(asa::Object a) {
+  if (a.type == asa::BigDouble) return to_string_with_precision(std::stold(a.value), LDBL_DIG);
+  if (a.type == asa::BigInteger) return std::to_string(std::stoll(a.value));
+  if (a.type == asa::Double) return to_string_with_precision(std::stod(a.value), DBL_DIG);
+  if (a.type == asa::Float) return to_string_with_precision(std::stof(a.value), FLT_DIG);
+  return a.value;
 }
 
 asa::Object compare(asa::Object a, asa::Object b) {
-  asa::Type returnType = a.type;
+  asa::Type return_t = determine_return_type(a, b)  ;
+  a.type = return_t;
+  b.type = return_t;
+  switch (return_t) {
+  case asa::Char: {
+    char ac = a.value[0];
+    char bc = b.value[0];
+    std::string result;
+    if (ac < bc)  result = "-1";
+    if (ac == bc) result = "0";
+    if (ac > bc)  result = "1";
+    return {.value = result, .type = asa::Integer};
+  }
 
-  switch (returnType) {
+  case asa::Bool: {
+    bool ab = a.value == "true";
+    bool bb = b.value == "true";
+    std::string result;
+    if (ab < bb)  result = "-1";
+    if (ab == bb) result = "0";
+    if (ab > bb)  result = "1";
+    return {.value = result, .type = asa::Integer};
+  }
+
+  case asa::BigDouble: {
+    long double ad = std::stold(a.value);
+    long double bd = std::stold(b.value);
+    std::string result;
+    if (ad < bd)  result = "-1";
+    if (ad == bd) result = "0";
+    if (ad > bd)  result = "1";
+    return {.value = result, .type = asa::Integer};
+  }
+
   case asa::String: {
     std::string result;
-    if (a.value < b.value)
-      result = "-1";
-    if (a.value == b.value)
-      result = "0";
-    if (a.value < b.value)
-      result = "1";
+    if (a.value < b.value)  result = "-1";
+    if (a.value == b.value) result = "0";
+    if (a.value < b.value)  result = "1";
     return {.value = result, .type = asa::Integer};
+  }
+
+  case asa::BigInteger: {
+    long long int av = std::stoll(a.value);
+    long long int bv = std::stoll(b.value);
+    std::string res;
+    if (av < bv)  res = "-1";
+    if (av == bv) res = "0";
+    if (av > bv)  res = "1";
+    return {.value = res, .type = asa::Integer};
   }
 
   case asa::Integer: {
     int ai = std::stoi(a.value);
     int bi = std::stoi(b.value);
     std::string result;
-    if (ai < bi)
-      result = "-1";
-    if (ai == bi)
-      result = "0";
-    if (ai > bi)
-      result = "1";
+    if (ai < bi)  result = "-1";
+    if (ai == bi) result = "0";
+    if (ai > bi)  result = "1";
     return {.value = result, .type = asa::Integer};
   }
 
@@ -274,12 +312,9 @@ asa::Object compare(asa::Object a, asa::Object b) {
     int af = std::stof(a.value);
     int bf = std::stof(b.value);
     std::string result;
-    if (af < bf)
-      result = "-1";
-    if (af == bf)
-      result = "0";
-    if (af > bf)
-      result = "1";
+    if (af < bf)  result = "-1";
+    if (af == bf) result = "0";
+    if (af > bf)  result = "1";
     return {.value = result, .type = asa::Integer};
   }
 
@@ -287,12 +322,9 @@ asa::Object compare(asa::Object a, asa::Object b) {
     int ad = std::stod(a.value);
     int bd = std::stod(b.value);
     std::string result;
-    if (ad < bd)
-      result = "-1";
-    if (ad == bd)
-      result = "0";
-    if (ad > bd)
-      result = "1";
+    if (ad < bd)  result = "-1";
+    if (ad == bd) result = "0";
+    if (ad > bd)  result = "1";
     return {.value = result, .type = asa::Integer};
   }
 

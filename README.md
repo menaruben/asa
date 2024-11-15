@@ -1,14 +1,14 @@
 ```
-  aaaaaaaaaaaaa      ssssssssss     aaaaaaaaaaaaa   
-  a::::::::::::a   ss::::::::::s    a::::::::::::a  
-  aaaaaaaaa:::::ass:::::::::::::s   aaaaaaaaa:::::a 
-           a::::as::::::ssss:::::s           a::::a 
-    aaaaaaa:::::a s:::::s  ssssss     aaaaaaa:::::a 
-  aa::::::::::::a   s::::::s        aa::::::::::::a 
- a::::aaaa::::::a      s::::::s    a::::aaaa::::::a 
-a::::a    a:::::assssss   s:::::s a::::a    a:::::a 
-a::::a    a:::::as:::::ssss::::::sa::::a    a:::::a 
-a:::::aaaa::::::as::::::::::::::s a:::::aaaa::::::a 
+  aaaaaaaaaaaaa      ssssssssss     aaaaaaaaaaaaa
+  a::::::::::::a   ss::::::::::s    a::::::::::::a
+  aaaaaaaaa:::::ass:::::::::::::s   aaaaaaaaa:::::a
+           a::::as::::::ssss:::::s           a::::a
+    aaaaaaa:::::a s:::::s  ssssss     aaaaaaa:::::a
+  aa::::::::::::a   s::::::s        aa::::::::::::a
+ a::::aaaa::::::a      s::::::s    a::::aaaa::::::a
+a::::a    a:::::assssss   s:::::s a::::a    a:::::a
+a::::a    a:::::as:::::ssss::::::sa::::a    a:::::a
+a:::::aaaa::::::as::::::::::::::s a:::::aaaa::::::a
  a::::::::::aa:::as:::::::::::ss   a::::::::::aa:::a
   aaaaaaaaaa  aaaa sssssssssss      aaaaaaaaaa  aaaa
 ```
@@ -39,9 +39,9 @@ begin fib:
   push second; pop result; goto return;       // else: result = second + goto return label
 
   label base_zero;
-    push 0; pop result; goto return;          // result  = 0 + goto return label 
+    push 0; pop result; goto return;          // result  = 0 + goto return label
 
-  label base_one; 
+  label base_one;
     push 1; pop result; goto return;          // result  = 1 + goto return label
 
   label return;
@@ -75,7 +75,7 @@ end
 ```
 We define the entry point of the program by defining a `main` function. We then push the string "Hello World"
 to the stack and call the instruction println. `println` prints the top of the stack to the terminal appending a new line at the end.
-However if you don't want to append a newline you can just use the `print` instruction. 
+However if you don't want to append a newline you can just use the `print` instruction.
 
 ## Functions / Blocks
 In asa you can define functions by using the `begin` and `end` keyword. These functions are then called by using the
@@ -90,7 +90,7 @@ begin main:
   show;
 end
 ```
-The `main` function is the entrypoint of the program if we try to run it. 
+The `main` function is the entrypoint of the program if we try to run it.
 
 ## Variables
 In order to store something in a variable we usually `push` a value onto the stack and then `pop` it into a variable:
@@ -125,7 +125,7 @@ begin main:
   goto loop;
 end
 ```
-Loops can also be used to skip a portion of code. 
+Loops can also be used to skip a portion of code.
 ```pascal
 begin main:
   push 21; pop age;
@@ -151,16 +151,59 @@ end
 ```
 
 ## Math Operations
-In asa there are `add`, `sub`, `mul` and `div`. The
+In asa there are `add`, `sub`, `mul`, `div`, `lshift` and `rshift`. The
 ```pascal
 begin main:
   // evaluate (3*5 + 1)/4 - 3 = 1
-  push 3; push 5; mul;   // 3 * 5  = 15 
+  push 3; push 5; mul;   // 3 * 5  = 15
   push 1; add;           // 15 + 1 = 16
   push 4; div;           // 16 / 4 =  4
   push 3; sub;           // 4 - 3  =  1
-  show;                  // shows 1 in stack
+  println;
+  push 8; push 2; lshift; println; // 8 << 2
+  push 8; push 2; rshift; println; // 8 >> 2
 end
+```
+```
+1
+32
+2
+```
+
+## Types
+Asa has a few types:
+- Double
+- BigDouble
+- Integer
+- BigInteger
+- Float
+- String
+- Char
+
+You can get the type of the element on top of the stack by using the `type` instruction :
+```pascal
+begin main:
+  push 1;              type; println; // Integer
+  push 2147483650bi;   type; println; // BigInteger
+  push .078f;          type; println; // Float
+  push 3.14f;          type; println; // Double
+  push 2.71828bd;      type; println; // BigDouble
+  push "Hello World!"; type; println; // String
+  push true;           type; println; // Boolean
+  push false;          type; println; // Boolean
+  push 'a';            type; println; // Char
+end
+```
+```
+Integer
+BigInteger
+Float
+Float
+BigDouble
+String
+Bool
+Bool
+Char
 ```
 
 ## Importing
@@ -182,7 +225,7 @@ begin main:
   show;
 end
 ```
-The result of this code correctly shows `"Hi ruby!"` in the stack. As we can see, asa also has namespaces. Let's assume we want to write a 
+The result of this code correctly shows `"Hi ruby!"` in the stack. As we can see, asa also has namespaces. Let's assume we want to write a
 `greet` function. We can import `stringlib.asa` and define the `greet` as follows:
 > greeting.asa:
 ```pascal
@@ -210,10 +253,10 @@ Stack:
     Value: "Hello ruby", Type: String
 ```
 
-If you are developing libraries and your functions depend on functions inside the own 
+If you are developing libraries and your functions depend on functions inside the own
 namespace you still must use the namespace infront of the identifier. One example would be the `even?` function
-in the [`math.asa`](./src/stdlib/math.asa). It uses the `modulo` function from the same namespace but it still 
-has to use the full identifier `math/modulo` instead of just `modulo`. 
+in the [`math.asa`](./src/stdlib/math.asa). It uses the `modulo` function from the same namespace but it still
+has to use the full identifier `math/modulo` instead of just `modulo`.
 
 # stdlib
 The stdlib is work in progress and can be found [here](./src/stdlib/)
