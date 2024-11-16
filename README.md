@@ -12,10 +12,14 @@ a:::::aaaa::::::as::::::::::::::s a:::::aaaa::::::a
  a::::::::::aa:::as:::::::::::ss   a::::::::::aa:::a
   aaaaaaaaaa  aaaa sssssssssss      aaaaaaaaaa  aaaa
 ```
-> This is a toy project and should not be taken seriously, which means it is NOT for production at all. The goal of this project is to have fun!
-> I am not a C++ developer so keep that in mind but I will definitely clean up and refactor a lot :D
-
 > g++ version used: 13.2.0
+
+# annotation
+This is a toy project and should not be taken seriously, which means it is NOT for production at all. The goal of this project is to have fun!
+I am not a C++ developer so keep that in mind but I will definitely clean up and refactor a lot :D
+
+fyi: I have written a [tree-sitter grammar for asa](https://github.com/menaruben/tree-sitter-asa) to support
+syntax highlighting for a better experience as I previously used a pascal mode in my editor to have some sort of highlighting. :)
 
 ```pascal
 // define new 'fib' block/function
