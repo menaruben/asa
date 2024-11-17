@@ -87,6 +87,8 @@ std::string token_kind_to_str(TokenKind k) {
   case Increment:   return "Increment";
   case Decrement:   return "Decrement";
   case Halt:        return "Halt";
+  case ToChars:     return "ToChars";
+  case ToArray:     return "ToArray";
   case EndOfFile:   return "EndOfFile";
   default:          return "Unknown TokenKind";
   }
