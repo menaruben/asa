@@ -2,6 +2,7 @@
 #include "transpiler.hpp"
 #include <iostream>
 #include <list>
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -36,6 +37,11 @@ asa::Object eval(Program program, string entryPoint, list<asa::Object> *stack) {
     case InstructionKind::Clear: {
       stack->clear();
       break;
+    }
+
+    case InstructionKind::Raise: {
+      asa::Object o = pop_args(stack, 1)[0];    
+      throw runtime_error(o.value);
     }
 
     case InstructionKind::Push: {

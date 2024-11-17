@@ -46,6 +46,7 @@ enum TokenKind {
   Rshift,
   Halt,
   GetType,
+  Raise,
   EndOfFile,
 };
 
@@ -87,8 +88,7 @@ std::string token_kind_to_str(TokenKind k) {
   case Increment:   return "Increment";
   case Decrement:   return "Decrement";
   case Halt:        return "Halt";
-  case ToChars:     return "ToChars";
-  case ToArray:     return "ToArray";
+  case Raise:       return "Raise";
   case EndOfFile:   return "EndOfFile";
   default:          return "Unknown TokenKind";
   }
@@ -155,6 +155,7 @@ const std::regex LSHIFT_PATTERN("^Lshift$", std::regex_constants::icase);
 const std::regex RSHIFT_PATTERN("^Rshift$", std::regex_constants::icase);
 const std::regex GETTYPE_PATTERN("^Type$", std::regex_constants::icase);
 const std::regex HALT_PATTERN("^Halt$", std::regex_constants::icase);
+const std::regex RAISE_PATTERN("^Raise$", std::regex_constants::icase);
 
 Token token_from_str(std::string value, int line, int column) {
   if (std::regex_match(value, STRING_PATTERN))     return {.value = value.substr(1, value.size()-2),
@@ -192,6 +193,7 @@ Token token_from_str(std::string value, int line, int column) {
   if (std::regex_match(value, RSHIFT_PATTERN))     return {.value = value, .kind = Rshift, .line = line, .column = column};
   if (std::regex_match(value, GETTYPE_PATTERN))    return {.value = value, .kind = GetType, .line = line, .column = column};
   if (std::regex_match(value, HALT_PATTERN))       return {.value = value, .kind = Halt, .line = line, .column = column};
+  if (std::regex_match(value, RAISE_PATTERN))      return {.value = value, .kind = Raise, .line = line, .column = column};
   if (std::regex_match(value, IDENTIFIER_PATTERN)) return {.value = value, .kind = Identifier, .line = line, .column = column}; // must be last
 
   if (value == ",") return {.value = value, .kind = Comma, .line = line, .column = column};

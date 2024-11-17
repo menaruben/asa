@@ -1,0 +1,3 @@
+begin main:
+	push "this is how you raise errors"; raise;
+end

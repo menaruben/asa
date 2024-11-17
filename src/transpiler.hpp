@@ -238,6 +238,7 @@ void parse_var(int &index, vector<Token> *tokens, Program *program,
   check_expected(TokenKind::Semicolon, sc.kind, sc.line);
 }
 
+
 void parse_call(int &index, vector<Token> *tokens, Program *program,
                 string &current_block) {
   check_current_block(current_block, TokenKind::Call, (*tokens)[index].line);
@@ -245,6 +246,15 @@ void parse_call(int &index, vector<Token> *tokens, Program *program,
   Token id_tok = (*tokens)[index++];
   check_expected(TokenKind::Identifier, id_tok.kind, id_tok.line);
   (*program)[current_block].instructions.push_back(CALL(id_tok.value));
+  Token sc = (*tokens)[index];
+  check_expected(TokenKind::Semicolon, sc.kind, sc.line);
+}
+
+void parse_raise(int &index, vector<Token> *tokens, Program *program,
+                string &current_block) {
+  check_current_block(current_block, TokenKind::Call, (*tokens)[index].line);
+  index++; // skip raise
+  (*program)[current_block].instructions.push_back(RAISE);
   Token sc = (*tokens)[index];
   check_expected(TokenKind::Semicolon, sc.kind, sc.line);
 }
@@ -299,6 +309,11 @@ Program load_program(vector<Token> tokens) {
 
     case TokenKind::Label: {
       parse_label(i, &tokens, &program, current_block);
+      break;
+    }
+
+    case TokenKind::Raise: {
+      parse_raise(i, &tokens, &program, current_block);
       break;
     }
 
