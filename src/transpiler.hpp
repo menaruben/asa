@@ -4,6 +4,7 @@
 #include "fileread.hpp"
 #include "messages.hpp"
 #include <cstddef>
+#include <filesystem>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -13,6 +14,8 @@
 using namespace instructions;
 using namespace std;
 using namespace tokens;
+
+#define SINGLE_LINE_COMMENT "//"
 
 namespace transpiler {
 string trim(const string &str) {
@@ -76,7 +79,24 @@ void parse_import(int &index, vector<Token> *tokens, Program *program,
     throw runtime_error(errmsg);
   }
   string path = filepath.value;
-  string source = read_file(path, "//");
+  // first search in current dir and then in stdlib dir!
+  string source;
+  if (path.find("/") == std::string::npos) {
+    string currentdir_path = "./" + path;
+    if (std::filesystem::exists(currentdir_path)) {
+      source = read_file(currentdir_path, SINGLE_LINE_COMMENT);
+    } else {
+      string stdlibdir_path = "/lib/asa/" + path;
+      if (!std::filesystem::exists(stdlibdir_path))
+        throw runtime_error("File not found: Can not import " + path);
+      source = read_file(stdlibdir_path, SINGLE_LINE_COMMENT);
+    }
+  } else {
+    if (!std::filesystem::exists(path))
+      throw runtime_error("File not found: Can not import " + path);
+    source = read_file(path, SINGLE_LINE_COMMENT);
+  }
+  
   vector<Token> importedtoks = lexer::tokenize(source);
   Program imported = load_program(importedtoks);
 
