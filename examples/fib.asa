@@ -1,30 +1,24 @@
-begin fib:
-    pop n;
-    push n; push 0; cmp; ifgoto 0 base_zero;
-    push n; push 1; cmp; ifgoto 0 base_one;
+import "logical.asa";
 
-    push 0; pop first;
-    push 1; pop second;
-    push 2; pop i;
+begin fib: pop n;
+    push n; push 0; cmp; ifgoto 0 ret0;             // if n == 0 return 0
+    push n; push 1; cmp; ifgoto 0 ret1;             // if n == 1 return 1
+
+    var first 0;
+    var second 1;
+    var i 2;
     label loop;
-        push first; push second; add; pop result;
-        push second; pop first;
-        push result; pop second;
-    push i; push 1; add; pop i;
-    push i; push n; cmp; ifgoto -1 loop;
-    push i; push n; cmp; ifgoto 0 loop;
-    push second; pop result; goto return;
-
-    label base_zero;
-        push 0; pop result; 
-        goto return;
-
-    label base_one;
-        push 1; pop result; 
-        goto return;
-
-    label return;
-        push result;
+        push first; push second; add; pop result;   // result = first + second
+        push second; pop first;                     // first  = second
+        push result; pop second;                    // second = result
+        push i; push 1; add; pop i;
+        push i; push n; call logical/lesser_or_eq?; // if i <= n ...
+        ifgoto 1 loop;                              // then: goto loop (repeat loop)
+    push second; pop result; goto ret;              // else: result = second and return
+    
+    label ret0; push 0; pop result; goto ret;       // return 0
+    label ret1; push 1; pop result; goto ret;       // return 1
+    label ret;  push result;                        // push value of result to stack
 end
 
 begin main:
