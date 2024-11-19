@@ -1,6 +1,5 @@
 #pragma once
 
-#include <exception>
 #include <stdexcept>
 #include <string>
 
@@ -22,12 +21,11 @@ enum Error {
   FloatUnderflow,
 };
 
-std::string typeToStr(Type t) {
+std::string type_to_str(Type t) {
   switch (t) {
   case BigInteger: return "BigInteger";
   case Integer:    return "Integer";
   case Float:      return "Float";
-  case Double:     return "Double";
   case BigDouble:  return "BigDouble";
   case String:     return "String";
   case Bool:       return "Bool";
@@ -36,7 +34,7 @@ std::string typeToStr(Type t) {
   }
 }
 
-Type strToType(std::string t) {
+Type str_to_type(std::string t) {
   if (t == "BigInteger") return BigInteger;
   if (t == "BigDouble")  return BigDouble;
   if (t == "Integer")    return Integer;

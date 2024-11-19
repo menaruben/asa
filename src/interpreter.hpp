@@ -1,10 +1,13 @@
+#include "Tokens.hpp"
 #include "objects.hpp"
 #include "transpiler.hpp"
 #include <iostream>
 #include <list>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
+#include <variant>
 #include <vector>
 
 using namespace instructions;
@@ -81,7 +84,7 @@ asa::Object eval(Program program, string entryPoint, list<asa::Object> *stack) {
             "STACK UNDERFLOW: Cannot get type of 'nothing' (stack empty)");
 
       asa::Object o = pop_args(stack, 1)[0];
-      o.value = asa::typeToStr(o.type);
+      o.value = asa::type_to_str(o.type);
       o.type = asa::String;
       stack->push_back(o);
       break;
@@ -312,7 +315,7 @@ asa::Object eval(Program program, string entryPoint, list<asa::Object> *stack) {
       while (it != stack->rend()) {
         cout <<
           "    Value: " << it->value <<
-          ", Type: " << asa::typeToStr(it->type) <<
+          ", Type: " << asa::type_to_str(it->type) <<
         endl;
         it++;
       }

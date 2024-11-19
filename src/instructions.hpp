@@ -129,7 +129,7 @@ enum InstructionKind {
   Lshift,
   Rshift,
   GetType,
-  Raise
+  Raise,
 };
 
 struct Instruction {
@@ -261,7 +261,8 @@ asa::Object lshift(asa::Object a, asa::Object b) {
   asa::Type return_t = determine_return_type(a, b);
   if (return_t != asa::Integer && return_t != asa::BigInteger) {
     return asa::error_illegal_instruction(
-        "Unsupported type for bitwise operation: " + asa::typeToStr(return_t));
+        "Unsupported type for bitwise operation: " +
+        asa::type_to_str(return_t));
   }
   return perform_bitwise_operation<long long int>(
       a, b, [](long long int x, long long int y) { return x << y; }, return_t);
@@ -271,7 +272,8 @@ asa::Object rshift(asa::Object a, asa::Object b) {
   asa::Type return_t = determine_return_type(a, b);
   if (return_t != asa::Integer && return_t != asa::BigInteger) {
     return asa::error_illegal_instruction(
-        "Unsupported type for bitwise operation: " + asa::typeToStr(return_t));
+        "Unsupported type for bitwise operation: " +
+        asa::type_to_str(return_t));
   }
   return perform_bitwise_operation<long long int>(
       a, b, [](long long int x, long long int y) { return x >> y; }, return_t);

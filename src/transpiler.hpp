@@ -321,7 +321,7 @@ Program load_program(vector<Token> tokens) {
       parse_var(i, &tokens, &program, current_block);
       break;
     }
-
+    
     case TokenKind::Pop: {
       parse_pop(i, &tokens, &program, current_block);
       break;

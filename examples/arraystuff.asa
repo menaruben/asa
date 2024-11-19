@@ -1,0 +1,23 @@
+import "logical.asa";
+
+// asa does not implement some sort of collections, however since
+// asa is stack based this means you can work with a counter/size variable
+begin sum_count: pop count;
+	var res 0.0;
+	push count; push 0; call logical/lesser_or_eq?; ifgoto 1 return;
+
+	label loop;
+		pop val;
+		push val; push res; add; pop res;
+		decr count;
+		push count; push 0; call logical/lesser_or_eq?; ifgoto 1 return;
+	goto loop;
+
+	label return; push res;
+end
+
+begin main:
+	push 1; push 3.141; push 324.2312;
+	push 3; call sum_count; // sum last 3 values
+	println;
+end
