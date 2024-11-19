@@ -5,6 +5,9 @@ import "logical.asa";
 // precision used in math.asa
 begin precision: push 0.000000000000001f; end
 
+// round tolerance if that close to integer
+begin round_tolerance: push 0.0000000001f; end
+
 // mathematical constant pi
 begin pi:        push 3.141592653589793f; end
 
@@ -82,43 +85,16 @@ begin abs: pop n;
   label return; push res;
 end
 
-// power: pushes the result of base^exponent to the stack
-// begin power:
-//   pop exponent; pop base;
-//   push exponent; call math/abs; pop exponent_abs;
-// end
-
-// power_abs: computes base^n where n is a natural number
-//   => If you have fractional exponents, compute result in
-//      combination with root_nth function
-begin power_abs: pop n; pop base;
-  push n; push 1; call logical/equals?; ifgoto 1 retbase; // if n == 1 return base
-  push n; push 0; call logical/lesser?; pop n_lt_0;       // if n < 0 then n_lt_0 = 1 else 0
-
-  push n; call math/abs; pop n_abs;
-  var res 1.0f;                                                  // initialize result at 1 for x == 0
-  push n_abs; push 0; call logical/equals?; ifgoto 1 ret;         // if x == 0 return 1
-  var i 1;
-  label loop;
-    push i; push n_abs; call logical/lesser_or_eq?; ifgoto 0 ret; // if i > x goto return
-    push res; push base; mul; pop res;                            // res = res * base
-    incr i;                                                       // increment i
-    goto loop;                                                    // repeat...
-
-  label done;
-    push n_lt_0; ifgoto 0 ret;
-    push 1; push res; div; pop res;
-
-  label retbase; push base; pop res; goto ret;
-  label ret;     push res;
-end
-
 // exp: computes e^x, where x => 0
-begin exp: pop x; call math/e; push x; call math/power_abs; end
+begin exp: pop x; call math/e; push x; call math/ipow; end
 
-// ln: computes natural log of x for x => 0 using the taylor sequence
+// ln: computes natural log of x for x > 0 using the taylor sequence
 //   => more info on the taylor series here: https://en.wikipedia.org/wiki/Taylor_series
 begin ln: pop x;
+  push x; push 0; call logical/greater?; ifgoto 1 compute;
+  push "math/ln: input x must be greater than 0!"; raise;
+
+  label compute;
   push x; push 1; call logical/equals?;      ifgoto 1 ret0; // if x == 1 return 0
   push x; call math/e; call logical/equals?; ifgoto 1 ret1; // if x == e return 1
   push 0.693147180559945bd; pop ln2;                        // yes.. I actually saved it in a variable :)
@@ -131,8 +107,8 @@ begin ln: pop x;
   //   ln(x) = ln(x/2) + ln(2)
   //   example:
   //    ln(10)	= ln(5)    + ln(2)
-	//            = ln(2.5)  + ln(2) + ln(2)
-	//            = ln(1.25) + ln(2) + ln(2) + ln(2) = 2.30259...
+  //            = ln(2.5)  + ln(2) + ln(2)
+  //            = ln(1.25) + ln(2) + ln(2) + ln(2) = 2.30259...
   //    and then we compute ln(1.25) and add the ln(2)'s
   //    to get the final result
   // push 0; pop n;
@@ -156,7 +132,7 @@ begin ln: pop x;
     var subterm 1.0bd;                         // subterm = 1.0bd
     label loop;
       push k; push i; div; pop coeff;                   // coeff = k/i
-      push x; push 1; sub; push i; call math/power_abs;
+      push x; push 1; sub; push i; call math/ipow;
       pop subterm;                                      // subterm sb = (x-1)^i
       push coeff; push subterm; mul; pop term;          // term = coeff * sb
 
@@ -212,24 +188,82 @@ begin binomial_coeff: pop b; pop a;
   label return; push res;
 end
 
-// power: pushes the result of b^n to the stack
-// begin power:
-//   pop n; pop b;
-//   push n; push 0; call logical/equals?; ifgoto 1 ret1; // if n == 0 return 1
-//   push n; push 1; call logical/equals?; ifgoto 1 retb; // if n == 1 return b
-//   push n; push 0; call logical/lesser?; pop n_lt_0;    // if n < 0 then n_lt_0 = 1 else 0
-//   push b; push 0; call logical/equals?; ifgoto 1 ret0; // if b == 0 return 0
+// ipow: computes base^n where n is an integer
+//   => If you have fractional exponents, compute result in
+//      combination with iroot_nth function, since
+//      b^(n/m) <=> iroot(ipow(b, n), m)
+begin ipow: pop n; pop base;
+  push n; push 1; call logical/equals?; ifgoto 1 retbase; // if n == 1 return base
+  push n; push 0; call logical/lesser?; pop n_lt_0;       // if n < 0 then n_lt_0 = 1 else 0
 
-//   // b^n = e^ln(b^n) = e^(n * ln(b))
-//   TODO: implement
+  push n; call math/abs; pop n_abs;
+  var res 1.0f;                                                   // initialize result at 1 for x == 0
+  push n_abs; push 0; call logical/equals?; ifgoto 1 ret;         // if x == 0 return 1
+  var i 1;
+  label loop;
+    push i; push n_abs; call logical/lesser_or_eq?; ifgoto 0 done; // if i > n goto return
+    push res; push base; mul; pop res;                             // res = res * base
+    incr i;                                                        // increment i
+    goto loop;                                                     // repeat...
 
-//   label ret0; push 0; pop res; goto return;
-//   label ret1; push 1; pop res; goto return;
-//   label retb; push b; pop res; goto return;
-//   label return; push res;
-// end
+  label done;
+    push n_lt_0; ifgoto 0 ret;                 // if n > 0 goto return
+    push 1; push res; div; pop res; goto ret;  // else: res = 1/res
 
-// root_nth: computes the nth root of a where n > 0 and a natural number
-// begin root_nth:
-//   TODO: implement
-// end
+  label retbase; push base; pop res; goto ret;
+  label ret;     push res;
+end
+
+// iroot: approximates nth iroot of a base, where n is an integer
+begin iroot: pop n; pop base;
+  // Check if base > 0
+  push base; push 0; call logical/greater?; ifgoto 1 check_n;
+  push "math/iroot: base must be greater than 0!"; raise;
+
+  // Check if n > 0
+  label check_n;
+    push n; push 0; call logical/greater?; ifgoto 1 find_ceil;
+    push "math/iroot: can only be computed, where n (exponent) > 0!"; raise;
+
+  // Handle the special case n == 1
+  label find_ceil;
+    push n; push 1; call logical/equals?; ifgoto 1 retbase; 
+    var lower_bound 0.0bd;        // Correct lower bound initialization
+    var upper_bound 0.0bd;
+    push base; push 1; call logical/lesser?; ifgoto 1 small_base;
+    push base; pop upper_bound;  // Case where base >= 1
+    goto approx_loop;
+
+    label small_base;
+      push 1.0bd; pop upper_bound; // Case where base < 1
+
+    label approx_loop;
+      push lower_bound; push upper_bound; add; push 2; div; pop mid; // mid = (lower_bound + upper_bound) / 2
+      push mid; push n; call math/ipow; pop mid_res;                 // mid_res = mid^n
+
+      push mid_res; push base; call logical/lesser?; ifgoto 1 adjust_lb;
+      push mid; pop upper_bound;                                     // if mid_res >= base => upper_bound = mid
+      goto after_adj;
+
+      label adjust_lb;
+        push mid; pop lower_bound;                                   // if mid_res < base => lower_bound = mid
+
+      label after_adj;
+        push upper_bound; push lower_bound; sub; call math/precision;
+        call logical/greater?; ifgoto 1 approx_loop;                 // Continue loop if bounds are not precise enough
+
+  // ... else compute final result
+  push lower_bound; push upper_bound; add; push 2; div; pop res;     // res = (lower_bound + upper_bound)/2
+  push res; round; pop closest_int;                                  // closest_int = round(res)
+  push res; push closest_int; sub; call math/abs; pop delta;         // delta = abs(res - closest_int)
+  push delta; call math/round_tolerance; call logical/lesser_or_eq?; // if delta <= round_tolerance => round result
+  ifgoto 0 ret;                                                      // else return res
+  push res; round; pop res; goto ret;
+
+  // Handle n == 1 case
+  label retbase; 
+    push base; pop res; 
+    goto ret;
+
+  label ret; push res;
+end

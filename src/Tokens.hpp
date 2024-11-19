@@ -47,6 +47,9 @@ enum TokenKind {
   Halt,
   GetType,
   Raise,
+  Floor,
+  Ceil,
+  Round,
   EndOfFile,
 };
 
@@ -89,6 +92,9 @@ std::string token_kind_to_str(TokenKind k) {
   case Decrement:   return "Decrement";
   case Halt:        return "Halt";
   case Raise:       return "Raise";
+  case Floor:       return "Floor";
+  case Ceil:        return "Ceil";
+  case Round:       return "Round";
   case EndOfFile:   return "EndOfFile";
   default:          return "Unknown TokenKind";
   }
@@ -156,6 +162,9 @@ const std::regex RSHIFT_PATTERN("^Rshift$", std::regex_constants::icase);
 const std::regex GETTYPE_PATTERN("^Type$", std::regex_constants::icase);
 const std::regex HALT_PATTERN("^Halt$", std::regex_constants::icase);
 const std::regex RAISE_PATTERN("^Raise$", std::regex_constants::icase);
+const std::regex ROUND_PATTERN("^Round$", std::regex_constants::icase);
+const std::regex FLOOR_PATTERN("^Floor$", std::regex_constants::icase);
+const std::regex CEIL_PATTERN("^Ceil$", std::regex_constants::icase);
 
 Token token_from_str(std::string value, int line, int column) {
   if (std::regex_match(value, STRING_PATTERN))     return {.value = value.substr(1, value.size()-2),
@@ -194,6 +203,9 @@ Token token_from_str(std::string value, int line, int column) {
   if (std::regex_match(value, GETTYPE_PATTERN))    return {.value = value, .kind = GetType, .line = line, .column = column};
   if (std::regex_match(value, HALT_PATTERN))       return {.value = value, .kind = Halt, .line = line, .column = column};
   if (std::regex_match(value, RAISE_PATTERN))      return {.value = value, .kind = Raise, .line = line, .column = column};
+  if (std::regex_match(value, FLOOR_PATTERN))      return {.value = value, .kind = Floor, .line = line, .column = column};
+  if (std::regex_match(value, CEIL_PATTERN))       return {.value = value, .kind = Ceil, .line = line, .column = column};
+  if (std::regex_match(value, ROUND_PATTERN))      return {.value = value, .kind = Round, .line = line, .column = column};
   if (std::regex_match(value, IDENTIFIER_PATTERN)) return {.value = value, .kind = Identifier, .line = line, .column = column}; // must be last
 
   if (value == ",") return {.value = value, .kind = Comma, .line = line, .column = column};

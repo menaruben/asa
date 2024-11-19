@@ -1,13 +1,11 @@
-#include "Tokens.hpp"
 #include "objects.hpp"
 #include "transpiler.hpp"
+#include <cmath>
 #include <iostream>
 #include <list>
-#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
-#include <variant>
 #include <vector>
 
 using namespace instructions;
@@ -37,13 +35,45 @@ asa::Object eval(Program program, string entryPoint, list<asa::Object> *stack) {
       break;
     }
 
+
+    case InstructionKind::Ceil: {
+      asa::Object o = pop_args(stack, 1)[0];
+      int val_new = stoi(o.value) + 1;
+      std::string valstr = to_string(val_new);
+      o.value = valstr;
+      o.type = asa::Integer;
+      stack->push_back(o);
+      break;
+    }
+
+
+    case InstructionKind::Floor: {
+      asa::Object o = pop_args(stack, 1)[0];
+      int val_new = stoi(o.value);
+      std::string valstr = to_string(val_new);
+      o.value = valstr;
+      o.type = asa::Integer;
+      stack->push_back(o);
+      break;
+    }
+
+    case InstructionKind::Round: {
+      asa::Object o = pop_args(stack, 1)[0];
+      double val_new = round(std::stod(o.value));
+      std::string valstr = to_string(static_cast<int>(val_new));
+      o.value = valstr;
+      o.type = asa::Integer;
+      stack->push_back(o);
+      break;
+    }
+
     case InstructionKind::Clear: {
       stack->clear();
       break;
     }
 
     case InstructionKind::Raise: {
-      asa::Object o = pop_args(stack, 1)[0];    
+      asa::Object o = pop_args(stack, 1)[0];
       throw runtime_error(o.value);
     }
 

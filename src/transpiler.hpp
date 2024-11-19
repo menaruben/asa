@@ -96,7 +96,7 @@ void parse_import(int &index, vector<Token> *tokens, Program *program,
       throw runtime_error("File not found: Can not import " + path);
     source = read_file(path, SINGLE_LINE_COMMENT);
   }
-  
+
   vector<Token> importedtoks = lexer::tokenize(source);
   Program imported = load_program(importedtoks);
 
@@ -279,6 +279,33 @@ void parse_raise(int &index, vector<Token> *tokens, Program *program,
   check_expected(TokenKind::Semicolon, sc.kind, sc.line);
 }
 
+void parse_floor(int &index, vector<Token> *tokens, Program *program,
+                string &current_block) {
+  check_current_block(current_block, TokenKind::Floor, (*tokens)[index].line);
+  index++; // skip floor
+  (*program)[current_block].instructions.push_back(FLOOR);
+  Token sc = (*tokens)[index];
+  check_expected(TokenKind::Semicolon, sc.kind, sc.line);
+}
+
+void parse_ceil(int &index, vector<Token> *tokens, Program *program,
+                string &current_block) {
+  check_current_block(current_block, TokenKind::Ceil, (*tokens)[index].line);
+  index++; // skip ceil
+  (*program)[current_block].instructions.push_back(CEIL);
+  Token sc = (*tokens)[index];
+  check_expected(TokenKind::Semicolon, sc.kind, sc.line);
+}
+
+void parse_round(int &index, vector<Token> *tokens, Program *program,
+                string &current_block) {
+  check_current_block(current_block, TokenKind::Round, (*tokens)[index].line);
+  index++; // skip round
+  (*program)[current_block].instructions.push_back(ROUND);
+  Token sc = (*tokens)[index];
+  check_expected(TokenKind::Semicolon, sc.kind, sc.line);
+}
+
 Program load_program(vector<Token> tokens) {
   Program program;
   string current_block = "";
@@ -321,7 +348,7 @@ Program load_program(vector<Token> tokens) {
       parse_var(i, &tokens, &program, current_block);
       break;
     }
-    
+
     case TokenKind::Pop: {
       parse_pop(i, &tokens, &program, current_block);
       break;
@@ -376,6 +403,21 @@ Program load_program(vector<Token> tokens) {
       program[current_block].instructions.push_back(RSHIFT);
       Token sc = tokens[++i];
       check_expected(TokenKind::Semicolon, sc.kind, sc.line);
+      break;
+    }
+
+    case TokenKind::Ceil: {
+      parse_ceil(i, &tokens, &program, current_block);
+      break;
+    }
+
+    case TokenKind::Floor: {
+      parse_floor(i, &tokens, &program, current_block);
+      break;
+    }
+
+    case TokenKind::Round: {
+      parse_round(i, &tokens, &program, current_block);
       break;
     }
 

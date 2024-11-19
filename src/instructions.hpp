@@ -8,6 +8,15 @@
 #include <string>
 #include <vector>
 
+#define CEIL \
+  { .kind = InstructionKind::Ceil }
+
+#define FLOOR \
+  { .kind = InstructionKind::Floor }
+
+#define ROUND \
+  { .kind = InstructionKind::Round }
+
 #define RAISE                                                                  \
   { .kind = InstructionKind::Raise }
 
@@ -130,6 +139,9 @@ enum InstructionKind {
   Rshift,
   GetType,
   Raise,
+  Ceil,
+  Floor,
+  Round,
 };
 
 struct Instruction {
