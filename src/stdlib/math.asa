@@ -3,19 +3,19 @@
 import "logical.asa";
 
 // precision used in math.asa
-begin precision: push 0.000000000000001f; end
+def precision: push 0.000000000000001f; end
 
 // round tolerance if that close to integer
-begin round_tolerance: push 0.0000000001f; end
+def round_tolerance: push 0.0000000001f; end
 
 // mathematical constant pi
-begin pi:        push 3.141592653589793f; end
+def pi:        push 3.141592653589793f; end
 
 // mathematical constant e (euler's number)
-begin e:         push 2.718281828459045f; end
+def e:         push 2.718281828459045f; end
 
 // modulo: computes the smallest positive representation of a mod b
-begin modulo: pop b; pop a;
+def modulo: pop b; pop a;
   push a; push 0; cmp; pop a_to_0;
 
   push a_to_0; ifgoto 0 rem_0;        // if a == 0, jump to rem_0
@@ -60,7 +60,7 @@ begin modulo: pop b; pop a;
 end
 
 // max: returns the maximum of two values
-begin max: pop a; pop b;
+def max: pop a; pop b;
   push a; push b; call logical/lesser_or_eq?; pop a_leq_b;
   push a_leq_b; call logical/not; pop b_gt_a;
   push a; push b_gt_a; mul;  // a * (b > a)
@@ -69,7 +69,7 @@ begin max: pop a; pop b;
 end
 
 // min: returns the minimum of two values
-begin min: pop a; pop b;
+def min: pop a; pop b;
   push a; push b; call logical/lesser_or_eq?; pop a_leq_b;
   push a_leq_b; call logical/not; pop b_gt_a;
   push a; push a_leq_b; mul;  // a * (a <= b)
@@ -78,7 +78,7 @@ begin min: pop a; pop b;
 end
 
 // abs: pushes the absolute value of the element on top of the stack
-begin abs: pop n;
+def abs: pop n;
   push n; push 0; cmp; ifgoto -1 negative;        // if n < 0 return -1 * n
   push n; pop res; goto return;                   // else     return n
   label negative; push n; push -1; mul; pop res;
@@ -86,11 +86,11 @@ begin abs: pop n;
 end
 
 // exp: computes e^x, where x => 0
-begin exp: pop x; call math/e; push x; call math/ipow; end
+def exp: pop x; call math/e; push x; call math/ipow; end
 
 // ln: computes natural log of x for x > 0 using the taylor sequence
 //   => more info on the taylor series here: https://en.wikipedia.org/wiki/Taylor_series
-begin ln: pop x;
+def ln: pop x;
   push x; push 0; call logical/greater?; ifgoto 1 compute;
   push "math/ln: input x must be greater than 0!"; raise;
 
@@ -155,12 +155,12 @@ begin ln: pop x;
 end
 
 // even?: pushes 1 to the stack if the number is even
-begin even?: pop n; 
+def even?: pop n; 
   push n; push 2; call math/modulo; push 0; call logical/equals?;
 end
 
 // factorial: calculates the nth factorial
-begin factorial: pop n;
+def factorial: pop n;
     var ans 1bi; 
     var i 1;
     label fact;
@@ -173,7 +173,7 @@ begin factorial: pop n;
 end
 
 // binomial_coeff: calculates a choose b <=> a! / ((a-b)! * b!)
-begin binomial_coeff: pop b; pop a;
+def binomial_coeff: pop b; pop a;
   push a; push b; call logical/equals?;
   ifgoto 1 ret1;                             // if a == b return 1
   // else...
@@ -192,7 +192,7 @@ end
 //   => If you have fractional exponents, compute result in
 //      combination with iroot_nth function, since
 //      b^(n/m) <=> iroot(ipow(b, n), m)
-begin ipow: pop n; pop base;
+def ipow: pop n; pop base;
   push n; push 1; call logical/equals?; ifgoto 1 retbase; // if n == 1 return base
   push n; push 0; call logical/lesser?; pop n_lt_0;       // if n < 0 then n_lt_0 = 1 else 0
 
@@ -215,7 +215,7 @@ begin ipow: pop n; pop base;
 end
 
 // iroot: approximates nth iroot of a base, where n is an integer
-begin iroot: pop n; pop base;
+def iroot: pop n; pop base;
   // Check if base > 0
   push base; push 0; call logical/greater?; ifgoto 1 check_n;
   push "math/iroot: base must be greater than 0!"; raise;

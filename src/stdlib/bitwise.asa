@@ -2,17 +2,17 @@
 // Contains functions for bitwise operations
 
 // bin: converts the top of the stack to the binary representation and pushes the string to the stack
-begin bin:
+def bin:
 end
 
 // and: pushes the result of a bitwise "and" to the stack
-begin and:
+def and:
 end
 
 // or: pushes the result of a bitwise "or" to the stack
-begin or:
+def or:
 end
 
 // xor: pushes the result of a bitwise "xor" to the stack
-begin xor:
+def xor:
 end

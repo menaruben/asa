@@ -34,7 +34,7 @@ As we can see we successfully calculated `fib(0)`, `fib(1)`, `fib(7)` and `fib(1
 # Instructions / Keywords
 The simplest and first function everyone writes when learning a new language is the classic "Hello World" example:
 ```pascal
-begin main:
+def main:
   push "Hello World!"; println;
 end
 ```
@@ -43,14 +43,14 @@ to the stack and call the instruction println. `println` prints the top of the s
 However if you don't want to append a newline you can just use the `print` instruction.
 
 ## Functions / Blocks
-In asa you can define functions by using the `begin` and `end` keyword. These functions are then called by using the
+In asa you can define functions by using `def` and `end`. These functions are then called by using the
 `call` instruction. Here is a quick example:
 ```pascal
-begin do_something:
+def do_something:
   push "doing something...";
 end
 
-begin main:
+def main:
   call do_something;
   show;
 end
@@ -60,7 +60,7 @@ The `main` function is the entrypoint of the program if we try to run it.
 ## Variables
 In order to store something in a variable we usually `push` a value onto the stack and then `pop` it into a variable:
 ```pascal
-begin main:
+def main:
   push 1; pop x; // x = 1
   push 2; pop x; // variables are mutable, therefore x = 2 now
   push x;        // we can also push the value of the variable to the stack
@@ -73,7 +73,7 @@ Instead of always needing to do `push x; push 1; add; pop x` to increment you ca
 ## Comparing data
 Asa has a `cmp` instruction which takes the two top values of the stack and compares them:
 ```pascal
-begin main:
+def main:
   push 1; push 2; cmp; // pushes -1 to stack because 1  < 2
   push 2; push 2; cmp; // pushes  0 to stack because 2 == 2
   push 3; push 2; cmp; // pushes  1 to stack because 3  > 2
@@ -84,7 +84,7 @@ end
 Labels are used to mark a position in the program and Gotos are used to jump to the position. The following program pushes 1 to the stack until we get
 a stack overflow:
 ```pascal
-begin main:
+def main:
   label loop;
   push 1;
   goto loop;
@@ -92,7 +92,7 @@ end
 ```
 Loops can also be used to skip a portion of code.
 ```pascal
-begin main:
+def main:
   push 21; pop age;
   push 18; push age; cmp; pop 18_to_age;  // 18 < 21 <=> 18_to_age = -1
 
@@ -118,7 +118,7 @@ end
 ## Math Operations
 In asa there are `add`, `sub`, `mul`, `div`, `lshift` and `rshift`. The
 ```pascal
-begin main:
+def main:
   // evaluate (3*5 + 1)/4 - 3 = 1
   push 3; push 5; mul;   // 3 * 5  = 15
   push 1; add;           // 15 + 1 = 16
@@ -147,7 +147,7 @@ Asa has a few types:
 
 You can get the type of the element on top of the stack by using the `type` instruction :
 ```pascal
-begin main:
+def main:
   push 1;              type; println; // Integer
   push 2147483650bi;   type; println; // BigInteger
   push .078f;          type; println; // Float
@@ -175,7 +175,7 @@ Char
 asa also allows us to modularize our code because it supports `import` statements. Let's say that we have the following file (in the same directory):
 > stringlib.asa:
 ```pascal
-begin concat:
+def concat:
   pop b; pop a;
   push a; push b; add;
 end
@@ -184,7 +184,7 @@ We can import `stringlib.asa` into our code by using `import`:
 ```pascal
 import "stringlib.asa";
 
-begin main:
+def main:
   push "Hi"; push " ruby!";
   call stringlib/concat; // adds namespace "stringlib"
   show;
@@ -196,7 +196,7 @@ The result of this code correctly shows `"Hi ruby!"` in the stack. As we can see
 ```pascal
 import "stringlib.asa";
 
-begin greet:
+def greet:
   pop name;
   push "Hello "; push name; call stringlib/concat;
 end
@@ -206,7 +206,7 @@ We can then import the `greeting.asa` and use the `greeting/greet` function and 
 ```pascal
 import "greeting.asa";
 
-begin main:
+def main:
   push "ruby"; call greeting/greet;
   push "a"; push b; call stringlib/concat;
   show;

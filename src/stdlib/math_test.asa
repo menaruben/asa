@@ -1,7 +1,7 @@
 import "math.asa";
 import "testing.asa";
 
-begin modulo_test:
+def modulo_test:
   // -2 mod 5 => 3
   push 3; pop want;
   push -2; push 5; call math/modulo; pop have;
@@ -23,7 +23,7 @@ begin modulo_test:
   push have; push want; push "modulo_test_4"; call testing/assert; println;
 end
 
-begin max_test:
+def max_test:
   // max(2, 5) => 5
   push 5; pop want;
   push 2; push 5; call math/max; pop have;
@@ -40,7 +40,7 @@ begin max_test:
   push have; push want; push "max_test_3"; call testing/assert; println;
 end
 
-begin min_test:
+def min_test:
   // min(2, 5) => 2
   push 2; pop want;
   push 2; push 5; call math/min; pop have;
@@ -58,7 +58,7 @@ begin min_test:
 end
 
 
-begin ipow_test:
+def ipow_test:
   // 2^5 => 32
   var want 32;
   push 2; push 5; call math/ipow; pop have;
@@ -75,7 +75,7 @@ begin ipow_test:
   push have; push want; push "ipow_test_3"; call testing/assert; println;
 end
 
-begin iroot_test:
+def iroot_test:
   // 32^(1/5) => 2
   var want 2;
   push 32; push 5; call math/iroot; pop have;
@@ -92,7 +92,7 @@ begin iroot_test:
   push have; push want; push "iroot_test_3"; call testing/assert; println;
 end
 
-begin exp_test:
+def exp_test:
   // e^2 = 7.389056098930650f
   var want 7.389056098930650f;
   push 2; call math/exp; pop have;
@@ -104,7 +104,7 @@ begin exp_test:
   push have; push want; push "exp_test_2"; call testing/assert; println;
 end
 
-begin abs_test:
+def abs_test:
   // abs(-4) => 4
   push 4; pop want;
   push -4; call math/abs; pop have;
@@ -121,7 +121,7 @@ begin abs_test:
   push have; push want; push "abs_test_3"; call testing/assert; println;
 end
 
-begin even_test:
+def even_test:
   // even(16) => 1
   push 1; pop want;
   push 16; call math/even?; pop have;
@@ -133,7 +133,7 @@ begin even_test:
   push have; push want; push "even_test_2"; call testing/assert; println;
 end
 
-begin factorial_test:
+def factorial_test:
   // 5! => 120
   var want 120;
   push 5; call math/factorial; pop have;
@@ -155,7 +155,7 @@ begin factorial_test:
   push have; push want; push "factorial_test_4"; call testing/assert; println;
 end
 
-begin binomial_coeff_test:
+def binomial_coeff_test:
   // bincoeff(5, 2) => 10
   var want 10;
   push 5; push 2; call math/binomial_coeff; pop have;
@@ -172,7 +172,7 @@ begin binomial_coeff_test:
   push have; push want; push "binomial_coeff_test_3"; call testing/assert; println;
 end
 
-begin main:
+def main:
   call modulo_test;
   call max_test;
   call min_test;

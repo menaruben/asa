@@ -2,7 +2,7 @@ import "logical.asa";
 import "testing.asa";
 
 
-begin equals_test:
+def equals_test:
   // 0 equals 1 => 0
   push 0; pop want;
   push 0; push 1; call logical/equals?; pop have;
@@ -19,7 +19,7 @@ begin equals_test:
   push have; push want; push "equals_test_1"; call testing/assert; println;
 end
 
-begin not_equals_test:
+def not_equals_test:
   // 0 not_equals 1 => 1
   push 1; pop want;
   push 0; push 1; call logical/not_equals?; pop have;
@@ -36,7 +36,7 @@ begin not_equals_test:
   push have; push want; push "not_equals_test_1"; call testing/assert; println;
 end
 
-begin not_test:
+def not_test:
   // not 1  => 0
   push 0; pop want;
   push 1; call logical/not; pop have;
@@ -59,7 +59,7 @@ begin not_test:
 end
 
 
-begin or_test:
+def or_test:
   // 0 or 0 => 0
   push 0; pop want;
   push 0; push 0; call logical/or?; pop have;
@@ -82,7 +82,7 @@ begin or_test:
 end
 
 
-begin and_test:
+def and_test:
   // 0 and 0 => 0
   push 0; pop want;
   push 0; push 0; call logical/and?; pop have;
@@ -104,7 +104,7 @@ begin and_test:
   push have; push want; push "and_test_4"; call testing/assert; println;
 end
 
-begin xor_test:
+def xor_test:
   // 0 xor 0 => 0
   push 0; pop want;
   push 0; push 0; call logical/xor?; pop have;
@@ -126,7 +126,7 @@ begin xor_test:
   push have; push want; push "xor_test_4"; call testing/assert; println;
 end
 
-begin lesser_test:
+def lesser_test:
   // 0 < 1 => 1
   push 1; pop want;
   push 0; push 1; call logical/lesser?; pop have;
@@ -143,7 +143,7 @@ begin lesser_test:
   push have; push want; push "lesser_test_3"; call testing/assert; println;
 end
 
-begin lesser_or_eq_test:
+def lesser_or_eq_test:
   // 0 <= 1 => 1
   push 1; pop want;
   push 0; push 1; call logical/lesser_or_eq?; pop have;
@@ -160,7 +160,7 @@ begin lesser_or_eq_test:
   push have; push want; push "lesser_or_eq_test_3"; call testing/assert; println;
 end
 
-begin greater_test:
+def greater_test:
   // 0 > 1 => 0
   push 0; pop want;
   push 0; push 1; call logical/greater?; pop have;
@@ -177,7 +177,7 @@ begin greater_test:
   push have; push want; push "greater_test_3"; call testing/assert; println;
 end
 
-begin greater_or_eq_test:
+def greater_or_eq_test:
   // 0 >= 1 => 0
   push 0; pop want;
   push 0; push 1; call logical/greater_or_eq?; pop have;
@@ -194,7 +194,7 @@ begin greater_or_eq_test:
   push have; push want; push "greater_or_eq_test_3"; call testing/assert; println;
 end
 
-begin main:
+def main:
   call equals_test;
   call not_equals_test;
   call not_test;

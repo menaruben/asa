@@ -17,7 +17,7 @@ enum TokenKind {
   Float,
   Double,
   BigDouble,
-  Begin,
+  Def,
   End,
   IfGoto,
   Goto,
@@ -65,7 +65,7 @@ std::string token_kind_to_str(TokenKind k) {
   case Double:      return "Double";
   case BigDouble:   return "BigDouble";
   case GetType:     return "GetType";
-  case Begin:       return "Begin";
+  case Def:         return "Def";
   case End:         return "End";
   case Goto:        return "Goto";
   case IfGoto:      return "IfGoto";
@@ -135,7 +135,7 @@ const std::regex BOOL_PATTERN("^(true|false)$");
 const std::regex IDENTIFIER_PATTERN("^[a-zA-Z_][a-zA-Z0-9_/]*\\??$"); // allow ? as suffix and / for namespaces
 
 // keyword patterns (case insensitive)
-const std::regex BEGIN_PATTERN("^Begin$", std::regex_constants::icase);
+const std::regex DEF_PATTERN("^Def$", std::regex_constants::icase);
 const std::regex END_PATTERN("^End$", std::regex_constants::icase);
 const std::regex IMPORT_PATTERN("^Import$", std::regex_constants::icase);
 const std::regex IFGOTO_PATTERN("^Ifgoto$", std::regex_constants::icase);
@@ -148,7 +148,6 @@ const std::regex CALL_PATTERN("^Call$", std::regex_constants::icase);
 const std::regex PUSH_PATTERN("^Push$", std::regex_constants::icase);
 const std::regex POP_PATTERN("^Pop$", std::regex_constants::icase);
 const std::regex CMP_PATTERN("^Cmp$", std::regex_constants::icase);
-const std::regex DEF_PATTERN("^Def$", std::regex_constants::icase);
 const std::regex LABEL_PATTERN("^Label$", std::regex_constants::icase);
 const std::regex ADD_PATTERN("^Add$", std::regex_constants::icase);
 const std::regex SUB_PATTERN("^Sub$", std::regex_constants::icase);
@@ -170,6 +169,7 @@ Token token_from_str(std::string value, int line, int column) {
   if (std::regex_match(value, STRING_PATTERN))     return {.value = value.substr(1, value.size()-2),
                                                            .kind = String, .line = line, .column = column};
 
+  // literals
   if (std::regex_match(value, INT_PATTERN))        return {.value = value, .kind = Integer, .line = line, .column = column};
   if (std::regex_match(value, BIGINT_PATTERN))     return {.value = value, .kind = BigInteger, .line = line, .column = column};
   if (std::regex_match(value, CHAR_PATTERN))       return {.value = value, .kind = Char, .line = line, .column = column};
@@ -177,7 +177,9 @@ Token token_from_str(std::string value, int line, int column) {
   if (std::regex_match(value, BIGDOUBLE_PATTERN))  return {.value = value, .kind = BigDouble, .line = line, .column = column};
   if (std::regex_match(value, DOUBLE_PATTERN))     return {.value = value, .kind = Double, .line = line, .column = column};
   if (std::regex_match(value, BOOL_PATTERN))       return {.value = value, .kind = Bool, .line = line, .column = column};
-  if (std::regex_match(value, BEGIN_PATTERN))      return {.value = value, .kind = Begin, .line = line, .column = column};
+
+  // keywords / instructions
+  if (std::regex_match(value, DEF_PATTERN))        return {.value = value, .kind = Def, .line = line, .column = column};
   if (std::regex_match(value, END_PATTERN))        return {.value = value, .kind = End, .line = line, .column = column};
   if (std::regex_match(value, IMPORT_PATTERN))     return {.value = value, .kind = Import, .line = line, .column = column};
   if (std::regex_match(value, IFGOTO_PATTERN))     return {.value = value, .kind = IfGoto, .line = line, .column = column};

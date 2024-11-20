@@ -118,9 +118,9 @@ void parse_import(int &index, vector<Token> *tokens, Program *program,
   }
 }
 
-void parse_begin(int &index, vector<Token> *tokens, Program *program,
+void parse_def(int &index, vector<Token> *tokens, Program *program,
                  string &current_block) {
-  index++; // skip begin
+  index++; // skip def
   string errmsg;
   Token current_block_tok = (*tokens)[index++];
   check_expected(TokenKind::Identifier, current_block_tok.kind, (*tokens)[index-1].line);
@@ -319,8 +319,8 @@ Program load_program(vector<Token> tokens) {
       break;
     }
 
-    case TokenKind::Begin: {
-      parse_begin(i, &tokens, &program, current_block);
+    case TokenKind::Def: {
+      parse_def(i, &tokens, &program, current_block);
       break;
     }
 
