@@ -1,4 +1,0 @@
-begin main:
-  push 1; str;
-  show;
-end

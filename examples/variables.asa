@@ -1,4 +1,4 @@
-begin main:
+def main:
   var x 1;       // either declare variables like that
   push 2; pop y; // or like that (pop is also used to update the value of variables)
   var x 3;       // can also overwrite variable with var

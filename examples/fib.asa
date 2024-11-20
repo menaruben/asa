@@ -1,6 +1,6 @@
 import "logical.asa";
 
-begin fib: pop n;
+def fib: pop n;
     push n; push 0; cmp; ifgoto 0 ret0;             // if n == 0 return 0
     push n; push 1; cmp; ifgoto 0 ret1;             // if n == 1 return 1
 
@@ -21,7 +21,7 @@ begin fib: pop n;
     label ret;  push result;                        // push value of result to stack
 end
 
-begin main:
+def main:
     push 0;  call fib;
     push 1;  call fib;
     push 7;  call fib;

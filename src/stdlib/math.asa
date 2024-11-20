@@ -5,14 +5,14 @@ import "logical.asa";
 // precision used in math.asa
 def precision: push 0.000000000000001f; end
 
-// round tolerance if that close to integer
+// round tolerance if that close to integer => round
 def round_tolerance: push 0.0000000001f; end
 
 // mathematical constant pi
-def pi:        push 3.141592653589793f; end
+def pi: push 3.141592653589793f; end
 
 // mathematical constant e (euler's number)
-def e:         push 2.718281828459045f; end
+def e:  push 2.718281828459045f; end
 
 // modulo: computes the smallest positive representation of a mod b
 def modulo: pop b; pop a;

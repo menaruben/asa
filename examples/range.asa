@@ -1,4 +1,4 @@
-begin range:
+def range:
     pop until;                               // Get the upper limit
     pop from;                                // Get the lower limit
     push from; pop i;                        // Initialize i to start from 'from'
@@ -9,7 +9,7 @@ begin range:
     push i; push until; cmp; ifgoto 0 loop;
 end
 
-begin main:
+def main:
     push 3;
     push 9;
     call range;

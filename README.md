@@ -21,7 +21,7 @@ I am not a C++ developer so keep that in mind but I will definitely clean up and
 fyi: I have written a [tree-sitter grammar for asa](https://github.com/menaruben/tree-sitter-asa) to support
 syntax highlighting for a better experience as I previously used a pascal mode in my editor to have some sort of highlighting. :)
 
-![fibonacci computation in asa](./imgs/fib_asa.png)
+![fibonacci computation in asa](./imgs/fib.png)
 ```
 Stack:
     Value: 55, Type: Integer

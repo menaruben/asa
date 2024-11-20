@@ -1,4 +1,4 @@
-begin main:
+def main:
 	// evaluate (3*5 + 1)/4 - 3
 	push 3; push 5; mul;
 	push 1; add; 

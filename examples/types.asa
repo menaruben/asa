@@ -1,4 +1,4 @@
-begin main:
+def main:
   push 1;              type; println; // Integer
   push 2147483650bi;   type; println; // BigInteger
   push .078f;          type; println; // Float

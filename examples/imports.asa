@@ -1,6 +1,6 @@
 import "stringlib.asa";
 
-begin main:
+def main:
     push "Hi"; push " User!";
     call stringlib/concat;
     show;

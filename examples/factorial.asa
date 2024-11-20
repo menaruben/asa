@@ -1,4 +1,4 @@
-begin factorial:
+def factorial:
     pop n;
     push 1; pop ans;
     push 1; pop i;
@@ -12,7 +12,7 @@ begin factorial:
     push ans;
 end
 
-begin main:
+def main:
     push 10;
     call factorial;
     show;
