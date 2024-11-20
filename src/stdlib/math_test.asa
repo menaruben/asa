@@ -90,6 +90,11 @@ def iroot_test:
   push 2; pop want;
   push 8; push 3; call math/iroot; pop have;
   push have; push want; push "iroot_test_3"; call testing/assert; println;
+
+  // 420^(1/69) = 1.091485839346317601
+  push 1.091485839346317601f; pop want;
+  push 420; push 69; call math/iroot; pop have;
+  push have; push want; push "iroot_test_4"; call testing/assert; println;
 end
 
 def exp_test:

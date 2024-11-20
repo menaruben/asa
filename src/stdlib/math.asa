@@ -6,6 +6,7 @@ import "logical.asa";
 def precision: push 0.000000000000001f; end
 
 // round tolerance if that close to integer => round
+//   => not used by default! 
 def round_tolerance: push 0.0000000001f; end
 
 // mathematical constant pi
@@ -20,7 +21,7 @@ def modulo: pop b; pop a;
 
   push a_to_0; ifgoto 0 rem_0;        // if a == 0, jump to rem_0
   push a_to_0; ifgoto 1 a_greater_0;  // if a  > 0, jump to a_greater_0
-  // else: here means a < 0 (negativ)
+  // else: here means a < 0 (negative)
   // => add b to a until a >= 0
   label a_lesser_0;
     push a; push b; add; pop a;
@@ -214,56 +215,84 @@ def ipow: pop n; pop base;
   label ret;     push res;
 end
 
-// iroot: approximates nth iroot of a base, where n is an integer
+// iroot: computes the nth root of base
+//   => using newton raphson method to approximate integer root
+// def iroot:
+//   pop n; pop base;
+//   var corr 0.0bd; // correction
+//   var res 1.0bd;  // res
+  
+//   push base; push 0.0bd; call logical/equals?; 
+//   ifgoto 1 ret0;
+  
+//   push n; push 1; call logical/lesser?; 
+//   ifgoto 1 return_nan;
+  
+//   push base; push 0.0bd; call logical/lesser?; ifgoto 1 check_even;
+//   goto compute;
+
+//   label check_even;
+//     push n; call math/even?; ifgoto 1 return_nan;
+
+//   label compute;
+//     label loop;
+//       push base; push res; push n; push 1; sub; call math/ipow; div; push res; sub; push n; div; pop corr;
+//       push res; push corr; add; pop res;
+//       push corr; call math/abs; call math/precision; call logical/greater_or_eq?; ifgoto 1 loop;
+  
+//   label ret0;
+//     push 0.0bd; goto ret;
+
+//   label return_nan;
+//     push "math/iroot: exponent n must be integer and n >= 1"; raise;
+
+//   label ret;
+//     push res;
+// end
+
+
+// iroot: computes the nth root of base using the Newton-Raphson method
 def iroot: pop n; pop base;
-  // Check if base > 0
-  push base; push 0; call logical/greater?; ifgoto 1 check_n;
-  push "math/iroot: base must be greater than 0!"; raise;
+  var corr 0.0bd; // Correction term for Newton-Raphson update
+  var res 1.0bd;  // Initial approximation of the nth root
+  
+  // If base is 0, return 0
+  push base; push 0.0bd; call logical/equals?; 
+  ifgoto 1 ret_0;
+  
+  // If n is less than 1, raise an error
+  push n; push 1; call logical/lesser?; 
+  ifgoto 1 ret_nan;
+  
+  // If base is less than 0 and n is even, raise an error (no real root)
+  push base; push 0.0bd; call logical/lesser?; ifgoto 1 check_even;
+  goto compute;
 
-  // Check if n > 0
-  label check_n;
-    push n; push 0; call logical/greater?; ifgoto 1 find_ceil;
-    push "math/iroot: can only be computed, where n (exponent) > 0!"; raise;
+  label check_even;
+    push n; call math/even?; ifgoto 1 ret_no_real_root;
 
-  // Handle the special case n == 1
-  label find_ceil;
-    push n; push 1; call logical/equals?; ifgoto 1 retbase; 
-    var lower_bound 0.0bd;        // Correct lower bound initialization
-    var upper_bound 0.0bd;
-    push base; push 1; call logical/lesser?; ifgoto 1 small_base;
-    push base; pop upper_bound;  // Case where base >= 1
-    goto approx_loop;
+  // Compute the nth root using the Newton-Raphson method
+  label compute;
+    label loop;
+      // corr = ((base / (res^(n-1))) - res) / n
+      push base; 
+      push res; push n; push 1; sub; call math/ipow; div;
+      push res; sub; push n; div; pop corr;
 
-    label small_base;
-      push 1.0bd; pop upper_bound; // Case where base < 1
+      // res = res + corr
+      push res; push corr; add; pop res;
 
-    label approx_loop;
-      push lower_bound; push upper_bound; add; push 2; div; pop mid; // mid = (lower_bound + upper_bound) / 2
-      push mid; push n; call math/ipow; pop mid_res;                 // mid_res = mid^n
+      // continue until corr < precision, else return res
+      push corr; call math/abs; call math/precision; 
+      call logical/greater_or_eq?; ifgoto 1 loop; goto ret;
+  
+  label ret_0; push 0.0bd; pop res; goto ret;
 
-      push mid_res; push base; call logical/lesser?; ifgoto 1 adjust_lb;
-      push mid; pop upper_bound;                                     // if mid_res >= base => upper_bound = mid
-      goto after_adj;
-
-      label adjust_lb;
-        push mid; pop lower_bound;                                   // if mid_res < base => lower_bound = mid
-
-      label after_adj;
-        push upper_bound; push lower_bound; sub; call math/precision;
-        call logical/greater?; ifgoto 1 approx_loop;                 // Continue loop if bounds are not precise enough
-
-  // ... else compute final result
-  push lower_bound; push upper_bound; add; push 2; div; pop res;     // res = (lower_bound + upper_bound)/2
-  push res; round; pop closest_int;                                  // closest_int = round(res)
-  push res; push closest_int; sub; call math/abs; pop delta;         // delta = abs(res - closest_int)
-  push delta; call math/round_tolerance; call logical/lesser_or_eq?; // if delta <= round_tolerance => round result
-  ifgoto 0 ret;                                                      // else return res
-  push res; round; pop res; goto ret;
-
-  // Handle n == 1 case
-  label retbase; 
-    push base; pop res; 
-    goto ret;
+  label ret_nan; 
+    push "math/iroot: cannot compute nth root because n must be integer and n >= 1"; raise;
+    
+  label ret_no_real_root; 
+    push "math/iroot: cannot compute nth root because b < 0 and n is even => no real root"; raise;
 
   label ret; push res;
 end
