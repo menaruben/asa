@@ -1,8 +1,13 @@
+#include "AsaDouble.hpp"
+#include "AsaFloat.hpp"
+#include "AsaInteger.hpp"
+#include "AsaString.hpp"
 #include "Tokens.hpp"
 #include "Lexer.hpp"
 #include "instructions.hpp"
 #include "fileread.hpp"
 #include "messages.hpp"
+#include "objects.hpp"
 #include <cstddef>
 #include <filesystem>
 #include <sstream>
@@ -140,7 +145,31 @@ void parse_push(int &index, vector<Token> *tokens, Program *program,
   } else {
     try {
       asa::Type type = token_kind_to_asatype(id_tok.kind);
-      (*program)[current_block].instructions.push_back(PUSH(id_tok.value, type));
+      switch (type) {
+        case asa::Integer: {
+          AsaInteger o = AsaInteger(stoi(id_tok.value));  
+          (*program)[current_block].instructions.push_back(PUSH(o));
+        }
+        
+        case asa::Float: {
+          AsaFloat o = AsaFloat(stof(id_tok.value));  
+          (*program)[current_block].instructions.push_back(PUSH(o));
+        }
+        
+        case asa::Double: {
+          AsaDouble o = AsaDouble(stod(id_tok.value));  
+          (*program)[current_block].instructions.push_back(PUSH(o));
+        }
+
+        case asa::String: {
+          AsaString o = AsaString(id_tok.value);
+          (*program)[current_block].instructions.push_back(PUSH(o));
+        }
+
+        default:
+          throw runtime_error("Not Implemented");
+      }
+      
     } catch (runtime_error e) {
       string errmsg = string(e.what()) + ", at ";
       errmsg += to_string(id_tok.line) + ", in block " + current_block + '\n';
@@ -220,19 +249,46 @@ void parse_ifgoto(int &index, vector<Token> *tokens, Program *program,
                   string &current_block) {
   check_current_block(current_block, TokenKind::IfGoto, (*tokens)[index].line);
   index++; // skip ifgoto
-  Token expected_num = (*tokens)[index++];
-  check_expected(TokenKind::Integer, expected_num.kind, expected_num.line);
-  if (expected_num.value != "-1" &&
-      expected_num.value != "0" &&
-      expected_num.value != "1") {
+  Token expected = (*tokens)[index++];
+  check_expected(TokenKind::Integer, expected.kind, expected.line);
+  if (expected.value != "-1" &&
+      expected.value != "0" &&
+      expected.value != "1") {
     string errmsg = msgs::expected_but_got_at_line(
-      "-1, 0 or 1", expected_num.value, expected_num.line);
+      "-1, 0 or 1", expected.value, expected.line);
     throw runtime_error(errmsg);
   }
   Token label_id = (*tokens)[index++];
   check_expected(TokenKind::Identifier, label_id.kind, label_id.line);
-  (*program)[current_block].instructions.push_back(
-      IFGOTO(expected_num.value, label_id.value));
+
+  asa::Type expected_t = token_kind_to_asatype(expected.kind);
+  switch (expected_t) {
+    case asa::Integer: {
+      AsaInteger o = AsaInteger(stoi(expected.value));
+      (*program)[current_block].instructions.push_back(
+        IFGOTO(o, label_id.value));
+    }
+    case asa::Float: {
+      AsaFloat o = AsaFloat(stof(expected.value));
+      (*program)[current_block].instructions.push_back(
+        IFGOTO(o, label_id.value));
+    }
+    case asa::Double: {
+      AsaDouble o = AsaDouble(stod(expected.value));
+      (*program)[current_block].instructions.push_back(
+        IFGOTO(o, label_id.value));
+    }
+    
+    case asa::String: {
+      AsaString o = AsaString(expected.value);
+      (*program)[current_block].instructions.push_back(
+        IFGOTO(o, label_id.value));
+    }
+
+    default:
+      throw runtime_error("Not Implemented");
+  }
+  
   Token sc = (*tokens)[index];
   check_expected(TokenKind::Semicolon, sc.kind, sc.line);
 }
@@ -246,8 +302,29 @@ void parse_var(int &index, vector<Token> *tokens, Program *program,
   Token value = (*tokens)[index++];
 
   try {
-    (*program)[current_block].instructions.push_back(
-        DEF(id.value, value.value, token_kind_to_asatype(value.kind)));
+    asa::Type type = token_kind_to_asatype(value.kind);
+    switch (type) {
+    case asa::Integer: {
+      AsaInteger o = AsaInteger(stoi(value.value));  
+      (*program)[current_block].instructions.push_back(DEF(id.value, o));
+    }
+    
+    case asa::Float: {
+      AsaFloat o = AsaFloat(stof(id.value));  
+      (*program)[current_block].instructions.push_back(DEF(id.value, o));
+    }
+    
+    case asa::Double: {
+      AsaDouble o = AsaDouble(stod(id.value));  
+      (*program)[current_block].instructions.push_back(DEF(id.value, o));
+    }
+    case asa::String: {
+      AsaString o = AsaString(id.value);
+      (*program)[current_block].instructions.push_back(DEF(id.value, o));
+    }
+    default:
+      throw runtime_error("Not Implemented");
+    }
   } catch (runtime_error e) {
     string errmsg = string(e.what()) + ", at ";
     errmsg += to_string(value.line) + ", in block " + current_block + '\n';

@@ -1,0 +1,65 @@
+#pragma once
+#include "AsaObject.hpp"
+#include "AsaObject.hpp"
+#include "AsaString.hpp"
+#include "AsaInteger.hpp"
+#include <string>
+#include <cmath>
+
+
+using namespace asa;
+
+class AsaDouble : public AsaObject {
+private:
+  int double_value;
+
+public:
+  AsaDouble(double val)
+      : AsaObject(to_string(val), Double), double_value(val) {}
+
+  double get_value() const { return double_value; }
+  void set_value(double v) { double_value = v; }
+  string str() const { return to_string(double_value); }
+
+  AsaString  add(AsaString o)  { return AsaString(str() + o.get_value()); }
+  AsaDouble  add(AsaInteger o) { return AsaDouble(double_value + o.get_value()); }
+  AsaDouble  add(AsaFloat o)   { return AsaDouble(double_value + o.get_value()); }
+  AsaDouble  add(AsaDouble o)  { return AsaDouble(double_value + o.get_value()); }
+
+  AsaDouble  sub(AsaInteger o) { return AsaDouble(double_value - o.get_value()); }
+  AsaDouble  sub(AsaFloat o)   { return AsaDouble(double_value - o.get_value()); }
+  AsaDouble  sub(AsaDouble o)  { return AsaDouble(double_value - o.get_value()); }
+
+  AsaDouble  mul(AsaInteger o) { return AsaDouble(double_value * o.get_value()); }
+  AsaDouble  mul(AsaFloat o)   { return AsaDouble(double_value * o.get_value()); }
+  AsaDouble  mul(AsaDouble o)  { return AsaDouble(double_value * o.get_value()); }
+
+  AsaDouble  div(AsaInteger o) { return AsaDouble(double_value / double(o.get_value())); }
+  AsaDouble  div(AsaFloat o)  { return AsaDouble(double_value / double(o.get_value())); }
+  AsaDouble  div(AsaDouble o)  { return AsaDouble(double_value / o.get_value()); }
+
+  AsaDouble ceil()  { return AsaDouble(std::ceil(double_value)); }
+  AsaDouble floor() { return AsaDouble(std::floor(double_value)); }
+  AsaDouble round() { return AsaDouble(std::round(double_value)); }
+
+  AsaDouble incr() { return AsaDouble(double_value + 1); }
+  AsaDouble decr() { return AsaDouble(double_value - 1); }
+  
+  AsaInteger cmp(AsaInteger o) {
+    if (double_value < o.get_value())  return AsaInteger(-1);
+    if (double_value == o.get_value()) return AsaInteger(0);
+    return AsaInteger(1);
+  }
+  
+  AsaInteger cmp(AsaFloat o) {
+    if (double_value < o.get_value())  return AsaInteger(-1);
+    if (double_value == o.get_value()) return AsaInteger(0);
+    return AsaInteger(1);
+  }
+  
+  AsaInteger cmp(AsaDouble o) {
+    if (double_value < o.get_value())  return AsaInteger(-1);
+    if (double_value == o.get_value()) return AsaInteger(0);
+    return AsaInteger(1);
+  }
+};

@@ -29,15 +29,15 @@ int main(int argc, char **argv) {
   string source = read_file(sourcepath, "//");
   vector<Token> tokens = lexer::tokenize(source);
   Program program = load_program(tokens);
-  list<asa::Object> stack;
+  list<AsaObject> stack;
   if (program.find("main") == program.end()) {
     cout << "[ERROR]: No entry point 'main' found!" << endl;
   }
 
   if (action == "run") {
-    Object result = interpreter::eval(program, "main", &stack);
-    if (result.error != Ok) {
-      cout << "[ERROR]: " << result.value << endl;
+    AsaObject result = interpreter::eval(program, "main", &stack);
+    if (result.get_error_type() != Ok) {
+      cout << result.get_error() << endl;
       return -1;
     }
   } else if (action == "build") {
