@@ -192,7 +192,7 @@ void parse_push(int &index, vector<Token> *tokens, Program *program,
     } catch (runtime_error e) {
       string errmsg = string(e.what()) + ", at ";
       errmsg += to_string(id_tok.line) + ", in block " + current_block + '\n' +
-                e.what();
+                "input: " + id_tok.value + " tried to push type " + token_kind_to_str(id_tok.kind);
       throw runtime_error(errmsg);
     }
   }
@@ -332,7 +332,8 @@ void parse_ifgoto(int &index, vector<Token> *tokens, Program *program,
                           type_to_str(expected_t));
     }
   } catch (runtime_error e) {
-    throw runtime_error("Error in ifgoto: " + string(e.what()));
+    throw runtime_error("Error in ifgoto: " + string(e.what()) + "\n"
+                        + ", expected value: " + expected.value + ", value type: " + token_kind_to_str(expected.kind));
   }
 
   Token sc = (*tokens)[index];
@@ -386,6 +387,7 @@ void parse_var(int &index, vector<Token> *tokens, Program *program,
   } catch (runtime_error e) {
     string errmsg = string(e.what()) + ", at ";
     errmsg += to_string(value.line) + ", in block " + current_block + '\n';
+    errmsg += "var value: " + value.value + ", type: " + token_kind_to_str(value.kind);
     throw runtime_error(errmsg);
   }
 

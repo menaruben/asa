@@ -32,12 +32,6 @@ public:
   std::string get_type_str() const { return type_to_str(type); }
 
   virtual std::string str() const { return value; }
-  virtual AsaObject to_int();
-  virtual AsaObject to_bigint();
-  virtual AsaObject to_float();
-  virtual AsaObject to_double();
-  virtual AsaObject to_bigdouble();
-
   virtual AsaObject add(AsaObject o);
   virtual AsaObject sub(AsaObject o);
   virtual AsaObject mul(AsaObject o);

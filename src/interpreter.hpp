@@ -1,3 +1,5 @@
+#pragma once
+
 #include "AsaBigDouble.hpp"
 #include "AsaBigInteger.hpp"
 #include "AsaObject.hpp"
@@ -10,6 +12,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include "AsaTypeConverter.hpp"
 
 using namespace instructions;
 using namespace transpiler;
@@ -141,17 +144,17 @@ AsaObject eval(Program program, string entryPoint, list<AsaObject> *stack) {
     case InstructionKind::DefVar: {
       switch (inst.operand.get_type()) {
       case asa::Integer: {
-        variables[inst.id] = AsaInteger(stoi(inst.operand.str()));
+        variables[inst.id] = to_int(inst.operand);
         break;
       }
 
       case asa::Float: {
-        variables[inst.id] = AsaFloat(stof(inst.operand.str()));
+        variables[inst.id] = to_float(inst.operand);
         break;
       }
 
       case asa::Double: {
-        variables[inst.id] = AsaDouble(stod(inst.operand.str()));
+        variables[inst.id] = to_double(inst.operand);
         break;
       }
 
@@ -161,12 +164,12 @@ AsaObject eval(Program program, string entryPoint, list<AsaObject> *stack) {
       }
 
       case asa::BigInteger: {
-        variables[inst.id] = AsaBigInteger(stoll(inst.operand.str()));
+        variables[inst.id] = to_bigint(inst.operand);
         break;
       }
 
       case asa::BigDouble: {
-        variables[inst.id] = AsaBigDouble(stold(inst.operand.str()));
+        variables[inst.id] = to_bigdouble(inst.operand);
         break;
       }
 
