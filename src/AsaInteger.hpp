@@ -1,57 +1,37 @@
 #pragma once
 
-#include "AsaDouble.hpp"
-#include "AsaFloat.hpp"
 #include "AsaObject.hpp"
-#include "AsaString.hpp"
 #include <string>
-
-using namespace asa;
 
 class AsaInteger : public AsaObject {
 private:
-    int int_value;
+  int int_value;
 
 public:
-    AsaInteger(int val);
+  AsaInteger(int val);
 
-    int get_value() const;
-    void set_value(int v);
-    std::string str() const;
+  int get_value() const;
+  void set_value(int v);
+  std::string str() const;
 
-    AsaString  add(AsaString o);
-    AsaInteger add(AsaInteger o);
-    AsaFloat   add(AsaFloat o);
-    AsaDouble  add(AsaDouble o);
+  AsaObject add(AsaObject o);
+  AsaObject sub(AsaObject o);
+  AsaObject mul(AsaObject o);
+  AsaObject div(AsaObject o);
+  AsaObject lshift(AsaObject o);
+  AsaObject rshift(AsaObject o);
 
-    AsaInteger sub(AsaInteger o);
-    AsaFloat   sub(AsaFloat o);
-    AsaDouble  sub(AsaDouble o);
+  AsaObject bitwise_or(AsaObject o);
+  AsaObject bitwise_xor(AsaObject o);
+  AsaObject bitwise_and(AsaObject o);
+  AsaObject bitwise_not();
 
-    AsaInteger mul(AsaInteger o);
-    AsaFloat   mul(AsaFloat o);
-    AsaDouble  mul(AsaDouble o);
+  AsaObject ceil();
+  AsaObject floor();
+  AsaObject round();
 
-    AsaInteger div(AsaInteger o);
-    AsaFloat   div(AsaFloat o);
-    AsaDouble  div(AsaDouble o);
+  AsaObject incr();
+  AsaObject decr();
 
-    AsaInteger lshift(AsaInteger o);
-    AsaInteger rshift(AsaInteger o);
-
-    AsaInteger bitwise_or(AsaInteger o);
-    AsaInteger bitwise_xor(AsaInteger o);
-    AsaInteger bitwise_and(AsaInteger o);
-    AsaInteger bitwise_not();
-
-    AsaInteger ceil();
-    AsaInteger floor();
-    AsaInteger round();
-
-    AsaInteger incr();
-    AsaInteger decr();
-
-    AsaInteger cmp(AsaInteger o);
-    AsaInteger cmp(AsaFloat o);
-    AsaInteger cmp(AsaDouble o);
+  AsaObject cmp(AsaObject o);
 };

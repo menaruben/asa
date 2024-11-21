@@ -1,97 +1,60 @@
 #include "AsaInteger.hpp"
+#include "AsaObject.hpp"
 #include <string>
 
 AsaInteger::AsaInteger(int val)
     : AsaObject(std::to_string(val), Integer), int_value(val) {}
 
 int AsaInteger::get_value() const { return int_value; }
+
 void AsaInteger::set_value(int v) { int_value = v; }
+
 std::string AsaInteger::str() const { return std::to_string(int_value); }
 
-AsaString AsaInteger::add(AsaString o) {
-  return AsaString(str() + o.get_value());
-}
-AsaInteger AsaInteger::add(AsaInteger o) {
-  return AsaInteger(int_value + o.get_value());
-}
-AsaFloat AsaInteger::add(AsaFloat o) {
-  return AsaFloat(int_value + o.get_value());
-}
-AsaDouble AsaInteger::add(AsaDouble o) {
-  return AsaDouble(int_value + o.get_value());
+AsaObject AsaInteger::add(AsaObject o) {
+  return AsaInteger(int_value + stoi(o.str()));
 }
 
-AsaInteger AsaInteger::sub(AsaInteger o) {
-  return AsaInteger(int_value - o.get_value());
-}
-AsaFloat AsaInteger::sub(AsaFloat o) {
-  return AsaFloat(int_value - o.get_value());
-}
-AsaDouble AsaInteger::sub(AsaDouble o) {
-  return AsaDouble(int_value - o.get_value());
+AsaObject AsaInteger::sub(AsaObject o) {
+  return AsaInteger(int_value - stoi(o.str()));
 }
 
-AsaInteger AsaInteger::mul(AsaInteger o) {
-  return AsaInteger(int_value * o.get_value());
-}
-AsaFloat AsaInteger::mul(AsaFloat o) {
-  return AsaFloat(int_value * o.get_value());
-}
-AsaDouble AsaInteger::mul(AsaDouble o) {
-  return AsaDouble(int_value * o.get_value());
+AsaObject AsaInteger::mul(AsaObject o) {
+  return AsaInteger(int_value * stoi(o.str()));
 }
 
-AsaInteger AsaInteger::div(AsaInteger o) {
-  return AsaInteger(int_value / o.get_value());
-}
-AsaFloat AsaInteger::div(AsaFloat o) {
-  return AsaFloat(int_value / o.get_value());
-}
-AsaDouble AsaInteger::div(AsaDouble o) {
-  return AsaDouble(int_value / o.get_value());
+AsaObject AsaInteger::div(AsaObject o) {
+  return AsaInteger(int_value / stoi(o.str()));
 }
 
-AsaInteger AsaInteger::lshift(AsaInteger o) {
-  return AsaInteger(int_value << o.get_value());
+AsaObject AsaInteger::lshift(AsaObject o) {
+  return AsaInteger(int_value << stoi(o.str()));
 }
-AsaInteger AsaInteger::rshift(AsaInteger o) {
-  return AsaInteger(int_value >> o.get_value());
-}
-
-AsaInteger AsaInteger::bitwise_or(AsaInteger o) {
-  return AsaInteger(int_value | o.get_value());
-}
-AsaInteger AsaInteger::bitwise_xor(AsaInteger o) {
-  return AsaInteger(int_value ^ o.get_value());
-}
-AsaInteger AsaInteger::bitwise_and(AsaInteger o) {
-  return AsaInteger(int_value & o.get_value());
-}
-AsaInteger AsaInteger::bitwise_not() { return AsaInteger(~int_value); }
-
-AsaInteger AsaInteger::ceil() { return AsaInteger(int_value); }
-AsaInteger AsaInteger::floor() { return AsaInteger(int_value); }
-AsaInteger AsaInteger::round() { return AsaInteger(int_value); }
-
-AsaInteger AsaInteger::incr() { return AsaInteger(int_value + 1); }
-AsaInteger AsaInteger::decr() { return AsaInteger(int_value - 1); }
-
-AsaInteger AsaInteger::cmp(AsaInteger o) {
-  if (int_value < o.get_value())
-    return AsaInteger(-1);
-  if (int_value == o.get_value())
-    return AsaInteger(0);
-  return AsaInteger(1);
+AsaObject AsaInteger::rshift(AsaObject o) {
+  return AsaInteger(int_value >> stoi(o.str()));
 }
 
-AsaInteger AsaInteger::cmp(AsaFloat o) {
-  if (int_value < o.get_value())  return AsaInteger(-1);
-  if (int_value == o.get_value()) return AsaInteger(0);
-  return AsaInteger(1);
+AsaObject AsaInteger::bitwise_or(AsaObject o) {
+  return AsaInteger(int_value | stoi(o.str()));
+}
+AsaObject AsaInteger::bitwise_xor(AsaObject o) {
+  return AsaInteger(int_value ^ stoi(o.str()));
+}
+AsaObject AsaInteger::bitwise_and(AsaObject o) {
+  return AsaInteger(int_value & stoi(o.str()));
 }
 
-AsaInteger AsaInteger::cmp(AsaDouble o) {
-  if (int_value < o.get_value())  return AsaInteger(-1);
-  if (int_value == o.get_value()) return AsaInteger(0);
+AsaObject AsaInteger::bitwise_not() { return AsaInteger(~int_value); }
+
+AsaObject AsaInteger::ceil() { return AsaInteger(int_value); }
+AsaObject AsaInteger::floor() { return AsaInteger(int_value); }
+AsaObject AsaInteger::round() { return AsaInteger(int_value); }
+
+AsaObject AsaInteger::incr() { return AsaInteger(int_value + 1); }
+AsaObject AsaInteger::decr() { return AsaInteger(int_value - 1); }
+
+AsaObject AsaInteger::cmp(AsaObject o) {
+  if (int_value < stoi(o.str()))  return AsaInteger(-1);
+  if (int_value == stoi(o.str())) return AsaInteger(0);
   return AsaInteger(1);
 }

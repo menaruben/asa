@@ -3,27 +3,29 @@
 #include "AsaObject.hpp"
 #include <string>
 
-// Forward declarations
-class AsaInteger;
-class AsaFloat;
-class AsaString;
-
-class AsaDouble : public AsaObject {
+class AsaBigInteger : public AsaObject {
 private:
-  double double_value;
+  long long int int_value;
 
 public:
-  AsaDouble(double val);
+  AsaBigInteger(long long int val);
 
-  double get_value() const;
-  void set_value(double v);
+  int get_value() const;
+  void set_value(int v);
   std::string str() const;
 
   AsaObject add(AsaObject o);
   AsaObject sub(AsaObject o);
   AsaObject mul(AsaObject o);
   AsaObject div(AsaObject o);
-  
+  AsaObject lshift(AsaObject o);
+  AsaObject rshift(AsaObject o);
+
+  AsaObject bitwise_or(AsaObject o);
+  AsaObject bitwise_xor(AsaObject o);
+  AsaObject bitwise_and(AsaObject o);
+  AsaObject bitwise_not();
+
   AsaObject ceil();
   AsaObject floor();
   AsaObject round();

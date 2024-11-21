@@ -8,12 +8,12 @@ class AsaInteger;
 class AsaFloat;
 class AsaString;
 
-class AsaDouble : public AsaObject {
+class AsaBigDouble : public AsaObject {
 private:
-  double double_value;
+  long double double_value;
 
 public:
-  AsaDouble(double val);
+  AsaBigDouble(long double val);
 
   double get_value() const;
   void set_value(double v);
@@ -23,7 +23,7 @@ public:
   AsaObject sub(AsaObject o);
   AsaObject mul(AsaObject o);
   AsaObject div(AsaObject o);
-  
+
   AsaObject ceil();
   AsaObject floor();
   AsaObject round();

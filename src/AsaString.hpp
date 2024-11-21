@@ -1,27 +1,24 @@
 #pragma once
-#include "AsaObject.hpp"
+
 #include "AsaInteger.hpp"
+#include "AsaObject.hpp"
+#include <string>
 
 using namespace asa;
 
 class AsaString : public AsaObject {
 private:
-  string str_value;
+  std::string str_value;
 
 public:
-  AsaString(string val) : AsaObject(val, String), str_value(val) {}
+  AsaString(std::string val);
+  ~AsaString();
 
-  string get_value() const { return str_value; }
-  void set_value(string val) { str_value = val; }
+  std::string get_value() const;
+  void set_value(std::string val);
 
-  AsaString add(AsaObject o) {
-    string val = str_value + o.str();
-    return AsaString(val);
-  }
+  AsaObject add(AsaObject o);
+  AsaInteger cmp(AsaString o);
 
-  AsaInteger cmp(AsaString o) {
-    if (str_value < o.get_value()) return AsaInteger(-1);
-    if (str_value == o.get_value()) return AsaInteger(0);
-    return AsaInteger(1);
-  }
+  std::string str() const;
 };

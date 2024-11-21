@@ -1,11 +1,14 @@
+#include "AsaBigDouble.hpp"
+#include "AsaBigInteger.hpp"
 #include "AsaDouble.hpp"
 #include "AsaFloat.hpp"
 #include "AsaInteger.hpp"
+#include "AsaObject.hpp"
 #include "AsaString.hpp"
-#include "Tokens.hpp"
 #include "Lexer.hpp"
-#include "instructions.hpp"
+#include "Tokens.hpp"
 #include "fileread.hpp"
+#include "instructions.hpp"
 #include "messages.hpp"
 #include "objects.hpp"
 #include <cstddef>
@@ -44,20 +47,18 @@ struct Block {
 };
 typedef unordered_map<string, Block> Program;
 
-
 void check_expected(TokenKind expected, TokenKind got, int line) {
   if (expected != got) {
     string errmsg = msgs::expected_but_got_at_line(
-      token_kind_to_str(expected),
-      token_kind_to_str(got), line);
+        token_kind_to_str(expected), token_kind_to_str(got), line);
     throw runtime_error(errmsg);
   }
 }
 
 void check_current_block(string current_block, TokenKind got, int line) {
   if (current_block == "") {
-    string errmsg = msgs::expected_but_got_at_line(
-      "block", token_kind_to_str(got), line);
+    string errmsg =
+        msgs::expected_but_got_at_line("block", token_kind_to_str(got), line);
     throw runtime_error(errmsg);
   }
 }
@@ -66,21 +67,21 @@ void check_current_block(string current_block, TokenKind got, int line) {
 Program load_program(vector<Token> tokens);
 
 // Forward declaration of parse_import
-void parse_import(int &index, vector<Token> *tokens, Program *program, string &current_block);
+void parse_import(int &index, vector<Token> *tokens, Program *program,
+                  string &current_block);
 
 bool has_namespace(const string &blockname) {
   return blockname.find('/') != string::npos;
 }
 
 void parse_import(int &index, vector<Token> *tokens, Program *program,
-                 string &current_block) {
+                  string &current_block) {
   index++; // skip import
   string errmsg;
   Token filepath = (*tokens)[index++];
   if (filepath.kind != TokenKind::String) {
     errmsg = msgs::expected_but_got_at_line(
-        "string", token_kind_to_str(filepath.kind),
-        (*tokens)[index - 1].line);
+        "string", token_kind_to_str(filepath.kind), (*tokens)[index - 1].line);
     throw runtime_error(errmsg);
   }
   string path = filepath.value;
@@ -116,19 +117,20 @@ void parse_import(int &index, vector<Token> *tokens, Program *program,
   }
   Token semicolon = (*tokens)[index];
   if (semicolon.kind != TokenKind::Semicolon) {
-    errmsg = msgs::expected_but_got_at_line(
-        "';' (semicolon)", token_kind_to_str(semicolon.kind),
-        (*tokens)[index].line);
+    errmsg = msgs::expected_but_got_at_line("';' (semicolon)",
+                                            token_kind_to_str(semicolon.kind),
+                                            (*tokens)[index].line);
     throw runtime_error(errmsg);
   }
 }
 
 void parse_def(int &index, vector<Token> *tokens, Program *program,
-                 string &current_block) {
+               string &current_block) {
   index++; // skip def
   string errmsg;
   Token current_block_tok = (*tokens)[index++];
-  check_expected(TokenKind::Identifier, current_block_tok.kind, (*tokens)[index-1].line);
+  check_expected(TokenKind::Identifier, current_block_tok.kind,
+                 (*tokens)[index - 1].line);
   current_block = current_block_tok.value;
   (*program)[current_block] = Block();
   Token colonToken = (*tokens)[index];
@@ -146,33 +148,52 @@ void parse_push(int &index, vector<Token> *tokens, Program *program,
     try {
       asa::Type type = token_kind_to_asatype(id_tok.kind);
       switch (type) {
-        case asa::Integer: {
-          AsaInteger o = AsaInteger(stoi(id_tok.value));  
-          (*program)[current_block].instructions.push_back(PUSH(o));
-        }
-        
-        case asa::Float: {
-          AsaFloat o = AsaFloat(stof(id_tok.value));  
-          (*program)[current_block].instructions.push_back(PUSH(o));
-        }
-        
-        case asa::Double: {
-          AsaDouble o = AsaDouble(stod(id_tok.value));  
-          (*program)[current_block].instructions.push_back(PUSH(o));
-        }
 
-        case asa::String: {
-          AsaString o = AsaString(id_tok.value);
-          (*program)[current_block].instructions.push_back(PUSH(o));
-        }
-
-        default:
-          throw runtime_error("Not Implemented");
+      case asa::Integer: {
+        AsaInteger o = AsaInteger(stoi(id_tok.value));
+        (*program)[current_block].instructions.push_back(PUSH(o));
+        break;
       }
-      
+
+      case asa::BigInteger: {
+        AsaBigInteger o = AsaBigInteger(stoll(id_tok.value));
+        (*program)[current_block].instructions.push_back(PUSH(o));
+        break;
+      }
+
+      case asa::Float: {
+        AsaFloat o = AsaFloat(stof(id_tok.value));
+        (*program)[current_block].instructions.push_back(PUSH(o));
+        break;
+      }
+
+      case asa::Double: {
+        AsaDouble o = AsaDouble(stod(id_tok.value));
+        (*program)[current_block].instructions.push_back(PUSH(o));
+        break;
+      }
+
+      case asa::BigDouble: {
+        AsaBigDouble o = AsaBigDouble(stold(id_tok.value));
+        (*program)[current_block].instructions.push_back(PUSH(o));
+        break;
+      }
+
+      case asa::String: {
+        AsaString o = AsaString(id_tok.value);
+        (*program)[current_block].instructions.push_back(PUSH(o));
+        break;
+      }
+
+      default:
+        throw runtime_error("Not Implemented: push for asa type " +
+                            type_to_str(type));
+      }
+
     } catch (runtime_error e) {
       string errmsg = string(e.what()) + ", at ";
-      errmsg += to_string(id_tok.line) + ", in block " + current_block + '\n';
+      errmsg += to_string(id_tok.line) + ", in block " + current_block + '\n' +
+                e.what();
       throw runtime_error(errmsg);
     }
   }
@@ -181,7 +202,7 @@ void parse_push(int &index, vector<Token> *tokens, Program *program,
 }
 
 void parse_str(int &index, vector<Token> *tokens, Program *program,
-                string &current_block) {
+               string &current_block) {
   check_current_block(current_block, TokenKind::Str, (*tokens)[index].line);
   index++;
   (*program)[current_block].instructions.push_back(STR);
@@ -190,8 +211,9 @@ void parse_str(int &index, vector<Token> *tokens, Program *program,
 }
 
 void parse_incr(int &index, vector<Token> *tokens, Program *program,
-               string &current_block) {
-  check_current_block(current_block, TokenKind::Increment, (*tokens)[index].line);
+                string &current_block) {
+  check_current_block(current_block, TokenKind::Increment,
+                      (*tokens)[index].line);
   index++; // skip incr
   Token id_token = (*tokens)[index++];
   check_expected(TokenKind::Identifier, id_token.kind, id_token.line);
@@ -201,8 +223,9 @@ void parse_incr(int &index, vector<Token> *tokens, Program *program,
 }
 
 void parse_decr(int &index, vector<Token> *tokens, Program *program,
-               string &current_block) {
-  check_current_block(current_block, TokenKind::Decrement, (*tokens)[index].line);
+                string &current_block) {
+  check_current_block(current_block, TokenKind::Decrement,
+                      (*tokens)[index].line);
   index++; // skip decr
   Token id_token = (*tokens)[index++];
   check_expected(TokenKind::Identifier, id_token.kind, id_token.line);
@@ -251,44 +274,68 @@ void parse_ifgoto(int &index, vector<Token> *tokens, Program *program,
   index++; // skip ifgoto
   Token expected = (*tokens)[index++];
   check_expected(TokenKind::Integer, expected.kind, expected.line);
-  if (expected.value != "-1" &&
-      expected.value != "0" &&
+  if (expected.value != "-1" && expected.value != "0" &&
       expected.value != "1") {
-    string errmsg = msgs::expected_but_got_at_line(
-      "-1, 0 or 1", expected.value, expected.line);
+    string errmsg = msgs::expected_but_got_at_line("-1, 0 or 1", expected.value,
+                                                   expected.line);
     throw runtime_error(errmsg);
   }
   Token label_id = (*tokens)[index++];
   check_expected(TokenKind::Identifier, label_id.kind, label_id.line);
 
   asa::Type expected_t = token_kind_to_asatype(expected.kind);
-  switch (expected_t) {
+  try {
+    switch (expected_t) {
     case asa::Integer: {
       AsaInteger o = AsaInteger(stoi(expected.value));
       (*program)[current_block].instructions.push_back(
-        IFGOTO(o, label_id.value));
+          IFGOTO(o, label_id.value));
+      break;
     }
+
+    case asa::BigInteger: {
+      AsaBigInteger o = AsaBigInteger(stoll(expected.value));
+      (*program)[current_block].instructions.push_back(
+          IFGOTO(o, label_id.value));
+      break;
+    }
+
     case asa::Float: {
       AsaFloat o = AsaFloat(stof(expected.value));
       (*program)[current_block].instructions.push_back(
-        IFGOTO(o, label_id.value));
+          IFGOTO(o, label_id.value));
+      break;
     }
+
     case asa::Double: {
       AsaDouble o = AsaDouble(stod(expected.value));
       (*program)[current_block].instructions.push_back(
-        IFGOTO(o, label_id.value));
+          IFGOTO(o, label_id.value));
+      break;
     }
-    
+
+    case asa::BigDouble: {
+      AsaBigDouble o = AsaBigDouble(stold(expected.value));
+      (*program)[current_block].instructions.push_back(
+          IFGOTO(o, label_id.value));
+      break;
+    }
+
     case asa::String: {
       AsaString o = AsaString(expected.value);
       (*program)[current_block].instructions.push_back(
-        IFGOTO(o, label_id.value));
+          IFGOTO(o, label_id.value));
+      break;
     }
 
     default:
-      throw runtime_error("Not Implemented");
+      throw runtime_error("Not Implemented: ifgoto for type " +
+                          type_to_str(expected_t));
+    }
+  } catch (runtime_error e) {
+    throw runtime_error("Error in ifgoto: " + string(e.what()));
   }
-  
+
   Token sc = (*tokens)[index];
   check_expected(TokenKind::Semicolon, sc.kind, sc.line);
 }
@@ -304,20 +351,32 @@ void parse_var(int &index, vector<Token> *tokens, Program *program,
   try {
     asa::Type type = token_kind_to_asatype(value.kind);
     switch (type) {
+
     case asa::Integer: {
-      AsaInteger o = AsaInteger(stoi(value.value));  
+      AsaInteger o = AsaInteger(stoi(value.value));
       (*program)[current_block].instructions.push_back(DEF(id.value, o));
     }
-    
+
+    case asa::BigInteger: {
+      AsaBigInteger o = AsaBigInteger(stoll(value.value));
+      (*program)[current_block].instructions.push_back(DEF(id.value, o));
+    }
+
     case asa::Float: {
-      AsaFloat o = AsaFloat(stof(id.value));  
+      AsaFloat o = AsaFloat(stof(id.value));
+      (*program)[current_block].instructions.push_back(DEF(id.value, o));
+    }
+
+    case asa::Double: {
+      AsaDouble o = AsaDouble(stod(id.value));
       (*program)[current_block].instructions.push_back(DEF(id.value, o));
     }
     
-    case asa::Double: {
-      AsaDouble o = AsaDouble(stod(id.value));  
+    case asa::BigDouble: {
+      AsaBigDouble o = AsaBigDouble(stold(value.value));
       (*program)[current_block].instructions.push_back(DEF(id.value, o));
     }
+    
     case asa::String: {
       AsaString o = AsaString(id.value);
       (*program)[current_block].instructions.push_back(DEF(id.value, o));
@@ -335,7 +394,6 @@ void parse_var(int &index, vector<Token> *tokens, Program *program,
   check_expected(TokenKind::Semicolon, sc.kind, sc.line);
 }
 
-
 void parse_call(int &index, vector<Token> *tokens, Program *program,
                 string &current_block) {
   check_current_block(current_block, TokenKind::Call, (*tokens)[index].line);
@@ -348,7 +406,7 @@ void parse_call(int &index, vector<Token> *tokens, Program *program,
 }
 
 void parse_raise(int &index, vector<Token> *tokens, Program *program,
-                string &current_block) {
+                 string &current_block) {
   check_current_block(current_block, TokenKind::Call, (*tokens)[index].line);
   index++; // skip raise
   (*program)[current_block].instructions.push_back(RAISE);
@@ -357,7 +415,7 @@ void parse_raise(int &index, vector<Token> *tokens, Program *program,
 }
 
 void parse_floor(int &index, vector<Token> *tokens, Program *program,
-                string &current_block) {
+                 string &current_block) {
   check_current_block(current_block, TokenKind::Floor, (*tokens)[index].line);
   index++; // skip floor
   (*program)[current_block].instructions.push_back(FLOOR);
@@ -375,7 +433,7 @@ void parse_ceil(int &index, vector<Token> *tokens, Program *program,
 }
 
 void parse_round(int &index, vector<Token> *tokens, Program *program,
-                string &current_block) {
+                 string &current_block) {
   check_current_block(current_block, TokenKind::Round, (*tokens)[index].line);
   index++; // skip round
   (*program)[current_block].instructions.push_back(ROUND);

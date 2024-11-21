@@ -1,12 +1,12 @@
 #pragma once
 
-#include "AsaDouble.hpp"
-#include "AsaInteger.hpp"
 #include "AsaObject.hpp"
-#include "AsaString.hpp"
 #include <string>
 
-using namespace asa;
+// Forward declarations
+class AsaInteger;
+class AsaDouble;
+class AsaString;
 
 class AsaFloat : public AsaObject {
 private:
@@ -19,31 +19,17 @@ public:
   void set_value(float v);
   std::string str() const;
 
-  AsaString add(AsaString o);
-  AsaFloat add(AsaInteger o);
-  AsaFloat add(AsaFloat o);
-  AsaDouble add(AsaDouble o);
+  AsaObject add(AsaObject o);
+  AsaObject sub(AsaObject o);
+  AsaObject mul(AsaObject o);
+  AsaObject div(AsaObject o);
 
-  AsaFloat sub(AsaInteger o);
-  AsaFloat sub(AsaFloat o);
-  AsaDouble sub(AsaDouble o);
+  AsaObject ceil();
+  AsaObject floor();
+  AsaObject round();
 
-  AsaFloat mul(AsaInteger o);
-  AsaFloat mul(AsaFloat o);
-  AsaDouble mul(AsaDouble o);
+  AsaObject incr();
+  AsaObject decr();
 
-  AsaFloat div(AsaInteger o);
-  AsaFloat div(AsaFloat o);
-  AsaDouble div(AsaDouble o);
-
-  AsaFloat ceil();
-  AsaFloat floor();
-  AsaFloat round();
-
-  AsaFloat incr();
-  AsaFloat decr();
-
-  AsaInteger cmp(AsaInteger o);
-  AsaInteger cmp(AsaFloat o);
-  AsaInteger cmp(AsaDouble o);
+  AsaObject cmp(AsaObject o);
 };

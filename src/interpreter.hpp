@@ -1,6 +1,8 @@
-#include "objects.hpp"
+#include "AsaBigDouble.hpp"
+#include "AsaBigInteger.hpp"
 #include "AsaObject.hpp"
 #include "AsaString.hpp"
+#include "objects.hpp"
 #include "transpiler.hpp"
 #include <cmath>
 #include <iostream>
@@ -17,12 +19,14 @@ namespace interpreter {
 #define MAX_STACK_SIZE 8192
 
 bool can_pop(list<AsaObject> stack, int count = 1) {
-  if (stack.size() < count) return false;
+  if (stack.size() < count)
+    return false;
   return true;
 }
 
-bool can_push(list<AsaObject> stack) {  
-  if (stack.size() + 1 > MAX_STACK_SIZE) return false;
+bool can_push(list<AsaObject> stack) {
+  if (stack.size() + 1 > MAX_STACK_SIZE)
+    return false;
   return true;
 }
 
@@ -72,13 +76,13 @@ AsaObject eval(Program program, string entryPoint, list<AsaObject> *stack) {
 
     case InstructionKind::Raise: {
       AsaObject o = pop_args(stack, 1)[0];
-      throw runtime_error(o.get_value());
+      throw runtime_error(o.str());
     }
 
     case InstructionKind::Push: {
-      if (!can_push(*stack)) 
+      if (!can_push(*stack))
         return StackOverflowError;
-      
+
       stack->push_back(inst.operand);
       break;
     }
@@ -95,7 +99,7 @@ AsaObject eval(Program program, string entryPoint, list<AsaObject> *stack) {
     case InstructionKind::Str: {
       if (!can_pop(*stack))
         return StackUnderflowError;
-      
+
       AsaObject o = pop_args(stack, 1)[0];
       stack->push_back(AsaString(o.str()));
       break;
@@ -121,7 +125,8 @@ AsaObject eval(Program program, string entryPoint, list<AsaObject> *stack) {
     }
 
     case InstructionKind::IfGoto: {
-      if (!can_pop(*stack)) return StackUnderflowError;
+      if (!can_pop(*stack))
+        return StackUnderflowError;
       if (program[entryPoint].labels.find(inst.id) ==
           program[entryPoint].labels.end()) {
         return AsaError(LabelNotFound, inst.id);
@@ -129,31 +134,45 @@ AsaObject eval(Program program, string entryPoint, list<AsaObject> *stack) {
 
       AsaObject top = pop_args(stack, 1)[0];
       AsaObject other = inst.operand;
-      if (top.cmp(other).get_value() == "0")
+      if (top.cmp(other).str() == "0")
         instPosition = program[entryPoint].labels[inst.id];
       break;
     }
 
     case InstructionKind::DefVar: {
       switch (inst.operand.get_type()) {
-        case asa::Integer: {
-          variables[inst.id] = AsaInteger(stoi(inst.operand.get_value()));
-        }
+      case asa::Integer: {
+        variables[inst.id] = AsaInteger(stoi(inst.operand.str()));
+        break;
+      }
 
-        case asa::Float: {
-          variables[inst.id] = AsaFloat(stof(inst.operand.get_value()));
-        }
+      case asa::Float: {
+        variables[inst.id] = AsaFloat(stof(inst.operand.str()));
+        break;
+      }
 
-        case asa::Double: {
-          variables[inst.id] = AsaDouble(stod(inst.operand.get_value()));    
-        }
+      case asa::Double: {
+        variables[inst.id] = AsaDouble(stod(inst.operand.str()));
+        break;
+      }
 
-        case asa::String: {
-          variables[inst.id] = AsaString(inst.operand.get_value());    
-        }
+      case asa::String: {
+        variables[inst.id] = AsaString(inst.operand.str());
+        break;
+      }
 
-        default:
-          throw runtime_error("Not Implemented");
+      case asa::BigInteger: {
+        variables[inst.id] = AsaBigInteger(stoll(inst.operand.str()));
+        break;
+      }
+
+      case asa::BigDouble: {
+        variables[inst.id] = AsaBigDouble(stold(inst.operand.str()));
+        break;
+      }
+
+      default:
+        throw runtime_error("Not Implemented");
       }
       break;
     }
@@ -203,7 +222,8 @@ AsaObject eval(Program program, string entryPoint, list<AsaObject> *stack) {
       AsaObject rhs = args[0];
       AsaObject lhs = args[1];
       AsaObject res = rhs.add(lhs);
-      if (res.get_error_type() != Ok) return res;
+      if (res.get_error_type() != Ok)
+        return res;
       stack->push_back(res);
       break;
     }
@@ -213,7 +233,8 @@ AsaObject eval(Program program, string entryPoint, list<AsaObject> *stack) {
       AsaObject rhs = args[0];
       AsaObject lhs = args[1];
       AsaObject res = lhs.sub(rhs);
-      if (res.get_error_type() != Ok) return res;
+      if (res.get_error_type() != Ok)
+        return res;
       stack->push_back(res);
       break;
     }
@@ -223,7 +244,8 @@ AsaObject eval(Program program, string entryPoint, list<AsaObject> *stack) {
       AsaObject rhs = args[0];
       AsaObject lhs = args[1];
       AsaObject res = rhs.mul(lhs);
-      if (res.get_error_type() != Ok) return res;
+      if (res.get_error_type() != Ok)
+        return res;
       stack->push_back(res);
       break;
     }
@@ -233,7 +255,8 @@ AsaObject eval(Program program, string entryPoint, list<AsaObject> *stack) {
       AsaObject rhs = args[0];
       AsaObject lhs = args[1];
       AsaObject res = lhs.div(rhs);
-      if (res.get_error_type() != Ok) return res;
+      if (res.get_error_type() != Ok)
+        return res;
       stack->push_back(res);
       break;
     }
@@ -243,7 +266,8 @@ AsaObject eval(Program program, string entryPoint, list<AsaObject> *stack) {
       AsaObject rhs = args[0];
       AsaObject lhs = args[1];
       AsaObject res = lhs.lshift(rhs);
-      if (res.get_error_type() != Ok) return res;
+      if (res.get_error_type() != Ok)
+        return res;
       stack->push_back(res);
       break;
     }
@@ -253,7 +277,8 @@ AsaObject eval(Program program, string entryPoint, list<AsaObject> *stack) {
       AsaObject rhs = args[0];
       AsaObject lhs = args[1];
       AsaObject res = lhs.rshift(rhs);
-      if (res.get_error_type() != Ok) return res;
+      if (res.get_error_type() != Ok)
+        return res;
       stack->push_back(res);
       break;
     }
@@ -271,14 +296,16 @@ AsaObject eval(Program program, string entryPoint, list<AsaObject> *stack) {
     }
 
     case InstructionKind::Print: {
-      if (!can_pop(*stack)) return StackUnderflowError;
+      if (!can_pop(*stack))
+        return StackUnderflowError;
       AsaObject top = stack->back();
       std::cout << top.str();
       break;
     }
 
     case InstructionKind::Println: {
-      if (!can_pop(*stack)) return StackUnderflowError;
+      if (!can_pop(*stack))
+        return StackUnderflowError;
       AsaObject top = stack->back();
       std::cout << top.str() << std::endl;
       break;
@@ -292,10 +319,8 @@ AsaObject eval(Program program, string entryPoint, list<AsaObject> *stack) {
       }
       list<AsaObject>::reverse_iterator it = stack->rbegin();
       while (it != stack->rend()) {
-        cout <<
-          "    Value: " << it->str() <<
-          ", Type: " << asa::type_to_str(it->get_type()) <<
-        endl;
+        cout << "    Value: " << it->str()
+             << ", Type: " << asa::type_to_str(it->get_type()) << endl;
         it++;
       }
       cout << endl;
