@@ -18,7 +18,7 @@ public:
   void set_value(std::string val);
 
   AsaObject add(AsaObject o);
-  AsaInteger cmp(AsaString o);
+  AsaObject cmp(AsaObject o);
 
   std::string str() const;
 };

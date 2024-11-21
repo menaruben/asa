@@ -12,19 +12,19 @@ void AsaBigDouble::set_value(double v) { double_value = v; }
 std::string AsaBigDouble::str() const { return std::to_string(double_value); }
 
 AsaObject AsaBigDouble::add(AsaObject o) {
-  return AsaBigDouble(double_value + stold(o.str()));
+  return AsaBigDouble(double_value + (long double)stold(o.str()));
 }
 
 AsaObject AsaBigDouble::sub(AsaObject o) {
-  return AsaBigDouble(double_value - stold(o.str()));
+  return AsaBigDouble(double_value - (long double)stold(o.str()));
 }
 
 AsaObject AsaBigDouble::mul(AsaObject o) {
-  return AsaBigDouble(double_value * stold(o.str()));
+  return AsaBigDouble(double_value * (long double)stold(o.str()));
 }
 
 AsaObject AsaBigDouble::div(AsaObject o) {
-  return AsaBigDouble(double_value / stold(o.str()));
+  return AsaBigDouble(double_value / (long double)stold(o.str()));
 }
 
 AsaObject AsaBigDouble::ceil() { return AsaBigDouble(std::ceil(double_value)); }

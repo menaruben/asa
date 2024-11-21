@@ -1,5 +1,6 @@
 #include "AsaString.hpp"
 #include "AsaInteger.hpp"
+#include "AsaObject.hpp"
 
 AsaString::AsaString(std::string val)
     : AsaObject(val, String), str_value(val) {}
@@ -14,7 +15,7 @@ AsaObject AsaString::add(AsaObject o) {
   return AsaString(val);
 }
 
-AsaInteger AsaString::cmp(AsaString o) {
+AsaObject AsaString::cmp(AsaObject o) {
   if (str_value < o.get_value())  return AsaInteger(-1);
   if (str_value == o.get_value()) return AsaInteger(0);
   return AsaInteger(1);

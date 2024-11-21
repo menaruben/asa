@@ -148,7 +148,6 @@ void parse_push(int &index, vector<Token> *tokens, Program *program,
     try {
       asa::Type type = token_kind_to_asatype(id_tok.kind);
       switch (type) {
-
       case asa::Integer: {
         AsaInteger o = AsaInteger(stoi(id_tok.value));
         (*program)[current_block].instructions.push_back(PUSH(o));

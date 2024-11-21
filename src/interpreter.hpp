@@ -4,7 +4,6 @@
 #include "AsaString.hpp"
 #include "objects.hpp"
 #include "transpiler.hpp"
-#include <cmath>
 #include <iostream>
 #include <list>
 #include <stdexcept>

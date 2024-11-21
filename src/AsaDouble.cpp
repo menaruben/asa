@@ -12,19 +12,19 @@ void AsaDouble::set_value(double v) { double_value = v; }
 std::string AsaDouble::str() const { return std::to_string(double_value); }
 
 AsaObject AsaDouble::add(AsaObject o) {
-  return AsaDouble(double_value + stod(o.str()));
+  return AsaDouble(double_value + (double)stod(o.str()));
 }
 
 AsaObject AsaDouble::sub(AsaObject o) {
-  return AsaDouble(double_value - stod(o.str()));
+  return AsaDouble(double_value - (double)stod(o.str()));
 }
 
 AsaObject AsaDouble::mul(AsaObject o) {
-  return AsaDouble(double_value * stod(o.str()));
+  return AsaDouble(double_value * (double)stod(o.str()));
 }
 
 AsaObject AsaDouble::div(AsaObject o) {
-  return AsaDouble(double_value / stod(o.str()));
+  return AsaDouble(double_value / (double)stod(o.str()));
 }
 
 AsaObject AsaDouble::ceil() { return AsaDouble(std::ceil(double_value)); }

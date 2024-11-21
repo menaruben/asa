@@ -11,19 +11,19 @@ void AsaFloat::set_value(float v) { float_value = v; }
 std::string AsaFloat::str() const { return std::to_string(float_value); }
 
 AsaObject AsaFloat::add(AsaObject o) {
-  return AsaFloat(float_value + stof(o.str()));
+  return AsaFloat(float_value + (float)stof(o.str()));
 }
 
 AsaObject AsaFloat::sub(AsaObject o) {
-  return AsaFloat(float_value - stof(o.str()));
+  return AsaFloat(float_value - (float)stof(o.str()));
 }
 
 AsaObject AsaFloat::mul(AsaObject o) {
-  return AsaFloat(float_value * stof(o.str()));
+  return AsaFloat(float_value * (float)stof(o.str()));
 }
 
 AsaObject AsaFloat::div(AsaObject o) {
-  return AsaFloat(float_value / stof(o.str()));
+  return AsaFloat(float_value / (float)stof(o.str()));
 }
 
 AsaObject AsaFloat::ceil() { return AsaFloat(std::ceil(float_value)); }
