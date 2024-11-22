@@ -50,26 +50,6 @@ public:
   virtual AsaObject cmp(AsaObject o);
 };
 
-class AsaError : public AsaObject {
-public:
-  AsaError(Error err, std::string msg) : AsaObject(err, msg) {}
-};
-
-// TODO: convert to separate error classes and add value of label, variable id
-// etc..
-const AsaError OkError = AsaError(Ok, "No error, everything is fine! :)");
-const AsaError StackOverflowError =
-    AsaError(StackOverflow, "Stack reached its limit");
-const AsaError StackUnderflowError =
-    AsaError(StackUnderflow, "Cannot pop from empty stack");
-const AsaError LabelNotFoundError = AsaError(LabelNotFound, "Label not found");
-const AsaError DivByZeroError =
-    AsaError(DivByZero, "Division by Zero encountered");
-const AsaError IllegalInstructionError =
-    AsaError(IllegalInstruction, "Illegal instruction encountered");
-const AsaError UndefinedVariableError =
-    AsaError(UndefinedVariable, "Undefined variable");
-
 class AsaInteger;
 class AsaFloat;
 class AsaDouble;

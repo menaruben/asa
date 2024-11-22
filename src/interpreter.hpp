@@ -13,6 +13,7 @@
 #include <unordered_map>
 #include <vector>
 #include "AsaTypeConverter.hpp"
+#include "AsaError.hpp"
 
 using namespace instructions;
 using namespace transpiler;
@@ -120,7 +121,7 @@ AsaObject eval(Program program, string entryPoint, list<AsaObject> *stack) {
     case InstructionKind::Goto: {
       if (program[entryPoint].labels.find(inst.id) ==
           program[entryPoint].labels.end()) {
-        return AsaError(LabelNotFound, inst.id);
+        return LabelNotFoundError(inst.id);
       }
       instPosition = program[entryPoint].labels[inst.id];
       break;
@@ -144,17 +145,17 @@ AsaObject eval(Program program, string entryPoint, list<AsaObject> *stack) {
     case InstructionKind::DefVar: {
       switch (inst.operand.get_type()) {
       case asa::Integer: {
-        variables[inst.id] = to_int(inst.operand);
+        variables[inst.id] = to_int(inst.operand.str(), asa::Integer);
         break;
       }
 
       case asa::Float: {
-        variables[inst.id] = to_float(inst.operand);
+        variables[inst.id] = to_float(inst.operand.str(), asa::Float);
         break;
       }
 
       case asa::Double: {
-        variables[inst.id] = to_double(inst.operand);
+        variables[inst.id] = to_double(inst.operand.str(), asa::Double);
         break;
       }
 
@@ -164,12 +165,12 @@ AsaObject eval(Program program, string entryPoint, list<AsaObject> *stack) {
       }
 
       case asa::BigInteger: {
-        variables[inst.id] = to_bigint(inst.operand);
+        variables[inst.id] = to_bigint(inst.operand.str(), asa::BigInteger);
         break;
       }
 
       case asa::BigDouble: {
-        variables[inst.id] = to_bigdouble(inst.operand);
+        variables[inst.id] = to_bigdouble(inst.operand.str(), asa::BigDouble);
         break;
       }
 
@@ -188,7 +189,7 @@ AsaObject eval(Program program, string entryPoint, list<AsaObject> *stack) {
 
     case InstructionKind::GetVar: {
       if (variables.find(inst.id) == variables.end()) {
-        return UndefinedVariableError;
+        return UndefinedVariableError(inst.id);
       }
       AsaObject o = variables[inst.id];
       stack->push_back(o);
@@ -197,7 +198,7 @@ AsaObject eval(Program program, string entryPoint, list<AsaObject> *stack) {
 
     case InstructionKind::Increment: {
       if (variables.find(inst.id) == variables.end()) {
-        return UndefinedVariableError;
+        return UndefinedVariableError(inst.id);
       }
       AsaObject o = variables[inst.id];
       variables[inst.id] = o.add(AsaInteger(1));
@@ -206,7 +207,7 @@ AsaObject eval(Program program, string entryPoint, list<AsaObject> *stack) {
 
     case InstructionKind::Decrement: {
       if (variables.find(inst.id) == variables.end()) {
-        return UndefinedVariableError;
+        return UndefinedVariableError(inst.id);
       }
       AsaObject o = variables[inst.id];
       variables[inst.id] = o.sub(AsaInteger(1));
@@ -287,7 +288,7 @@ AsaObject eval(Program program, string entryPoint, list<AsaObject> *stack) {
 
     case InstructionKind::Call: {
       if (program.find(inst.id) == program.end()) {
-        return IllegalInstructionError;
+        return IllegalInstructionError(inst.id);
       }
       vector<Instruction> funcinsts = program[inst.id].instructions;
       AsaObject result = eval(program, inst.id, stack);

@@ -155,8 +155,8 @@ def factorial_test:
   push have; push want; push "factorial_test_3"; call testing/assert; println;
 
   // 13! => 6227020800 (uses BigInteger <=> long long int)
-  var want 6227020800;
-  push 13; call math/factorial; pop have;
+  var want 6227020800bi;
+  push 13bi; call math/factorial; pop have;
   push have; push want; push "factorial_test_4"; call testing/assert; println;
 end
 

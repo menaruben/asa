@@ -5,7 +5,6 @@
 #include "AsaDouble.hpp"
 #include "AsaFloat.hpp"
 #include "AsaInteger.hpp"
-#include "AsaObject.hpp"
 #include "objects.hpp"
 #include <iostream>
 #include <stdexcept>
@@ -13,215 +12,161 @@
 
 using namespace std;
 
-inline AsaInteger to_int(AsaObject o) {
+inline string strip_suffix(std::string val, const std::string &suffix) {
+  if (val.size() > suffix.size() &&
+      val.substr(val.size() - suffix.size()) == suffix) {
+    val = val.substr(0, val.size() - suffix.size());
+  }
+  return val;
+}
+
+inline AsaInteger to_int(const std::string &input_str, asa::Type type) {
+  std::string stripped_input = strip_suffix(input_str, "bi");
+  stripped_input = strip_suffix(stripped_input, "bd");
+
   try {
-    switch (o.get_type()) {
-    case asa::Integer: {
-      int val = stoi(o.str());
-      return AsaInteger(val);
-    }
-
-    case asa::Float: {
-      int val = static_cast<int>(stof(o.str()));
-      return AsaInteger(val);
-    }
-
-    case asa::Double: {
-      int val = static_cast<int>(stod(o.str()));
-      return AsaInteger(val);
-    }
-
-    case asa::BigInteger: {
-      int val = static_cast<int>(stoll(o.str()));
-      return AsaInteger(val);
-    }
-
-    case asa::BigDouble: {
-      int val = static_cast<int>(stold(o.str()));
-      return AsaInteger(val);
-    }
-
-    case asa::String: {
-      int val = stoi(o.str());
-      return AsaInteger(val);
-    }
-
+    switch (type) {
+    case asa::Type::Integer:
+    case asa::Type::String:
+      return AsaInteger(stoi(stripped_input));
+    case asa::Type::Float:
+      return AsaInteger(static_cast<int>(stof(stripped_input)));
+    case asa::Type::Double:
+      return AsaInteger(static_cast<int>(stod(stripped_input)));
+    case asa::Type::BigInteger:
+      return AsaInteger(static_cast<int>(stoll(stripped_input)));
+    case asa::Type::BigDouble:
+      return AsaInteger(static_cast<int>(stold(stripped_input)));
     default:
-      throw runtime_error("Cannot convert " + type_to_str(o.get_type()) +
+      throw runtime_error("Cannot convert " + asa::type_to_str(type) +
                           " to int");
     }
   } catch (const exception &e) {
-    cerr << "Failed to convert input: " << o.str()
+    cerr << "Failed to convert input: " << input_str
          << " to int. Error: " << e.what() << endl;
     throw;
   }
 }
 
-inline AsaBigInteger to_bigint(AsaObject o) {
+inline AsaBigDouble to_bigdouble(const std::string &input_str, asa::Type type) {
   try {
-    switch (o.get_type()) {
-    case asa::BigInteger: {
-      long long int val = static_cast<long long int>(stoll(o.str()));
-      return AsaBigInteger(val);
-    }
+    std::string stripped_input = strip_suffix(input_str, "bi");
+    stripped_input = strip_suffix(stripped_input, "bd");
 
-    case asa::Integer: {
-      long long int val = static_cast<long long int>(stoi(o.str()));
-      return AsaBigInteger(val);
-    }
-
-    case asa::Float: {
-      long long int val = static_cast<long long int>(stof(o.str()));
-      return AsaBigInteger(val);
-    }
-
-    case asa::Double: {
-      long long int val = static_cast<long long int>(stod(o.str()));
-      return AsaBigInteger(val);
-    }
-
-    case asa::BigDouble: {
-      long long int val = static_cast<long long int>(stold(o.str()));
-      return AsaBigInteger(val);
-    }
-
-    case asa::String: {
-      long long int val = stoll(o.str());
-      return AsaBigInteger(val);
-    }
-
+    switch (type) {
+    case asa::Type::BigDouble:
+      return AsaBigDouble(stold(stripped_input));
+    case asa::Type::Integer:
+      return AsaBigDouble(static_cast<long double>(stoi(stripped_input)));
+    case asa::Type::Float:
+      return AsaBigDouble(static_cast<long double>(stof(stripped_input)));
+    case asa::Type::Double:
+      return AsaBigDouble(static_cast<long double>(stod(stripped_input)));
+    case asa::Type::BigInteger:
+      return AsaBigDouble(static_cast<long double>(stoll(stripped_input)));
+    case asa::Type::String:
+      cerr << "Attempting to convert string to BigDouble: " << stripped_input
+           << endl;
+      return AsaBigDouble(stold(stripped_input));
     default:
-      throw runtime_error("Cannot convert " + type_to_str(o.get_type()) +
-                          " to bigint");
+      throw runtime_error("Cannot convert " + asa::type_to_str(type) +
+                          " to BigDouble");
     }
   } catch (const exception &e) {
-    cerr << "Failed to convert input: " << o.str()
-         << " to bigint. Error: " << e.what() << endl;
-    throw;
+    cerr << "Failed to convert input: " << input_str
+         << " to BigDouble. Error: " << e.what() << endl;
+    throw runtime_error(string("Error in to_bigdouble: ") + e.what() +
+                        "\nInput: " + input_str);
   }
 }
 
-inline AsaBigDouble to_bigdouble(AsaObject o) {
+inline AsaBigInteger to_bigint(const std::string &input_str, asa::Type type) {
   try {
-    switch (o.get_type()) {
-    case asa::BigDouble:
-      return AsaBigDouble(stold(o.str()));
+    std::string stripped_input = strip_suffix(input_str, "bi");
+    stripped_input = strip_suffix(stripped_input, "bd");
 
-    case asa::Integer: {
-      long double val = static_cast<long double>(stoi(o.str()));
-      return AsaBigDouble(val);
-    }
-
-    case asa::Float: {
-      long double val = static_cast<long double>(stof(o.str()));
-      return AsaBigDouble(val);
-    }
-
-    case asa::Double: {
-      long double val = static_cast<long double>(stod(o.str()));
-      return AsaBigDouble(val);
-    }
-
-    case asa::BigInteger: {
-      long double val = static_cast<long double>(stoll(o.str()));
-      return AsaBigDouble(val);
-    }
-
-    case asa::String: {
-      long double val = stold(o.str());
-      return AsaBigDouble(val);
-    }
-
+    switch (type) {
+    case asa::Type::BigInteger:
+      return AsaBigInteger(stoll(stripped_input));
+    case asa::Type::Integer:
+      return AsaBigInteger(static_cast<long long int>(stoi(stripped_input)));
+    case asa::Type::Float:
+      return AsaBigInteger(static_cast<long long int>(stof(stripped_input)));
+    case asa::Type::Double:
+      return AsaBigInteger(static_cast<long long int>(stod(stripped_input)));
+    case asa::Type::BigDouble:
+      return AsaBigInteger(static_cast<long long int>(stold(stripped_input)));
+    case asa::Type::String:
+      cerr << "Attempting to convert string to BigInteger: " << stripped_input
+           << endl;
+      return AsaBigInteger(stoll(stripped_input));
     default:
-      throw runtime_error("Cannot convert " + type_to_str(o.get_type()) +
-                          " to bigdouble");
+      throw runtime_error("Cannot convert " + asa::type_to_str(type) +
+                          " to BigInteger");
     }
   } catch (const exception &e) {
-    cerr << "Failed to convert input: " << o.str()
-         << " to bigdouble. Error: " << e.what() << endl;
-    throw;
+    cerr << "Failed to convert input: " << input_str
+         << " to BigInteger. Error: " << e.what() << endl;
+    throw runtime_error(string("Error in to_bigint: ") + e.what() +
+                        "\nInput: " + input_str);
   }
 }
 
-inline AsaFloat to_float(AsaObject o) {
+inline AsaFloat to_float(const std::string &input_str, asa::Type type) {
   try {
-    switch (o.get_type()) {
-    case asa::Float:
-      return AsaFloat(stof(o.str()));
+    std::string stripped_input = strip_suffix(input_str, "bi");
+    stripped_input = strip_suffix(stripped_input, "bd");
 
-    case asa::Integer: {
-      float val = static_cast<float>(stoi(o.str()));
-      return AsaFloat(val);
-    }
-
-    case asa::Double: {
-      float val = static_cast<float>(stod(o.str()));
-      return AsaFloat(val);
-    }
-
-    case asa::BigInteger: {
-      float val = static_cast<float>(stoll(o.str()));
-      return AsaFloat(val);
-    }
-
-    case asa::BigDouble: {
-      float val = static_cast<float>(stold(o.str()));
-      return AsaFloat(val);
-    }
-
-    case asa::String: {
-      float val = stof(o.str());
-      return AsaFloat(val);
-    }
-
+    switch (type) {
+    case asa::Type::Float:
+      return AsaFloat(stof(stripped_input));
+    case asa::Type::Integer:
+      stripped_input += ".0f";
+      return AsaFloat(static_cast<float>(stoi(stripped_input)));
+    case asa::Type::Double:
+      return AsaFloat(static_cast<float>(stod(stripped_input)));
+    case asa::Type::BigInteger:
+      return AsaFloat(static_cast<float>(stoll(stripped_input)));
+    case asa::Type::BigDouble:
+      return AsaFloat(static_cast<float>(stold(stripped_input)));
+    case asa::Type::String:
+      return AsaFloat(stof(stripped_input));
     default:
-      throw runtime_error("Cannot convert " + type_to_str(o.get_type()) +
+      throw runtime_error("Cannot convert " + asa::type_to_str(type) +
                           " to float");
     }
   } catch (const exception &e) {
-    cerr << "Failed to convert input: " << o.str()
+    cerr << "Failed to convert input: " << input_str
          << " to float. Error: " << e.what() << endl;
-    throw;
+    throw runtime_error(string("Error in to_float: ") + e.what() +
+                        "\nInput: " + input_str);
   }
 }
 
-inline AsaDouble to_double(AsaObject o) {
+inline AsaDouble to_double(const std::string &input_str, asa::Type type) {
   try {
-    switch (o.get_type()) {
-    case asa::Double:
-      return AsaDouble(stod(o.str()));
+    std::string stripped_input = strip_suffix(input_str, "bi");
+    stripped_input = strip_suffix(stripped_input, "bd");
 
-    case asa::Integer: {
-      double val = static_cast<double>(stoi(o.str()));
-      return AsaDouble(val);
-    }
-
-    case asa::Float: {
-      double val = static_cast<double>(stof(o.str()));
-      return AsaDouble(val);
-    }
-
-    case asa::BigInteger: {
-      double val = static_cast<double>(stoll(o.str()));
-      return AsaDouble(val);
-    }
-
-    case asa::BigDouble: {
-      double val = static_cast<double>(stold(o.str()));
-      return AsaDouble(val);
-    }
-
-    case asa::String: {
-      double val = stod(o.str());
-      return AsaDouble(val);
-    }
-
+    switch (type) {
+    case asa::Type::Double:
+      return AsaDouble(stod(stripped_input));
+    case asa::Type::Integer:
+      return AsaDouble(static_cast<double>(stoi(stripped_input)));
+    case asa::Type::Float:
+      return AsaDouble(static_cast<double>(stof(stripped_input)));
+    case asa::Type::BigInteger:
+      return AsaDouble(static_cast<double>(stoll(stripped_input)));
+    case asa::Type::BigDouble:
+      return AsaDouble(static_cast<double>(stold(stripped_input)));
+    case asa::Type::String:
+      return AsaDouble(stod(stripped_input));
     default:
-      throw runtime_error("Cannot convert " + type_to_str(o.get_type()) +
+      throw runtime_error("Cannot convert " + asa::type_to_str(type) +
                           " to double");
     }
   } catch (const exception &e) {
-    cerr << "Failed to convert input: " << o.str()
+    cerr << "Failed to convert input: " << input_str
          << " to double. Error: " << e.what() << endl;
     throw;
   }

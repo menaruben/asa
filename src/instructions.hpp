@@ -149,13 +149,7 @@ std::vector<AsaObject> pop_args(std::list<AsaObject> *stack, int count) {
   std::vector<AsaObject> args;
   std::list<AsaObject>::iterator it;
   if (stack->size() < count) {
-    throw runtime_error(
-        AsaError(StackUnderflow, "Cannot pop args without at least " +
-                                     std::to_string(count) +
-                                     " elements on the stack")
-            .get_error());
-
-    return args;
+    throw runtime_error("Stack underflow! Wanted to pop " + to_string(count) + " elements..");
   };
 
   int i = 0;

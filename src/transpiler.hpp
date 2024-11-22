@@ -1,3 +1,5 @@
+#pragma once
+
 #include "AsaBigDouble.hpp"
 #include "AsaBigInteger.hpp"
 #include "AsaDouble.hpp"
@@ -18,6 +20,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include "AsaTypeConverter.hpp"
 
 using namespace instructions;
 using namespace std;
@@ -149,31 +152,31 @@ void parse_push(int &index, vector<Token> *tokens, Program *program,
       asa::Type type = token_kind_to_asatype(id_tok.kind);
       switch (type) {
       case asa::Integer: {
-        AsaInteger o = AsaInteger(stoi(id_tok.value));
+        AsaInteger o = to_int(id_tok.value, asa::Integer);
         (*program)[current_block].instructions.push_back(PUSH(o));
         break;
       }
 
       case asa::BigInteger: {
-        AsaBigInteger o = AsaBigInteger(stoll(id_tok.value));
+        AsaBigInteger o = to_bigint(id_tok.value, asa::BigInteger);
         (*program)[current_block].instructions.push_back(PUSH(o));
         break;
       }
 
       case asa::Float: {
-        AsaFloat o = AsaFloat(stof(id_tok.value));
+        AsaFloat o = to_float(id_tok.value, asa::Float);
         (*program)[current_block].instructions.push_back(PUSH(o));
         break;
       }
 
       case asa::Double: {
-        AsaDouble o = AsaDouble(stod(id_tok.value));
+        AsaDouble o = to_double(id_tok.value, asa::Double);
         (*program)[current_block].instructions.push_back(PUSH(o));
         break;
       }
 
       case asa::BigDouble: {
-        AsaBigDouble o = AsaBigDouble(stold(id_tok.value));
+        AsaBigDouble o = to_bigdouble(id_tok.value, asa::BigDouble);
         (*program)[current_block].instructions.push_back(PUSH(o));
         break;
       }
@@ -189,10 +192,11 @@ void parse_push(int &index, vector<Token> *tokens, Program *program,
                             type_to_str(type));
       }
 
-    } catch (runtime_error e) {
-      string errmsg = string(e.what()) + ", at ";
-      errmsg += to_string(id_tok.line) + ", in block " + current_block + '\n' +
-                "input: " + id_tok.value + " tried to push type " + token_kind_to_str(id_tok.kind);
+    } catch (const exception &e) {
+      string errmsg = string(e.what()) + ", at line " +
+                      to_string(id_tok.line) + ", in block " + current_block +
+                      "\nInput: " + id_tok.value + ", type: " + token_kind_to_str(id_tok.kind);
+      cerr << errmsg << endl;
       throw runtime_error(errmsg);
     }
   }
@@ -286,35 +290,35 @@ void parse_ifgoto(int &index, vector<Token> *tokens, Program *program,
   try {
     switch (expected_t) {
     case asa::Integer: {
-      AsaInteger o = AsaInteger(stoi(expected.value));
+      AsaInteger o = to_int(expected.value, asa::Integer);
       (*program)[current_block].instructions.push_back(
           IFGOTO(o, label_id.value));
       break;
     }
 
     case asa::BigInteger: {
-      AsaBigInteger o = AsaBigInteger(stoll(expected.value));
+      AsaBigInteger o = to_bigint(expected.value, asa::BigInteger);
       (*program)[current_block].instructions.push_back(
           IFGOTO(o, label_id.value));
       break;
     }
 
     case asa::Float: {
-      AsaFloat o = AsaFloat(stof(expected.value));
+      AsaFloat o = to_float(expected.value, asa::Float);
       (*program)[current_block].instructions.push_back(
           IFGOTO(o, label_id.value));
       break;
     }
 
     case asa::Double: {
-      AsaDouble o = AsaDouble(stod(expected.value));
+      AsaDouble o = to_double(expected.value, asa::Double);
       (*program)[current_block].instructions.push_back(
           IFGOTO(o, label_id.value));
       break;
     }
 
     case asa::BigDouble: {
-      AsaBigDouble o = AsaBigDouble(stold(expected.value));
+      AsaBigDouble o = to_bigdouble(expected.value, asa::BigDouble);
       (*program)[current_block].instructions.push_back(
           IFGOTO(o, label_id.value));
       break;
@@ -331,7 +335,7 @@ void parse_ifgoto(int &index, vector<Token> *tokens, Program *program,
       throw runtime_error("Not Implemented: ifgoto for type " +
                           type_to_str(expected_t));
     }
-  } catch (runtime_error e) {
+  } catch (const exception &e) {
     throw runtime_error("Error in ifgoto: " + string(e.what()) + "\n"
                         + ", expected value: " + expected.value + ", value type: " + token_kind_to_str(expected.kind));
   }
@@ -353,41 +357,47 @@ void parse_var(int &index, vector<Token> *tokens, Program *program,
     switch (type) {
 
     case asa::Integer: {
-      AsaInteger o = AsaInteger(stoi(value.value));
+      AsaInteger o = to_int(value.value, asa::Integer);
       (*program)[current_block].instructions.push_back(DEF(id.value, o));
+      break;
     }
 
     case asa::BigInteger: {
-      AsaBigInteger o = AsaBigInteger(stoll(value.value));
+      AsaBigInteger o = to_bigint(value.value, asa::BigInteger);
       (*program)[current_block].instructions.push_back(DEF(id.value, o));
+      break;
     }
 
     case asa::Float: {
-      AsaFloat o = AsaFloat(stof(id.value));
+      AsaFloat o = to_float(value.value, asa::Float);
       (*program)[current_block].instructions.push_back(DEF(id.value, o));
+      break;
     }
 
     case asa::Double: {
-      AsaDouble o = AsaDouble(stod(id.value));
+      AsaDouble o = to_double(value.value, asa::Double);
       (*program)[current_block].instructions.push_back(DEF(id.value, o));
+      break;
     }
     
     case asa::BigDouble: {
-      AsaBigDouble o = AsaBigDouble(stold(value.value));
+      AsaBigDouble o = to_bigdouble(value.value, asa::BigDouble);
       (*program)[current_block].instructions.push_back(DEF(id.value, o));
+      break;
     }
     
     case asa::String: {
-      AsaString o = AsaString(id.value);
+      AsaString o = AsaString(value.value);
       (*program)[current_block].instructions.push_back(DEF(id.value, o));
+      break;
     }
     default:
-      throw runtime_error("Not Implemented");
+      throw runtime_error("Not Implemented converting " + value.value + " to type " + 
+                          token_kind_to_str(value.kind));
     }
-  } catch (runtime_error e) {
+  } catch (const exception &e) {
     string errmsg = string(e.what()) + ", at ";
     errmsg += to_string(value.line) + ", in block " + current_block + '\n';
-    errmsg += "var value: " + value.value + ", type: " + token_kind_to_str(value.kind);
     throw runtime_error(errmsg);
   }
 
