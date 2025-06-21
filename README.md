@@ -13,6 +13,7 @@ a:::::aaaa::::::as::::::::::::::s a:::::aaaa::::::a
   aaaaaaaaaa  aaaa sssssssssss      aaaaaaaaaa  aaaa
 ```
 > g++ version used: 13.2.0
+> ⚠️ This whole virtual machine is currently being rewritten in C with A LOT of changes. Currently in design phase, but probably swapping to a register based vm rather than stack based. Also new IR and a looot of target possibilities. :3
 
 # annotation
 This is a toy project and should not be taken seriously, which means it is NOT for production at all. The goal of this project is to have fun!
